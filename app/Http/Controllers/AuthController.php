@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
+use App\Models\Institution;
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -31,15 +34,28 @@ class AuthController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'required|string|max:20',
             'national_id' => 'required|string|max:20|unique:users',
-            'governorate' => 'required|string|max:100',
-            'university' => 'required|string|max:255',
-            'faculty' => 'required|string|max:255',
+            'governorate' => 'required|exists:governorates,id',
+            'institution_type' => 'required|exists:institution_types,id',
+            'university_type' => 'required|exists:university_types,id',
+            'institution_id' => 'required|exists:institutions,id',
+            'department_id' => 'required|exists:departments,id',
             'graduation_year' => 'required|integer|min:1950|max:' . (date('Y') + 5),
             'job_status' => 'required|string|max:100',
+            'age' => 'nullable|integer|min:1|max:150',
+            'gender' => 'nullable|string|in:ذكر,أنثى',
             'address' => 'nullable|string|max:1000',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
+
+        $institution = Institution::with('governorate')->find($validated['institution_id']);
+        $department = Department::find($validated['department_id']);
+
+        $validated['governorate'] = $institution->governorate->name;
+        $validated['university'] = $institution->name;
+        $validated['faculty'] = $department->name;
+
+        unset($validated['institution_type'], $validated['university_type'], $validated['institution_id'], $validated['department_id']);
 
         // Handle ID photos
         if ($request->hasFile('id_photos')) {
@@ -62,21 +78,35 @@ class AuthController extends Controller
         $validated['role'] = 'user';
         $validated['approval_status'] = 'pending';
 
-        $user = User::create($validated);
+        $newUser = User::create($validated);
 
-        Auth::login($user);
+        // Notify all admins about new registration
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            Notification::create([
+                'user_id' => $admin->id,
+                'type' => 'new_registration',
+                'data' => [
+                    'title' => 'تسجيل خريج جديد',
+                    'message' => "قام الخريج {$newUser->name} بالتسجيل. يرجى مراجعة الحساب.",
+                    'user_id' => $newUser->id,
+                    'user_name' => $newUser->name,
+                    'user_email' => $newUser->email,
+                ],
+            ]);
+        }
 
-        $redirect = route('profile.show');
+        $redirect = route('login');
 
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'تم التسجيل بنجاح. حسابك قيد المراجعة.',
+                'message' => 'تم التسجيل بنجاح. حسابك قيد المراجعة، سيتم إشعارك عند الاعتماد.',
                 'redirect' => $redirect,
             ]);
         }
 
-        return redirect($redirect)->with('success', 'تم التسجيل بنجاح. حسابك قيد المراجعة.');
+        return redirect($redirect)->with('success', 'تم التسجيل بنجاح. حسابك قيد المراجعة، سيتم إشعارك عند الاعتماد.');
     }
 
     public function login(Request $request): JsonResponse|RedirectResponse
@@ -88,13 +118,31 @@ class AuthController extends Controller
 
         $user = User::where('email', $credentials['email'])->first();
 
-        if ($user && $user->status === 'inactive') {
-            if ($request->ajax()) {
-                throw ValidationException::withMessages([
-                    'email' => ['حسابك غير نشط. يرجى التواصل مع الأدمن.'],
-                ]);
+        if ($user) {
+            if ($user->approval_status === 'pending') {
+                $msg = 'حسابك قيد المراجعة. يرجى الانتظار حتى يتم اعتماد حسابك.';
+                if ($request->ajax()) {
+                    throw ValidationException::withMessages(['email' => [$msg]]);
+                }
+                return back()->withErrors(['email' => $msg])->withInput();
             }
-            return back()->withErrors(['email' => 'حسابك غير نشط. يرجى التواصل مع الأدمن.'])->withInput();
+
+            if ($user->approval_status === 'rejected') {
+                $reason = $user->rejection_reason ? ' السبب: ' . $user->rejection_reason : '';
+                $msg = 'تم رفض حسابك.' . $reason;
+                if ($request->ajax()) {
+                    throw ValidationException::withMessages(['email' => [$msg]]);
+                }
+                return back()->withErrors(['email' => $msg])->withInput();
+            }
+
+            if ($user->status === 'inactive') {
+                $msg = 'حسابك غير نشط. يرجى التواصل مع الأدمن.';
+                if ($request->ajax()) {
+                    throw ValidationException::withMessages(['email' => [$msg]]);
+                }
+                return back()->withErrors(['email' => $msg])->withInput();
+            }
         }
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {

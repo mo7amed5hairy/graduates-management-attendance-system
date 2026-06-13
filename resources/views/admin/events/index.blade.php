@@ -54,7 +54,7 @@
             <a href="{{ route('admin.events.show', $e) }}" class="btn btn-sm btn-primary">🔍</a>
             <a href="{{ route('admin.events.edit', $e) }}" class="btn btn-sm btn-warning">✏️</a>
             <a href="{{ route('admin.attendance.event', $e) }}" class="btn btn-sm btn-success">📋 حضور</a>
-            <button class="btn btn-sm btn-danger" onclick="deleteEvent({{ $e->id }})">🗑</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteEvent(this)" data-url="{{ route('admin.events.destroy', $e) }}">🗑</button>
           </td>
         </tr>
         @empty
@@ -77,10 +77,10 @@ $(function() {
   });
 });
 
-function deleteEvent(id) {
+function deleteEvent(btn) {
   if (!confirm('هل أنت متأكد من حذف هذه الفعالية؟')) return;
   var form = document.getElementById('deleteForm');
-  form.action = '{{ route('admin.events.destroy', '') }}/' + id;
+  form.action = btn.dataset.url;
   fetch(form.action, {
     method: 'POST',
     headers: {

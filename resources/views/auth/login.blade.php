@@ -33,7 +33,7 @@
       <button type="submit" class="btn btn-primary w-full justify-center">دخول</button>
     </form>
 
-    <div style="display:none;" class="mt-4 text-center text-sm text-slate-500">
+    <div  class="mt-4 text-center text-sm text-slate-500">
       ليس لديك حساب؟ <a href="{{ route('register') }}" class="text-sky-600 font-bold hover:underline">تسجيل جديد</a>
     </div>
 

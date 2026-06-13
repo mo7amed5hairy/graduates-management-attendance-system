@@ -3,10 +3,13 @@
 * { font-family: 'Cairo', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  background:
+  /* background:
     radial-gradient(1200px 600px at 100% -10%, #e0f2fe 0%, transparent 60%),
     radial-gradient(900px 500px at -10% 110%, #dcfce7 0%, transparent 60%),
-    #f8fafc;
+    #f8fafc; */
+
+    background: radial-gradient(1200px 600px at 100% -10%, #abc5d7 0%, transparent 60%), radial-gradient(900px 500px at -10% 110%, #c9d9ce 0%, transparent 60%), #e2e8ed;
+    
   min-height: 100vh;
 }
 
@@ -48,6 +51,43 @@ body {
   background: linear-gradient(135deg,#0ea5e9,#0284c7);
   color: white;
   box-shadow: 0 6px 16px -6px rgba(2,132,199,.5);
+}
+
+/* ── Wide Modal ── */
+.modal-content.modal-content-wide {
+  max-width: 960px;
+  width: 94%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.modal-content.modal-content-xl {
+  max-width: 1100px;
+  width: 94%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* ── Nav Group (collapsible) ── */
+.nav-group-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+.nav-group-toggle .nav-arrow {
+  margin-right: auto;
+  font-size: .7rem;
+  transition: transform .2s;
+}
+.nav-group-toggle.open .nav-arrow {
+  transform: rotate(180deg);
+}
+.nav-sub a {
+  padding-right: 2.2rem !important;
+  font-size: .82rem !important;
+  margin-bottom: .1rem !important;
+}
+.nav-sub a.active {
+  background: linear-gradient(135deg,#38bdf8,#0ea5e9) !important;
+  box-shadow: none !important;
 }
 
 /* ── Main Area ── */

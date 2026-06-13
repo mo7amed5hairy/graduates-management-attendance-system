@@ -31,6 +31,8 @@ class User extends Authenticatable
         'faculty',
         'graduation_year',
         'job_status',
+        'age',
+        'gender',
         'id_photos',
         'residence_proof',
         'approval_status',
@@ -48,7 +50,6 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
             'social_links' => 'array',
             'id_photos' => 'array',
             'residence_proof' => 'array',

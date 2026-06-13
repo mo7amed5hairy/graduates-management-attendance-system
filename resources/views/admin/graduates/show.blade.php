@@ -23,8 +23,8 @@
       </div>
       <div class="flex gap-2">
         @if($user->isPending())
-          <button class="btn btn-success" onclick="approveUser({{ $user->id }})">✓ اعتماد</button>
-          <button class="btn btn-danger" onclick="showRejectModal({{ $user->id }})">✕ رفض</button>
+          <button class="btn btn-success" onclick="approveUser()">✓ اعتماد</button>
+          <button class="btn btn-danger" onclick="showRejectModal()">✕ رفض</button>
         @endif
         <a href="{{ route('admin.graduates.index') }}" class="btn btn-ghost">⬅ عودة</a>
       </div>
@@ -145,9 +145,9 @@
 
 @push('scripts')
 <script>
-function approveUser(id) {
+function approveUser() {
   if (!confirm('هل أنت متأكد من اعتماد هذا الحساب؟')) return;
-  fetch('{{ route('admin.graduates.approve', '') }}/' + id, {
+  fetch('{{ route('admin.graduates.approve', $user) }}', {
     method: 'POST',
     headers: {
       'X-Requested-With': 'XMLHttpRequest',
@@ -159,9 +159,9 @@ function approveUser(id) {
   }).catch(function(e) { App.toast('حدث خطأ', 'error'); });
 }
 
-function showRejectModal(id) {
+function showRejectModal() {
   var form = document.getElementById('rejectForm');
-  form.action = '{{ route('admin.graduates.reject', '') }}/' + id;
+  form.action = '{{ route('admin.graduates.reject', $user) }}';
   document.getElementById('rejectModal').classList.add('active');
 }
 </script>

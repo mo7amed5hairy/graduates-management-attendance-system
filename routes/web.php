@@ -1,9 +1,15 @@
 <?php
 
 use App\Http\Controllers\Admin\AttendanceController;
+use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\EventController;
+use App\Http\Controllers\Admin\GovernorateController;
 use App\Http\Controllers\Admin\GraduateController;
 use App\Http\Controllers\Admin\ImportController;
+use App\Http\Controllers\Admin\InstitutionController;
+use App\Http\Controllers\Admin\InstitutionTypeController;
+use App\Http\Controllers\Admin\UniversityTypeController;
+use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
@@ -34,6 +40,15 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 });
 
+// API routes for location cascading dropdowns
+Route::prefix('api')->name('api.')->group(function () {
+    Route::get('/governorates', [LocationController::class, 'governorates'])->name('governorates');
+    Route::get('/institution-types', [LocationController::class, 'institutionTypes'])->name('institution-types');
+    Route::get('/university-types', [LocationController::class, 'universityTypes'])->name('university-types');
+    Route::get('/governorates/{governorate}/institution-type/{institutionType}/university-type/{universityType}/institutions', [LocationController::class, 'institutionsByGovernorate'])->name('institutions.by-filters');
+    Route::get('/institutions/{institution}/departments', [LocationController::class, 'departmentsByInstitution'])->name('departments.by-institution');
+});
+
 // Auth routes
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -52,13 +67,54 @@ Route::middleware('auth')->group(function () {
     Route::middleware(AdminMiddleware::class)->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-        // Users management (keep for admin user management)
+        // Governorates
+        Route::prefix('governorates')->name('governorates.')->group(function () {
+            Route::get('/', [GovernorateController::class, 'index'])->name('index');
+            Route::post('/', [GovernorateController::class, 'store'])->name('store');
+            Route::put('/{governorate}', [GovernorateController::class, 'update'])->name('update');
+            Route::delete('/{governorate}', [GovernorateController::class, 'destroy'])->name('destroy');
+        });
+
+        // Institution Types (جامعة / معهد)
+        Route::prefix('institution-types')->name('institution-types.')->group(function () {
+            Route::get('/', [InstitutionTypeController::class, 'index'])->name('index');
+            Route::post('/', [InstitutionTypeController::class, 'store'])->name('store');
+            Route::put('/{institutionType}', [InstitutionTypeController::class, 'update'])->name('update');
+            Route::delete('/{institutionType}', [InstitutionTypeController::class, 'destroy'])->name('destroy');
+        });
+
+        // University Types (حكومية / أهلية)
+        Route::prefix('university-types')->name('university-types.')->group(function () {
+            Route::get('/', [UniversityTypeController::class, 'index'])->name('index');
+            Route::post('/', [UniversityTypeController::class, 'store'])->name('store');
+            Route::put('/{universityType}', [UniversityTypeController::class, 'update'])->name('update');
+            Route::delete('/{universityType}', [UniversityTypeController::class, 'destroy'])->name('destroy');
+        });
+
+        // Institutions (universities & institutes)
+        Route::prefix('institutions')->name('institutions.')->group(function () {
+            Route::get('/', [InstitutionController::class, 'index'])->name('index');
+            Route::post('/', [InstitutionController::class, 'store'])->name('store');
+            Route::put('/{institution}', [InstitutionController::class, 'update'])->name('update');
+            Route::delete('/{institution}', [InstitutionController::class, 'destroy'])->name('destroy');
+        });
+
+        // Departments
+        Route::prefix('departments')->name('departments.')->group(function () {
+            Route::get('/', [DepartmentController::class, 'index'])->name('index');
+            Route::post('/', [DepartmentController::class, 'store'])->name('store');
+            Route::put('/{department}', [DepartmentController::class, 'update'])->name('update');
+            Route::delete('/{department}', [DepartmentController::class, 'destroy'])->name('destroy');
+        });
+
+        // Users management (approval / suspend / delete)
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('index');
             Route::post('/', [UserController::class, 'store'])->name('store');
             Route::get('/{user}', [UserController::class, 'show'])->name('show');
             Route::put('/{user}', [UserController::class, 'update'])->name('update');
             Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+            Route::post('/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggle-status');
         });
 
         // Points management

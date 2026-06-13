@@ -33,6 +33,32 @@
       <a href="{{ route('admin.graduates.index') }}" class="{{ request()->routeIs('admin.graduates.*') ? 'active' : '' }}">
         <span>🎓</span><span>الخريجين</span>
       </a>
+      <div class="nav-group">
+        @php
+          $dataRoutes = ['admin.governorates.*', 'admin.institution-types.*', 'admin.university-types.*', 'admin.institutions.*', 'admin.departments.*'];
+          $dataActive = request()->routeIs($dataRoutes);
+        @endphp
+        <a href="#" onclick="toggleNavGroup(this); return false;" class="nav-group-toggle{{ $dataActive ? ' open' : '' }}">
+          <span>⚙️</span><span>المحافظات والجامعات والأقسام</span><span class="nav-arrow">{{ $dataActive ? '▲' : '▼' }}</span>
+        </a>
+        <div class="nav-sub" id="navDataGroup" style="display: {{ $dataActive ? 'block' : 'none' }};">
+          <a href="{{ route('admin.governorates.index') }}" class="{{ request()->routeIs('admin.governorates.*') ? 'active' : '' }}">
+            <span>🏛️</span><span>المحافظات</span>
+          </a>
+          <a href="{{ route('admin.institution-types.index') }}" class="{{ request()->routeIs('admin.institution-types.*') ? 'active' : '' }}">
+            <span>🏫</span><span>أنواع المؤسسات</span>
+          </a>
+          <a href="{{ route('admin.university-types.index') }}" class="{{ request()->routeIs('admin.university-types.*') ? 'active' : '' }}">
+            <span>📚</span><span>أنواع الجامعات</span>
+          </a>
+          <a href="{{ route('admin.institutions.index') }}" class="{{ request()->routeIs('admin.institutions.*') ? 'active' : '' }}">
+            <span>🎓</span><span>المؤسسات التعليمية</span>
+          </a>
+          <a href="{{ route('admin.departments.index') }}" class="{{ request()->routeIs('admin.departments.*') ? 'active' : '' }}">
+            <span>📖</span><span>الأقسام والتخصصات</span>
+          </a>
+        </div>
+      </div>
       <a href="{{ route('admin.events.index') }}" class="{{ request()->routeIs('admin.events.*') ? 'active' : '' }}">
         <span>📅</span><span>الفعاليات</span>
       </a>
@@ -132,6 +158,21 @@
 <script src="{{ asset('js/dataTables.min.js') }}"></script>
 <script src="{{ asset('js/app.js') }}"></script>
 <script>
+// Collapsible nav group
+function toggleNavGroup(btn) {
+  var sub = btn.nextElementSibling;
+  var arrow = btn.querySelector('.nav-arrow');
+  if (sub.style.display === 'none' || sub.style.display === '') {
+    sub.style.display = 'block';
+    arrow.textContent = '▲';
+    btn.classList.add('open');
+  } else {
+    sub.style.display = 'none';
+    arrow.textContent = '▼';
+    btn.classList.remove('open');
+  }
+}
+
 // Notification system
 let notifVisible = false;
 var notifBase = '{{ route('notifications.index') }}'.replace(/\/+$/, '');
@@ -185,13 +226,41 @@ async function fetchNotifList() {
       return;
     }
     if (markBtn) markBtn.style.display = 'block';
+    var graduatesUrl = '{{ route('admin.graduates.index') }}';
     list.innerHTML = data.data.map(function(n) {
-      var taskId = (n.data && n.data.task_id) || 0;
-      var detailUrl = '{{ route('tasks.index') }}' + '/' + taskId;
-      return '<div class="flex items-start gap-2 p-3 hover:bg-sky-50 border-b border-slate-50 notif-item" data-id="' + n.id + '" data-task="' + taskId + '">' +
-        '<span class="text-lg">📋</span>' +
+      var icon, text, linkUrl;
+      switch (n.type) {
+        case 'new_registration':
+          icon = '&#x1F464;';
+          text = 'تسجيل خريج جديد: ' + (n.data && n.data.user_name || '');
+          linkUrl = graduatesUrl;
+          break;
+        case 'event_invitation':
+          icon = '&#x1F4C5;';
+          text = (n.data && n.data.message) || 'دعوة لفعالية';
+          linkUrl = '{{ route('events.index') }}';
+          break;
+        case 'approval':
+          icon = '&#x2705;';
+          text = (n.data && n.data.message) || 'تم اعتماد حسابك';
+          linkUrl = '{{ route('profile.show') }}';
+          break;
+        case 'rejection':
+          icon = '&#x274C;';
+          text = 'تم رفض حسابك';
+          linkUrl = '{{ route('profile.show') }}';
+          break;
+        default:
+          icon = '&#x1F4CB;';
+          var taskId = (n.data && n.data.task_id) || 0;
+          text = (n.data && n.data.title) || 'إشعار';
+          linkUrl = '{{ route('tasks.index') }}' + '/' + taskId;
+      }
+      var markReadUrl = notifBase + '/' + n.id + '/read';
+      return '<div class="flex items-start gap-2 p-3 hover:bg-sky-50 border-b border-slate-50 notif-item" data-id="' + n.id + '">' +
+        '<span class="text-lg">' + icon + '</span>' +
         '<div class="flex-1 min-w-0">' +
-          '<div class="text-sm font-semibold text-slate-900">تم تكليفك بمهمة: <a href="' + detailUrl + '" class="text-sky-600 hover:underline" onclick="fetch(\'' + notifBase + '/' + n.id + '/read\', {method:\'POST\',headers:{\'X-Requested-With\':\'XMLHttpRequest\',\'X-CSRF-TOKEN\':\'' + csrfToken + '\'}}).then(function(){ fetchNotifCount(); });">' + ((n.data && n.data.title) || '') + '</a></div>' +
+          '<div class="text-sm font-semibold text-slate-900"><a href="' + linkUrl + '" class="text-sky-600 hover:underline" onclick="fetch(\'' + markReadUrl + '\', {method:\'POST\',headers:{\'X-Requested-With\':\'XMLHttpRequest\',\'X-CSRF-TOKEN\':\'' + csrfToken + '\'}}).then(function(){ fetchNotifCount(); });">' + text + '</a></div>' +
           '<div class="text-xs text-slate-400">' + n.created_at + '</div>' +
         '</div>' +
         '<button class="text-sky-600 text-xs font-bold mark-notif-read" onclick="event.stopPropagation(); event.preventDefault(); markNotifRead(this, ' + n.id + ')" data-id="' + n.id + '">✓</button>' +
