@@ -16,6 +16,10 @@ class User extends Authenticatable
 
     protected $fillable = [
         'access_token',
+        'first_name',
+        'father_name',
+        'grandfather_name',
+        'family_name',
         'name',
         'mother_name',
         'email',
@@ -65,6 +69,19 @@ class User extends Authenticatable
             'graduation_year' => 'integer',
             'approved_at' => 'datetime',
         ];
+    }
+
+    public function getNameAttribute($value)
+    {
+        if ($this->attributes['first_name'] ?? null) {
+            return trim(
+                ($this->attributes['first_name'] ?? '') . ' ' .
+                ($this->attributes['father_name'] ?? '') . ' ' .
+                ($this->attributes['grandfather_name'] ?? '') . ' ' .
+                ($this->attributes['family_name'] ?? '')
+            );
+        }
+        return $value;
     }
 
     public function isAdmin(): bool

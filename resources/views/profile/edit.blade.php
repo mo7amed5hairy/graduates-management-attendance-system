@@ -35,8 +35,20 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="label">الإسم الرباعى مع اللقب</label>
-          <input class="input" name="name" value="{{ $user->name }}" required>
+          <label class="label">الإسم</label>
+          <input class="input" name="first_name" value="{{ $user->first_name ?? $user->name }}" required>
+        </div>
+        <div>
+          <label class="label">اسم الأب</label>
+          <input class="input" name="father_name" value="{{ $user->father_name }}" required>
+        </div>
+        <div>
+          <label class="label">اسم الجد</label>
+          <input class="input" name="grandfather_name" value="{{ $user->grandfather_name }}" required>
+        </div>
+        <div>
+          <label class="label">اللقب</label>
+          <input class="input" name="family_name" value="{{ $user->family_name }}" required>
         </div>
         <div>
           <label class="label">اسم الأم الرباعى</label>

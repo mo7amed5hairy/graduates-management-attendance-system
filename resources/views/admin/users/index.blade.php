@@ -104,8 +104,20 @@
       @method('PUT')
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="label">الاسم</label>
-          <input class="input" name="name" value="{{ $user->name }}" required>
+          <label class="label">الإسم</label>
+          <input class="input" name="first_name" value="{{ $user->first_name ?? $user->name }}" required>
+        </div>
+        <div>
+          <label class="label">اسم الأب</label>
+          <input class="input" name="father_name" value="{{ $user->father_name }}" required>
+        </div>
+        <div>
+          <label class="label">اسم الجد</label>
+          <input class="input" name="grandfather_name" value="{{ $user->grandfather_name }}" required>
+        </div>
+        <div>
+          <label class="label">اللقب</label>
+          <input class="input" name="family_name" value="{{ $user->family_name }}" required>
         </div>
         <div>
           <label class="label">البريد الإلكتروني</label>
@@ -144,11 +156,23 @@
     <form data-ajax="true" action="{{ route('admin.users.store') }}" method="POST" enctype="multipart/form-data">
       @csrf
 
-      {{-- Row 1: name, mother_name, national_id, phone --}}
+      {{-- Row 1: name parts, mother_name, national_id, phone --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-3">
-          <label class="label">الإسم الرباعى مع اللقب <span class="text-rose-500">*</span></label>
-          <input class="input" name="name" placeholder="الاسم الرباعي مع اللقب" required>
+          <label class="label">الإسم <span class="text-rose-500">*</span></label>
+          <input class="input" name="first_name" placeholder="الإسم" required>
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">اسم الأب <span class="text-rose-500">*</span></label>
+          <input class="input" name="father_name" placeholder="اسم الأب" required>
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">اسم الجد <span class="text-rose-500">*</span></label>
+          <input class="input" name="grandfather_name" placeholder="اسم الجد" required>
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">اللقب <span class="text-rose-500">*</span></label>
+          <input class="input" name="family_name" placeholder="اللقب" required>
         </div>
         <div class="col-span-12 md:col-span-3">
           <label class="label">اسم الأم الرباعى</label>

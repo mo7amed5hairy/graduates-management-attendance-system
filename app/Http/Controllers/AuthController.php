@@ -29,7 +29,10 @@ class AuthController extends Controller
     public function register(Request $request): JsonResponse|RedirectResponse
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'father_name' => 'required|string|max:255',
+            'grandfather_name' => 'required|string|max:255',
+            'family_name' => 'required|string|max:255',
             'mother_name' => 'required|string|max:255',
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'required|string|regex:/^077\d{8}$/',
@@ -47,6 +50,9 @@ class AuthController extends Controller
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
+
+        // Concatenate name parts
+        $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}");
 
         // Calculate age from date_of_birth
         if ($validated['date_of_birth']) {

@@ -20,7 +20,10 @@ class UserController extends Controller
     public function store(Request $request): JsonResponse
     {
         $rules = [
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'father_name' => 'required|string|max:255',
+            'grandfather_name' => 'required|string|max:255',
+            'family_name' => 'required|string|max:255',
             'email' => 'nullable|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'required|string|max:20',
@@ -47,6 +50,8 @@ class UserController extends Controller
         }
 
         $validated = $request->validate($rules);
+
+        $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}");
 
         $validated['password'] = Hash::make($validated['password']);
 
@@ -117,11 +122,16 @@ class UserController extends Controller
     public function update(Request $request, User $user): JsonResponse
     {
         $data = $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'father_name' => 'required|string|max:255',
+            'grandfather_name' => 'required|string|max:255',
+            'family_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
             'status' => 'required|in:active,inactive',
         ]);
+
+        $data['name'] = trim("{$data['first_name']} {$data['father_name']} {$data['grandfather_name']} {$data['family_name']}");
 
         $user->update($data);
 

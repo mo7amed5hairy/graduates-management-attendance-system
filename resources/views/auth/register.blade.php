@@ -24,12 +24,28 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
     <form id="registerForm" data-ajax="true" action="{{ route('register') }}" method="POST" class="space-y-4" enctype="multipart/form-data">
       @csrf
 
-      {{-- Row 1: الإسم الرباعى مع اللقب, اسم الأم الرباعى, رقم البطاقة الوطنية --}}
+      {{-- Row 1: الإسم, اسم الأب, اسم الجد, اللقب --}}
       <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12 md:col-span-4">
-          <label class="label">الإسم الرباعى مع اللقب <span class="text-rose-500">*</span></label>
-          <input class="input" name="name" placeholder="الاسم الرباعي مع اللقب" required>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">الإسم <span class="text-rose-500">*</span></label>
+          <input class="input" name="first_name" placeholder="الإسم" required>
         </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">اسم الأب <span class="text-rose-500">*</span></label>
+          <input class="input" name="father_name" placeholder="اسم الأب" required>
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">اسم الجد <span class="text-rose-500">*</span></label>
+          <input class="input" name="grandfather_name" placeholder="اسم الجد" required>
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">اللقب <span class="text-rose-500">*</span></label>
+          <input class="input" name="family_name" placeholder="اللقب" required>
+        </div>
+      </div>
+
+      {{-- Row 2: اسم الأم, رقم البطاقة --}}
+      <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-4">
           <label class="label">اسم الأم الرباعى <span class="text-rose-500">*</span></label>
           <input class="input" name="mother_name" placeholder="اسم الأم الرباعي" required>
@@ -40,7 +56,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         </div>
       </div>
 
-      {{-- Row 2: تاريخ الميلاد, العمر (auto), الجنس --}}
+      {{-- Row 3: تاريخ الميلاد, العمر (auto), الجنس --}}
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-4">
           <label class="label">تاريخ الميلاد <span class="text-rose-500">*</span></label>

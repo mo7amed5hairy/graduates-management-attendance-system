@@ -47,7 +47,10 @@ class ProfileController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'father_name' => 'required|string|max:255',
+            'grandfather_name' => 'required|string|max:255',
+            'family_name' => 'required|string|max:255',
             'mother_name' => 'nullable|string|max:255',
             'email' => 'nullable|string|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
@@ -67,6 +70,8 @@ class ProfileController extends Controller
             'social_links' => 'nullable|array',
             'social_links.*' => 'nullable|url|max:500',
         ]);
+
+        $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}");
 
         if ($request->filled('password')) {
             $validated['password'] = Hash::make($validated['password']);
