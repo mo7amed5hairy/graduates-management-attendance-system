@@ -180,7 +180,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
   function toggleChildrenCount() {
     var val = document.getElementById('socialStatus').value;
     var wrap = document.getElementById('childrenCountWrap');
-    if (val.includes('أطفال')) {
+    if (val.includes('لديه أطفال')) {
       wrap.style.display = 'block';
     } else {
       wrap.style.display = 'none';

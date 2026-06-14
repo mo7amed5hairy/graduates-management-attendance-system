@@ -352,7 +352,7 @@ function calculateAgeC() {
 function toggleChildrenCountC() {
   var val = document.getElementById('createSocialStatus').value;
   var wrap = document.getElementById('createChildrenCountWrap');
-  if (val.includes('أطفال')) {
+  if (val.includes('لديه أطفال')) {
     wrap.style.display = 'block';
   } else {
     wrap.style.display = 'none';

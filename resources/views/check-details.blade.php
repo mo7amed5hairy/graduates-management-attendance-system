@@ -48,7 +48,7 @@
       <div>
         <span class="text-xs text-slate-400 block">الحالة الاجتماعية</span>
         <span class="font-semibold">{{ $user->social_status ?? 'غير محدد' }}</span>
-        @if(str_contains($user->social_status ?? '', 'أطفال') && $user->children_count !== null)
+        @if(str_contains($user->social_status ?? '', 'لديه أطفال') && $user->children_count !== null)
           <span class="text-xs text-slate-500">عدد الأولاد: {{ $user->children_count }}</span>
         @endif
       </div>

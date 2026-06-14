@@ -75,7 +75,7 @@
             <option value="أرمل (لديه أطفال)" {{ $user->social_status === 'أرمل (لديه أطفال)' ? 'selected' : '' }}>أرمل (لديه أطفال)</option>
           </select>
         </div>
-        <div id="childrenCountWrap" style="{{ str_contains($user->social_status ?? '', 'أطفال') ? 'display:block' : 'display:none' }}">
+        <div id="childrenCountWrap" style="{{ str_contains($user->social_status ?? '', 'لديه أطفال') ? 'display:block' : 'display:none' }}">
           <label class="label">عدد الأولاد</label>
           <input class="input" type="number" name="children_count" id="children_count" value="{{ $user->children_count }}" min="0">
         </div>
@@ -215,7 +215,7 @@ function toggleChildrenCountEdit() {
   var val = document.getElementById('social_status')?.value;
   var wrap = document.getElementById('childrenCountWrap');
   if (!wrap) return;
-  if (val && val.includes('أطفال')) {
+  if (val && val.includes('لديه أطفال')) {
     wrap.style.display = 'block';
   } else {
     wrap.style.display = 'none';
