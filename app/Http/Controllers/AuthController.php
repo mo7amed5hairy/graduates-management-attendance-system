@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Department;
-use App\Models\Institution;
+use App\Models\Governorate;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -23,60 +22,41 @@ class AuthController extends Controller
 
     public function showRegisterForm()
     {
-        return view('auth.register');
+        $governorates = Governorate::orderBy('name')->get();
+        return view('auth.register', compact('governorates'));
     }
 
     public function register(Request $request): JsonResponse|RedirectResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'mother_name' => 'required|string|max:255',
             'password' => 'required|string|min:8|confirmed',
-            'phone' => 'required|string|max:20',
+            'phone' => 'required|string|regex:/^077\d{8}$/',
             'national_id' => 'required|string|max:20|unique:users',
-            'governorate' => 'required|exists:governorates,id',
-            'institution_type' => 'required|exists:institution_types,id',
-            'university_type' => 'required|exists:university_types,id',
-            'institution_id' => 'required|exists:institutions,id',
-            'department_id' => 'required|exists:departments,id',
+            'governorate' => 'required|string|max:100',
+            'address' => 'required|string|max:1000',
+            'date_of_birth' => 'required|date',
+            'gender' => 'nullable|string|in:ذكر,أنثى',
             'graduation_year' => 'required|integer|min:1950|max:' . (date('Y') + 5),
             'job_status' => 'required|string|max:100',
-            'age' => 'nullable|integer|min:1|max:150',
-            'gender' => 'nullable|string|in:ذكر,أنثى',
-            'address' => 'nullable|string|max:1000',
+            'qualification_id' => 'required|exists:qualifications,id',
+            'qualification_faculty_id' => 'required|exists:qualification_faculties,id',
+            'social_status' => 'required|string|in:أعزب,متزوج ولديه اولاد,متزوج وليس لديه اولاد,أرمل',
+            'children_count' => 'nullable|integer|min:0',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
 
-        $institution = Institution::with('governorate')->find($validated['institution_id']);
-        $department = Department::find($validated['department_id']);
-
-        $validated['governorate'] = $institution->governorate->name;
-        $validated['university'] = $institution->name;
-        $validated['faculty'] = $department->name;
-
-        unset($validated['institution_type'], $validated['university_type'], $validated['institution_id'], $validated['department_id']);
-
-        // Handle ID photos
-        if ($request->hasFile('id_photos')) {
-            $photos = [];
-            foreach ($request->file('id_photos') as $file) {
-                $photos[] = $file->store('id-photos', 'public');
-            }
-            $validated['id_photos'] = $photos;
-        }
-
-        // Handle residence proof
-        if ($request->hasFile('residence_proof')) {
-            $proofs = [];
-            foreach ($request->file('residence_proof') as $file) {
-                $proofs[] = $file->store('residence-proof', 'public');
-            }
-            $validated['residence_proof'] = $proofs;
+        // Calculate age from date_of_birth
+        if ($validated['date_of_birth']) {
+            $validated['age'] = \Carbon\Carbon::parse($validated['date_of_birth'])->age;
         }
 
         $validated['role'] = 'user';
         $validated['approval_status'] = 'pending';
+        $validated['email'] = 'user_' . $validated['national_id'] . '@system.local';
+        $validated['access_token'] = bin2hex(random_bytes(32));
 
         $newUser = User::create($validated);
 
@@ -91,18 +71,21 @@ class AuthController extends Controller
                     'message' => "قام الخريج {$newUser->name} بالتسجيل. يرجى مراجعة الحساب.",
                     'user_id' => $newUser->id,
                     'user_name' => $newUser->name,
-                    'user_email' => $newUser->email,
+                    'user_email' => $newUser->email ?? '',
                 ],
             ]);
         }
 
         $redirect = route('login');
 
+        $accessLink = url('/checkmydetails/' . $newUser->access_token);
+
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
                 'message' => 'تم التسجيل بنجاح. حسابك قيد المراجعة، سيتم إشعارك عند الاعتماد.',
                 'redirect' => $redirect,
+                'access_link' => $accessLink,
             ]);
         }
 
@@ -112,63 +95,70 @@ class AuthController extends Controller
     public function login(Request $request): JsonResponse|RedirectResponse
     {
         $credentials = $request->validate([
-            'email' => 'required|string|email',
+            'national_id' => 'required|string',
             'password' => 'required|string',
         ]);
 
-        $user = User::where('email', $credentials['email'])->first();
+        $login = $credentials['national_id'];
+        $isEmail = str_contains($login, '@');
+        $field = $isEmail ? 'email' : 'national_id';
+
+        $user = User::where($field, $login)->first();
 
         if ($user) {
             if ($user->approval_status === 'pending') {
                 $msg = 'حسابك قيد المراجعة. يرجى الانتظار حتى يتم اعتماد حسابك.';
                 if ($request->ajax()) {
-                    throw ValidationException::withMessages(['email' => [$msg]]);
+                    throw ValidationException::withMessages(['national_id' => [$msg]]);
                 }
-                return back()->withErrors(['email' => $msg])->withInput();
+                return back()->withErrors(['national_id' => $msg])->withInput();
             }
 
             if ($user->approval_status === 'rejected') {
                 $reason = $user->rejection_reason ? ' السبب: ' . $user->rejection_reason : '';
                 $msg = 'تم رفض حسابك.' . $reason;
                 if ($request->ajax()) {
-                    throw ValidationException::withMessages(['email' => [$msg]]);
+                    throw ValidationException::withMessages(['national_id' => [$msg]]);
                 }
-                return back()->withErrors(['email' => $msg])->withInput();
+                return back()->withErrors(['national_id' => $msg])->withInput();
             }
 
             if ($user->status === 'inactive') {
                 $msg = 'حسابك غير نشط. يرجى التواصل مع الأدمن.';
                 if ($request->ajax()) {
-                    throw ValidationException::withMessages(['email' => [$msg]]);
+                    throw ValidationException::withMessages(['national_id' => [$msg]]);
                 }
-                return back()->withErrors(['email' => $msg])->withInput();
+                return back()->withErrors(['national_id' => $msg])->withInput();
             }
         }
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        if (Auth::attempt([$field => $login, 'password' => $credentials['password']], $request->boolean('remember'))) {
             $request->session()->regenerate();
 
             $user = Auth::user();
             $redirect = $user->isAdmin() ? route('admin.dashboard') : route('profile.show');
+
+            $cookie = cookie('access_token', $user->access_token, 60 * 24 * 365);
 
             if ($request->ajax()) {
                 return response()->json([
                     'success' => true,
                     'message' => 'تم تسجيل الدخول بنجاح',
                     'redirect' => $redirect,
-                ]);
+                    'access_token' => $user->access_token,
+                ])->cookie($cookie);
             }
 
-            return redirect()->intended($redirect);
+            return redirect()->intended($redirect)->withCookie($cookie);
         }
 
         if ($request->ajax()) {
             throw ValidationException::withMessages([
-                'email' => ['بيانات الدخول غير صحيحة'],
+                'national_id' => ['بيانات الدخول غير صحيحة'],
             ]);
         }
 
-        return back()->withErrors(['email' => 'بيانات الدخول غير صحيحة'])->withInput();
+        return back()->withErrors(['national_id' => 'بيانات الدخول غير صحيحة'])->withInput();
     }
 
     public function logout(Request $request): JsonResponse|RedirectResponse

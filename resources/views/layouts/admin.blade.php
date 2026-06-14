@@ -71,12 +71,37 @@
       <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
         <span>👥</span><span>إدارة المستخدمين</span>
       </a>
+      <div class="nav-group">
+        @php
+          $qualRoutes = ['admin.qualifications.*', 'admin.qualification-faculties.*'];
+          $qualActive = request()->routeIs($qualRoutes);
+        @endphp
+        <a href="#" onclick="toggleNavGroup(this); return false;" class="nav-group-toggle{{ $qualActive ? ' open' : '' }}">
+          <span>📚</span><span>المؤهلات الدراسية</span><span class="nav-arrow">{{ $qualActive ? '▲' : '▼' }}</span>
+        </a>
+        <div class="nav-sub" id="navQualGroup" style="display: {{ $qualActive ? 'block' : 'none' }};">
+          <a href="{{ route('admin.qualifications.index') }}" class="{{ request()->routeIs('admin.qualifications.*') ? 'active' : '' }}">
+            <span>🎓</span><span>المؤهلات</span>
+          </a>
+          <a href="{{ route('admin.qualification-faculties.index') }}" class="{{ request()->routeIs('admin.qualification-faculties.*') ? 'active' : '' }}">
+            <span>🏛️</span><span>الكليات</span>
+          </a>
+        </div>
+      </div>
+      <a href="{{ route('admin.statistics.index') }}" class="{{ request()->routeIs('admin.statistics.*') ? 'active' : '' }}">
+        <span>📊</span><span>الإحصائيات</span>
+      </a>
       <a href="{{ route('admin.tasks.index') }}" class="{{ request()->routeIs('admin.tasks.*') ? 'active' : '' }}">
         <span>📋</span><span>المهام</span>
       </a>
       <a href="{{ route('admin.import.index') }}" class="{{ request()->routeIs('admin.import.*') ? 'active' : '' }}">
         <span>📥</span><span>استيراد</span>
       </a>
+      @if(auth()->user()->email === 'admin@admin.com')
+      <a href="{{ route('admin.sub-admins.index') }}" class="{{ request()->routeIs('admin.sub-admins.*') ? 'active' : '' }}">
+        <span>🔐</span><span>المشرفين والصلاحيات</span>
+      </a>
+      @endif
       @endif
       @if(!auth()->user()->isAdmin())
       <a href="{{ route('tasks.index') }}" class="{{ request()->routeIs('tasks.index') ? 'active' : '' }}">
@@ -260,7 +285,7 @@ async function fetchNotifList() {
       return '<div class="flex items-start gap-2 p-3 hover:bg-sky-50 border-b border-slate-50 notif-item" data-id="' + n.id + '">' +
         '<span class="text-lg">' + icon + '</span>' +
         '<div class="flex-1 min-w-0">' +
-          '<div class="text-sm font-semibold text-slate-900"><a href="' + linkUrl + '" class="text-sky-600 hover:underline" onclick="fetch(\'' + markReadUrl + '\', {method:\'POST\',headers:{\'X-Requested-With\':\'XMLHttpRequest\',\'X-CSRF-TOKEN\':\'' + csrfToken + '\'}}).then(function(){ fetchNotifCount(); });">' + text + '</a></div>' +
+          '<div class="text-sm font-semibold text-slate-900"><a href="' + linkUrl + '" class="text-sky-600 hover:underline" onclick="event.preventDefault(); var self=this; fetch(\'' + markReadUrl + '\',{method:\'POST\',headers:{\'X-Requested-With\':\'XMLHttpRequest\',\'X-CSRF-TOKEN\':\'' + csrfToken + '\'},keepalive:true}).then(function(){ window.location.href=self.href; }).catch(function(){ window.location.href=self.href; });">' + text + '</a></div>' +
           '<div class="text-xs text-slate-400">' + n.created_at + '</div>' +
         '</div>' +
         '<button class="text-sky-600 text-xs font-bold mark-notif-read" onclick="event.stopPropagation(); event.preventDefault(); markNotifRead(this, ' + n.id + ')" data-id="' + n.id + '">✓</button>' +

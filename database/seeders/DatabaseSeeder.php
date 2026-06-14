@@ -11,12 +11,14 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            QualificationSeeder::class,
             IraqiUniversitiesSeeder::class,
         ]);
 
         User::create([
             'name' => 'مدير النظام',
             'email' => 'admin@admin.com',
+            'national_id' => '0000000000',
             'password' => Hash::make('password'),
             'phone' => '0500000000',
             'role' => 'admin',

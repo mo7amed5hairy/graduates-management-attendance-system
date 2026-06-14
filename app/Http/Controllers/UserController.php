@@ -19,34 +19,50 @@ class UserController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $validated = $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'nullable|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'required|string|max:20',
             'national_id' => 'required|string|max:20|unique:users',
-            'governorate' => 'required|exists:governorates,id',
-            'institution_type' => 'required|exists:institution_types,id',
-            'university_type' => 'required|exists:university_types,id',
-            'institution_id' => 'required|exists:institutions,id',
-            'department_id' => 'required|exists:departments,id',
             'graduation_year' => 'required|integer|min:1950|max:' . (date('Y') + 5),
             'job_status' => 'required|string|max:100',
             'age' => 'nullable|integer|min:1|max:150',
             'gender' => 'nullable|string|in:ذكر,أنثى',
             'address' => 'nullable|string|max:1000',
-        ]);
+            'mother_name' => 'nullable|string|max:255',
+            'social_status' => 'nullable|string|in:أعزب,متزوج ولديه اولاد,متزوج وليس لديه اولاد,أرمل',
+            'children_count' => 'nullable|integer|min:0',
+            'date_of_birth' => 'nullable|date',
+            'qualification_id' => 'nullable|exists:qualifications,id',
+            'qualification_faculty_id' => 'nullable|exists:qualification_faculties,id',
+        ];
+
+        if ($request->filled('governorate') || $request->has('institution_type')) {
+            $rules['governorate'] = 'nullable|exists:governorates,id';
+            $rules['institution_type'] = 'nullable|exists:institution_types,id';
+            $rules['university_type'] = 'nullable|exists:university_types,id';
+            $rules['institution_id'] = 'nullable|exists:institutions,id';
+            $rules['department_id'] = 'nullable|exists:departments,id';
+        }
+
+        $validated = $request->validate($rules);
 
         $validated['password'] = Hash::make($validated['password']);
 
-        $institution = Institution::with('governorate')->find($validated['institution_id']);
-        $department = Department::find($validated['department_id']);
+        if ($request->filled('institution_id')) {
+            $institution = Institution::with('governorate')->find($validated['institution_id']);
+            $department = Department::find($validated['department_id']);
+            $validated['governorate'] = $institution->governorate->name;
+            $validated['university'] = $institution->name;
+            $validated['faculty'] = $department->name;
+            unset($validated['institution_type'], $validated['university_type'], $validated['institution_id'], $validated['department_id']);
+        }
 
-        $validated['governorate'] = $institution->governorate->name;
-        $validated['university'] = $institution->name;
-        $validated['faculty'] = $department->name;
-
-        unset($validated['institution_type'], $validated['university_type'], $validated['institution_id'], $validated['department_id']);
+        // Calculate age from date_of_birth if provided
+        if (!empty($validated['date_of_birth']) && empty($validated['age'])) {
+            $validated['age'] = \Carbon\Carbon::parse($validated['date_of_birth'])->age;
+        }
 
         if ($request->hasFile('id_photos')) {
             $photos = [];
@@ -68,6 +84,12 @@ class UserController extends Controller
         $validated['approval_status'] = 'approved';
         $validated['approved_at'] = now();
         $validated['approved_by'] = auth()->id();
+        $validated['access_token'] = bin2hex(random_bytes(32));
+
+        // Auto-generate email if not provided
+        if (empty($validated['email'])) {
+            $validated['email'] = 'user_' . $validated['national_id'] . '@system.local';
+        }
 
         $user = User::create($validated);
 
@@ -122,6 +144,28 @@ class UserController extends Controller
             'success' => true,
             'message' => "تم تغيير حالة المستخدم إلى $statusText",
             'data' => $user->fresh(),
+        ]);
+    }
+
+    public function bulkActivate(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:users,id',
+        ]);
+
+        $count = User::whereIn('id', $validated['ids'])
+            ->where('role', '!=', 'admin')
+            ->update([
+                'approval_status' => 'approved',
+                'approved_at' => now(),
+                'approved_by' => auth()->id(),
+                'status' => 'active',
+            ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "تم تفعيل {$count} مستخدم بنجاح",
         ]);
     }
 

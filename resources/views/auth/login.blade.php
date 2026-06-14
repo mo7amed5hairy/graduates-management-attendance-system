@@ -19,9 +19,9 @@
     <form id="loginForm" data-ajax="true" action="{{ route('login') }}" method="POST" class="space-y-4">
       @csrf
       <div>
-        <label class="label">البريد الإلكتروني</label>
-        <input class="input @error('email') border-red-400 @enderror" type="email" name="email" value="{{ old('email') }}" placeholder="example@mail.com" required autofocus>
-        @error('email')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+        <label class="label">رقم البطاقة الوطنية</label>
+        <input class="input @error('national_id') border-red-400 @enderror" type="text" name="national_id" value="{{ old('national_id') }}" placeholder="أدخل رقم البطاقة الوطنية" required autofocus dir="rtl">
+        @error('national_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
       </div>
       <div>
         <label class="label">كلمة المرور</label>

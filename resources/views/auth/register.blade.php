@@ -24,29 +24,33 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
     <form id="registerForm" data-ajax="true" action="{{ route('register') }}" method="POST" class="space-y-4" enctype="multipart/form-data">
       @csrf
 
-      {{-- Row 1: الاسم الرباعي, الرقم القومي, البريد, الهاتف, العمر, الجنس --}}
+      {{-- Row 1: الإسم الرباعى مع اللقب, اسم الأم الرباعى, رقم البطاقة الوطنية --}}
       <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12 md:col-span-3">
-          <label class="label">الاسم الرباعي <span class="text-rose-500">*</span></label>
-          <input class="input" name="name" placeholder="الاسم الكامل" required>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">الإسم الرباعى مع اللقب <span class="text-rose-500">*</span></label>
+          <input class="input" name="name" placeholder="الاسم الرباعي مع اللقب" required>
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">اسم الأم الرباعى <span class="text-rose-500">*</span></label>
+          <input class="input" name="mother_name" placeholder="اسم الأم الرباعي" required>
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">رقم البطاقة الوطنية <span class="text-rose-500">*</span></label>
+          <input class="input" name="national_id" placeholder="رقم البطاقة الوطنية" required dir="ltr">
+        </div>
+      </div>
+
+      {{-- Row 2: تاريخ الميلاد, العمر (auto), الجنس --}}
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">تاريخ الميلاد <span class="text-rose-500">*</span></label>
+          <input class="input" type="date" name="date_of_birth" id="dateOfBirth" required onchange="calculateAge()">
         </div>
         <div class="col-span-12 md:col-span-2">
-          <label class="label">الرقم القومي <span class="text-rose-500">*</span></label>
-          <input class="input" name="national_id" placeholder="الرقم القومي" required dir="ltr">
-        </div>
-        <div class="col-span-12 md:col-span-3">
-          <label class="label">البريد الإلكتروني <span class="text-rose-500">*</span></label>
-          <input class="input" type="email" name="email" placeholder="example@mail.com" required>
-        </div>
-        <div class="col-span-12 md:col-span-2">
-          <label class="label">رقم الهاتف <span class="text-rose-500">*</span></label>
-          <input class="input" name="phone" placeholder="05xxxxxxxx" required dir="ltr">
-        </div>
-        <div class="col-span-12 md:col-span-1">
           <label class="label">العمر</label>
-          <input class="input" type="number" name="age" placeholder="25" min="1" max="150">
+          <input class="input" type="number" name="age" id="age" placeholder="--" readonly style="background:#f1f5f9">
         </div>
-        <div class="col-span-12 md:col-span-1">
+        <div class="col-span-12 md:col-span-2">
           <label class="label">الجنس</label>
           <select class="input" name="gender">
             <option value="">اختر</option>
@@ -54,44 +58,44 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
             <option value="أنثى">أنثى</option>
           </select>
         </div>
-      </div>
-
-      {{-- Row 2: المحافظة, نوع المؤسسة, نوع الجامعة, الجامعة/معهد, القسم/تخصص --}}
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12 md:col-span-2">
-          <label class="label">المحافظة <span class="text-rose-500">*</span></label>
-          <select class="input" name="governorate" id="governorate" required>
-            <option value="">اختر...</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-2">
-          <label class="label">نوع المؤسسة <span class="text-rose-500">*</span></label>
-          <select class="input" name="institution_type" id="institutionType" required>
-            <option value="">اختر...</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-2">
-          <label class="label">نوع الجامعة <span class="text-rose-500">*</span></label>
-          <select class="input" name="university_type" id="universityType" required>
-            <option value="">اختر...</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-3">
-          <label class="label">الجامعة / المعهد <span class="text-rose-500">*</span></label>
-          <select class="input" name="institution_id" id="institution" required disabled>
-            <option value="">اختر أولاً...</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-3">
-          <label class="label">القسم / التخصص <span class="text-rose-500">*</span></label>
-          <select class="input" name="department_id" id="department" required disabled>
-            <option value="">اختر أولاً...</option>
-          </select>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">رقم الهاتف <span class="text-rose-500">*</span></label>
+          <input class="input" name="phone" placeholder="077xxxxxxxx" required dir="ltr" maxlength="11" pattern="077\d{8}" title="يجب أن يبدأ ب 077 ويتكون من 11 رقماً">
         </div>
       </div>
 
-      {{-- Row 3: سنة التخرج, الحالة الوظيفية, كلمة المرور, تأكيد كلمة المرور --}}
+      {{-- Row 3: الحالة الاجتماعية --}}
       <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">الحالة الاجتماعية <span class="text-rose-500">*</span></label>
+          <select class="input" name="social_status" id="socialStatus" required onchange="toggleChildrenCount()">
+            <option value="">اختر...</option>
+            <option value="أعزب">أعزب</option>
+            <option value="متزوج ولديه اولاد">متزوج ولديه اولاد</option>
+            <option value="متزوج وليس لديه اولاد">متزوج وليس لديه اولاد</option>
+            <option value="أرمل">أرمل</option>
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-2" id="childrenCountWrap" style="display:none">
+          <label class="label">عدد الأولاد</label>
+          <input class="input" type="number" name="children_count" id="childrenCount" min="0" placeholder="أدخل عدد الأولاد">
+        </div>
+      </div>
+
+      {{-- Row 4: التحصيل الدراسى والكلية --}}
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">التحصيل الدراسى <span class="text-rose-500">*</span></label>
+          <select class="input" name="qualification_id" id="qualificationId" required>
+            <option value="">اختر المؤهل...</option>
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">الكلية / المعهد <span class="text-rose-500">*</span></label>
+          <select class="input" name="qualification_faculty_id" id="qualificationFacultyId" required disabled>
+            <option value="">اختر المؤهل أولاً...</option>
+          </select>
+        </div>
         <div class="col-span-12 md:col-span-2">
           <label class="label">سنة التخرج <span class="text-rose-500">*</span></label>
           <input class="input" type="number" name="graduation_year" placeholder="2024" min="1950" max="{{ date('Y') + 5 }}" required>
@@ -108,31 +112,34 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
             <option value="أخرى">أخرى</option>
           </select>
         </div>
-        <div class="col-span-12 md:col-span-4">
+      </div>
+
+      {{-- Row 5: المحافظة وعنوان السكن الحالى --}}
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">المحافظة <span class="text-rose-500">*</span></label>
+          <select class="input" name="governorate" id="governorate" required>
+            <option value="">اختر المحافظة...</option>
+            @foreach($governorates as $gov)
+              <option value="{{ $gov->name }}">{{ $gov->name }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-9">
+          <label class="label">عنوان السكن الحالى <span class="text-rose-500">*</span></label>
+          <input class="input" name="address" placeholder="العنوان بالتفصيل" required>
+        </div>
+      </div>
+
+      {{-- Row 6: كلمة المرور --}}
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-12 md:col-span-6">
           <label class="label">كلمة المرور <span class="text-rose-500">*</span></label>
           <input class="input" type="password" name="password" placeholder="أقل شيء 8 أحرف" required>
         </div>
-        <div class="col-span-12 md:col-span-4">
+        <div class="col-span-12 md:col-span-6">
           <label class="label">تأكيد كلمة المرور <span class="text-rose-500">*</span></label>
           <input class="input" type="password" name="password_confirmation" placeholder="تأكيد كلمة المرور" required>
-        </div>
-      </div>
-
-      <div>
-        <label class="label">العنوان</label>
-        <textarea class="input" name="address" placeholder="العنوان بالتفصيل" rows="2"></textarea>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="label">صورة الهوية (يمكن اختيار أكثر من صورة)</label>
-          <input class="input" type="file" name="id_photos[]" multiple accept="image/*" onchange="previewImages(this, 'idPreview')">
-          <div class="flex flex-wrap gap-2 mt-2" id="idPreview"></div>
-        </div>
-        <div>
-          <label class="label">إثبات السكن (يمكن اختيار أكثر من صورة)</label>
-          <input class="input" type="file" name="residence_proof[]" multiple accept="image/*" onchange="previewImages(this, 'residencePreview')">
-          <div class="flex flex-wrap gap-2 mt-2" id="residencePreview"></div>
         </div>
       </div>
 
@@ -154,6 +161,29 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
 
   <script>
   var apiBase = '{{ url('/api') }}';
+
+  function calculateAge() {
+    var dob = document.getElementById('dateOfBirth').value;
+    var ageField = document.getElementById('age');
+    if (!dob) { ageField.value = ''; return; }
+    var birthDate = new Date(dob);
+    var today = new Date();
+    var age = today.getFullYear() - birthDate.getFullYear();
+    var m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) { age--; }
+    ageField.value = age >= 0 ? age : 0;
+  }
+
+  function toggleChildrenCount() {
+    var val = document.getElementById('socialStatus').value;
+    var wrap = document.getElementById('childrenCountWrap');
+    if (val === 'متزوج ولديه اولاد') {
+      wrap.style.display = 'block';
+    } else {
+      wrap.style.display = 'none';
+      document.getElementById('childrenCount').value = '';
+    }
+  }
 
   function loadSelect(url, selectId, placeholder) {
     var sel = document.getElementById(selectId);
@@ -179,108 +209,44 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
       });
   }
 
+  function loadFaculties() {
+    var qualId = document.getElementById('qualificationId').value;
+    var facSel = document.getElementById('qualificationFacultyId');
+
+    if (!qualId) {
+      facSel.innerHTML = '<option value="">اختر المؤهل أولاً...</option>';
+      facSel.disabled = true;
+      return;
+    }
+
+    facSel.disabled = true;
+    facSel.innerHTML = '<option value="">جاري التحميل...</option>';
+
+    fetch(apiBase + '/qualifications/' + qualId + '/faculties', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        facSel.innerHTML = '<option value="">اختر الكلية/المعهد...</option>';
+        if (d.success && d.data) {
+          d.data.forEach(function(item) {
+            var opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.name;
+            facSel.appendChild(opt);
+          });
+        }
+        facSel.disabled = false;
+      })
+      .catch(function() {
+        facSel.innerHTML = '<option value="">خطأ في التحميل</option>';
+        facSel.disabled = false;
+      });
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
-    loadSelect(apiBase + '/governorates', 'governorate', 'اختر المحافظة...');
-    loadSelect(apiBase + '/institution-types', 'institutionType', 'اختر النوع...');
-    loadSelect(apiBase + '/university-types', 'universityType', 'اختر النوع...');
+    loadSelect(apiBase + '/qualifications', 'qualificationId', 'اختر المؤهل...');
   });
 
-  function loadInstitutions() {
-    var govId = document.getElementById('governorate').value;
-    var instTypeId = document.getElementById('institutionType').value;
-    var uniTypeId = document.getElementById('universityType').value;
-    var instSel = document.getElementById('institution');
-    var deptSel = document.getElementById('department');
-
-    deptSel.innerHTML = '<option value="">اختر الجامعة أولاً...</option>';
-    deptSel.disabled = true;
-
-    if (!govId || !instTypeId || !uniTypeId) {
-      instSel.innerHTML = '<option value="">اختر المحافظة والنوع أولاً...</option>';
-      instSel.disabled = true;
-      return;
-    }
-
-    instSel.disabled = true;
-    instSel.innerHTML = '<option value="">جاري التحميل...</option>';
-
-    var url = apiBase + '/governorates/' + govId + '/institution-type/' + instTypeId + '/university-type/' + uniTypeId + '/institutions';
-    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-      .then(function(r) { return r.json(); })
-      .then(function(d) {
-        instSel.innerHTML = '<option value="">اختر الجامعة/المعهد...</option>';
-        if (d.success && d.data) {
-          d.data.forEach(function(item) {
-            var opt = document.createElement('option');
-            opt.value = item.id;
-            opt.textContent = item.name;
-            instSel.appendChild(opt);
-          });
-        }
-        instSel.disabled = false;
-      })
-      .catch(function() {
-        instSel.innerHTML = '<option value="">خطأ في التحميل</option>';
-        instSel.disabled = false;
-      });
-  }
-
-  function loadDepartments() {
-    var instId = document.getElementById('institution').value;
-    var deptSel = document.getElementById('department');
-
-    if (!instId) {
-      deptSel.innerHTML = '<option value="">اختر الجامعة أولاً...</option>';
-      deptSel.disabled = true;
-      return;
-    }
-
-    deptSel.disabled = true;
-    deptSel.innerHTML = '<option value="">جاري التحميل...</option>';
-
-    fetch(apiBase + '/institutions/' + instId + '/departments', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-      .then(function(r) { return r.json(); })
-      .then(function(d) {
-        deptSel.innerHTML = '<option value="">اختر القسم/التخصص...</option>';
-        if (d.success && d.data) {
-          d.data.forEach(function(item) {
-            var opt = document.createElement('option');
-            opt.value = item.id;
-            opt.textContent = item.name;
-            deptSel.appendChild(opt);
-          });
-        }
-        deptSel.disabled = false;
-      })
-      .catch(function() {
-        deptSel.innerHTML = '<option value="">خطأ في التحميل</option>';
-        deptSel.disabled = false;
-      });
-  }
-
-  document.getElementById('governorate').addEventListener('change', loadInstitutions);
-  document.getElementById('institutionType').addEventListener('change', loadInstitutions);
-  document.getElementById('universityType').addEventListener('change', loadInstitutions);
-  document.getElementById('institution').addEventListener('change', loadDepartments);
-
-  function previewImages(input, previewId) {
-    var preview = document.getElementById(previewId);
-    preview.innerHTML = '';
-    if (input.files) {
-      for (var i = 0; i < input.files.length; i++) {
-        (function(file) {
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            var img = document.createElement('img');
-            img.src = e.target.result;
-            img.className = 'w-20 h-20 object-cover rounded-lg border border-slate-200';
-            preview.appendChild(img);
-          };
-          reader.readAsDataURL(file);
-        })(input.files[i]);
-      }
-    }
-  }
+  document.getElementById('qualificationId').addEventListener('change', loadFaculties);
   </script>
 
   <script src="{{ asset('js/app.js') }}"></script>

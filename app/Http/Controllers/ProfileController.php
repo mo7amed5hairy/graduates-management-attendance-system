@@ -48,7 +48,8 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'mother_name' => 'nullable|string|max:255',
+            'email' => 'nullable|string|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:8|confirmed',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
@@ -59,6 +60,10 @@ class ProfileController extends Controller
             'faculty' => 'nullable|string|max:255',
             'graduation_year' => 'nullable|integer|min:1950|max:' . (date('Y') + 5),
             'job_status' => 'nullable|string|max:100',
+            'date_of_birth' => 'nullable|date',
+            'gender' => 'nullable|string|in:ذكر,أنثى',
+            'social_status' => 'nullable|string|in:أعزب,متزوج ولديه اولاد,متزوج وليس لديه اولاد,أرمل',
+            'children_count' => 'nullable|integer|min:0',
             'social_links' => 'nullable|array',
             'social_links.*' => 'nullable|url|max:500',
         ]);

@@ -129,6 +129,10 @@ const App = {
 
       this.toast(data.message, 'success');
 
+      if (data.access_token) {
+        try { localStorage.setItem('access_token', data.access_token); } catch(e) {}
+      }
+
       if (data.redirect) {
         setTimeout(() => window.location.href = data.redirect, 500);
         return data;

@@ -6,8 +6,14 @@
 
 @section('content')
 
-<div class="mb-4">
+<div class="mb-4 flex items-center gap-3">
   <button class="btn btn-primary" onclick="document.getElementById('createUserModal').classList.add('active')">➕ إضافة مستخدم جديد</button>
+  <div id="bulkActions" class="flex items-center gap-2" style="display:none">
+    <span class="text-sm text-slate-500" id="selectedCount">0</span>
+    <span class="text-sm text-slate-400">محدد</span>
+    <button class="btn btn-success text-sm" onclick="bulkActivate()">✅ تفعيل الجميع</button>
+    <button class="btn btn-ghost text-sm" onclick="clearAllCheckboxes()">إلغاء التحديد</button>
+  </div>
 </div>
 
 <div class="card p-0">
@@ -15,6 +21,7 @@
     <table class="data" id="usersTable">
       <thead>
         <tr>
+          <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
           <th>#</th>
           <th>المستخدم</th>
           <th>البريد الإلكتروني</th>
@@ -28,6 +35,7 @@
       <tbody>
         @forelse($users as $user)
         <tr>
+          <td><input type="checkbox" class="user-checkbox" value="{{ $user->id }}" onchange="updateBulkActions()" {{ $user->isAdmin() ? 'disabled' : '' }}></td>
           <td>{{ $user->id }}</td>
           <td>
             <div class="flex items-center gap-2">
@@ -136,29 +144,41 @@
     <form data-ajax="true" action="{{ route('admin.users.store') }}" method="POST" enctype="multipart/form-data">
       @csrf
 
-      {{-- Row 1: 6 columns (name, national_id, email, phone, age, gender) --}}
+      {{-- Row 1: name, mother_name, national_id, phone --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-3">
-          <label class="label">الاسم الرباعي <span class="text-rose-500">*</span></label>
-          <input class="input" name="name" placeholder="الاسم الكامل" required>
-        </div>
-        <div class="col-span-12 md:col-span-2">
-          <label class="label">الرقم القومي <span class="text-rose-500">*</span></label>
-          <input class="input" name="national_id" placeholder="الرقم القومي" required dir="ltr">
+          <label class="label">الإسم الرباعى مع اللقب <span class="text-rose-500">*</span></label>
+          <input class="input" name="name" placeholder="الاسم الرباعي مع اللقب" required>
         </div>
         <div class="col-span-12 md:col-span-3">
-          <label class="label">البريد الإلكتروني <span class="text-rose-500">*</span></label>
-          <input class="input" type="email" name="email" placeholder="example@mail.com" required>
+          <label class="label">اسم الأم الرباعى</label>
+          <input class="input" name="mother_name" placeholder="اسم الأم الرباعي">
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">رقم البطاقة الوطنية <span class="text-rose-500">*</span></label>
+          <input class="input" name="national_id" placeholder="رقم البطاقة الوطنية" required dir="ltr">
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">رقم الهاتف <span class="text-rose-500">*</span></label>
+          <input class="input" name="phone" placeholder="077xxxxxxxx" required dir="ltr">
+        </div>
+      </div>
+
+      {{-- Row 2: email, date_of_birth, age, gender --}}
+      <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">البريد الإلكتروني</label>
+          <input class="input" type="email" name="email" placeholder="example@mail.com">
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">تاريخ الميلاد</label>
+          <input class="input" type="date" name="date_of_birth" id="createDateOfBirth" onchange="calculateAgeC()">
         </div>
         <div class="col-span-12 md:col-span-2">
-          <label class="label">رقم الهاتف <span class="text-rose-500">*</span></label>
-          <input class="input" name="phone" placeholder="05xxxxxxxx" required dir="ltr">
-        </div>
-        <div class="col-span-12 md:col-span-1">
           <label class="label">العمر</label>
-          <input class="input" type="number" name="age" placeholder="25" min="1" max="150">
+          <input class="input" type="number" name="age" id="createAge" placeholder="--" readonly style="background:#f1f5f9">
         </div>
-        <div class="col-span-12 md:col-span-1">
+        <div class="col-span-12 md:col-span-2">
           <label class="label">الجنس</label>
           <select class="input" name="gender">
             <option value="">اختر</option>
@@ -166,44 +186,36 @@
             <option value="أنثى">أنثى</option>
           </select>
         </div>
-      </div>
-
-      {{-- Row 2: 5 columns (cascading) --}}
-      <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-2">
-          <label class="label">المحافظة <span class="text-rose-500">*</span></label>
-          <select class="input" name="governorate" id="createGovernorate" required>
+          <label class="label">الحالة الاجتماعية</label>
+          <select class="input" name="social_status" id="createSocialStatus" onchange="toggleChildrenCountC()">
             <option value="">اختر...</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-2">
-          <label class="label">نوع المؤسسة <span class="text-rose-500">*</span></label>
-          <select class="input" name="institution_type" id="createInstitutionType" required>
-            <option value="">اختر...</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-2">
-          <label class="label">نوع الجامعة <span class="text-rose-500">*</span></label>
-          <select class="input" name="university_type" id="createUniversityType" required>
-            <option value="">اختر...</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-3">
-          <label class="label">الجامعة / المعهد <span class="text-rose-500">*</span></label>
-          <select class="input" name="institution_id" id="createInstitution" required disabled>
-            <option value="">اختر أولاً...</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-3">
-          <label class="label">القسم / التخصص <span class="text-rose-500">*</span></label>
-          <select class="input" name="department_id" id="createDepartment" required disabled>
-            <option value="">اختر أولاً...</option>
+            <option value="أعزب">أعزب</option>
+            <option value="متزوج ولديه اولاد">متزوج ولديه اولاد</option>
+            <option value="متزوج وليس لديه اولاد">متزوج وليس لديه اولاد</option>
+            <option value="أرمل">أرمل</option>
           </select>
         </div>
       </div>
 
-      {{-- Row 3: 4 columns --}}
+      {{-- Row 3: children count + qualification cascading --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-2" id="createChildrenCountWrap" style="display:none">
+          <label class="label">عدد الأولاد</label>
+          <input class="input" type="number" name="children_count" id="createChildrenCount" min="0" placeholder="عدد الأولاد">
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">التحصيل الدراسى</label>
+          <select class="input" name="qualification_id" id="createQualificationId" onchange="loadFacultiesC()">
+            <option value="">اختر المؤهل...</option>
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">الكلية / المعهد</label>
+          <select class="input" name="qualification_faculty_id" id="createQualificationFacultyId" disabled>
+            <option value="">اختر المؤهل أولاً...</option>
+          </select>
+        </div>
         <div class="col-span-12 md:col-span-2">
           <label class="label">سنة التخرج <span class="text-rose-500">*</span></label>
           <input class="input" type="number" name="graduation_year" placeholder="2024" min="1950" max="{{ date('Y') + 5 }}" required>
@@ -220,19 +232,57 @@
             <option value="أخرى">أخرى</option>
           </select>
         </div>
-        <div class="col-span-12 md:col-span-4">
+      </div>
+
+      {{-- Row 4: cascading dropdowns (old fields for admin use) --}}
+      <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-2">
+          <label class="label">المحافظة (قديم)</label>
+          <select class="input" name="governorate" id="createGovernorate">
+            <option value="">اختر...</option>
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-2">
+          <label class="label">نوع المؤسسة</label>
+          <select class="input" name="institution_type" id="createInstitutionType">
+            <option value="">اختر...</option>
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-2">
+          <label class="label">نوع الجامعة</label>
+          <select class="input" name="university_type" id="createUniversityType">
+            <option value="">اختر...</option>
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">الجامعة / المعهد</label>
+          <select class="input" name="institution_id" id="createInstitution" disabled>
+            <option value="">اختر أولاً...</option>
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">القسم / التخصص</label>
+          <select class="input" name="department_id" id="createDepartment" disabled>
+            <option value="">اختر أولاً...</option>
+          </select>
+        </div>
+      </div>
+
+      {{-- Row 5: password --}}
+      <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-6">
           <label class="label">كلمة المرور <span class="text-rose-500">*</span></label>
           <input class="input" type="password" name="password" placeholder="أقل شيء 8 أحرف" required>
         </div>
-        <div class="col-span-12 md:col-span-4">
+        <div class="col-span-12 md:col-span-6">
           <label class="label">تأكيد كلمة المرور <span class="text-rose-500">*</span></label>
           <input class="input" type="password" name="password_confirmation" placeholder="تأكيد كلمة المرور" required>
         </div>
       </div>
 
       <div class="mb-4">
-        <label class="label">العنوان</label>
-        <textarea class="input" name="address" placeholder="العنوان بالتفصيل" rows="2"></textarea>
+        <label class="label">عنوان السكن الحالى</label>
+        <input class="input" name="address" placeholder="العنوان بالتفصيل">
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -284,10 +334,67 @@ function loadSelectC(url, selectId, placeholder) {
     });
 }
 
+function calculateAgeC() {
+  var dob = document.getElementById('createDateOfBirth').value;
+  var ageField = document.getElementById('createAge');
+  if (!dob) { ageField.value = ''; return; }
+  var birthDate = new Date(dob);
+  var today = new Date();
+  var age = today.getFullYear() - birthDate.getFullYear();
+  var m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) { age--; }
+  ageField.value = age >= 0 ? age : 0;
+}
+
+function toggleChildrenCountC() {
+  var val = document.getElementById('createSocialStatus').value;
+  var wrap = document.getElementById('createChildrenCountWrap');
+  if (val === 'متزوج ولديه اولاد') {
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+    document.getElementById('createChildrenCount').value = '';
+  }
+}
+
+function loadFacultiesC() {
+  var qualId = document.getElementById('createQualificationId').value;
+  var facSel = document.getElementById('createQualificationFacultyId');
+
+  if (!qualId) {
+    facSel.innerHTML = '<option value="">اختر المؤهل أولاً...</option>';
+    facSel.disabled = true;
+    return;
+  }
+
+  facSel.disabled = true;
+  facSel.innerHTML = '<option value="">جاري التحميل...</option>';
+
+  fetch(apiBase + '/qualifications/' + qualId + '/faculties', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      facSel.innerHTML = '<option value="">اختر الكلية/المعهد...</option>';
+      if (d.success && d.data) {
+        d.data.forEach(function(item) {
+          var opt = document.createElement('option');
+          opt.value = item.id;
+          opt.textContent = item.name;
+          facSel.appendChild(opt);
+        });
+      }
+      facSel.disabled = false;
+    })
+    .catch(function() {
+      facSel.innerHTML = '<option value="">خطأ في التحميل</option>';
+      facSel.disabled = false;
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   loadSelectC(apiBase + '/governorates', 'createGovernorate', 'اختر المحافظة...');
   loadSelectC(apiBase + '/institution-types', 'createInstitutionType', 'اختر النوع...');
   loadSelectC(apiBase + '/university-types', 'createUniversityType', 'اختر النوع...');
+  loadSelectC(apiBase + '/qualifications', 'createQualificationId', 'اختر المؤهل...');
 });
 
 function loadInstitutionsC() {
@@ -391,10 +498,66 @@ function previewImagesC(input, previewId) {
 $(document).ready(function() {
   $('#usersTable').DataTable({
     language: { url: '{{ asset('js/ar.json') }}' },
-    order: [[0, 'desc']],
-    columnDefs: [{ orderable: false, targets: [7] }]
+    order: [[1, 'desc']],
+    columnDefs: [{ orderable: false, targets: [0, 8] }]
   });
 });
+
+function toggleSelectAll(source) {
+  document.querySelectorAll('.user-checkbox:not(:disabled)').forEach(function(cb) {
+    cb.checked = source.checked;
+  });
+  updateBulkActions();
+}
+
+function updateBulkActions() {
+  var checked = document.querySelectorAll('.user-checkbox:checked');
+  var count = checked.length;
+  var bar = document.getElementById('bulkActions');
+  var label = document.getElementById('selectedCount');
+  if (count > 0) {
+    bar.style.display = 'flex';
+    label.textContent = count;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function clearAllCheckboxes() {
+  document.querySelectorAll('.user-checkbox:checked').forEach(function(cb) {
+    cb.checked = false;
+  });
+  document.getElementById('selectAll').checked = false;
+  updateBulkActions();
+}
+
+function bulkActivate() {
+  var checked = document.querySelectorAll('.user-checkbox:checked');
+  var ids = Array.from(checked).map(function(cb) { return cb.value; });
+  var count = ids.length;
+  if (count === 0) return;
+  if (!confirm('هل أنت متأكد من تفعيل ' + count + ' مستخدم؟')) return;
+
+  fetch('{{ route('admin.users.bulk-activate') }}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+    },
+    body: JSON.stringify({ ids: ids })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.success) {
+      App.toast(d.message);
+      location.reload();
+    } else {
+      alert(d.message || 'حدث خطأ');
+    }
+  })
+  .catch(function() { alert('حدث خطأ في الاتصال'); });
+}
 
 document.addEventListener('change', function(e) {
   if (e.target.classList.contains('status-toggle')) {

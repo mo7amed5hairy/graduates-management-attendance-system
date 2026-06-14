@@ -15,7 +15,9 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
+        'access_token',
         'name',
+        'mother_name',
         'email',
         'password',
         'phone',
@@ -32,13 +34,19 @@ class User extends Authenticatable
         'graduation_year',
         'job_status',
         'age',
+        'date_of_birth',
         'gender',
+        'social_status',
+        'children_count',
+        'qualification_id',
+        'qualification_faculty_id',
         'id_photos',
         'residence_proof',
         'approval_status',
         'rejection_reason',
         'approved_at',
         'approved_by',
+        'permissions',
     ];
 
     protected $hidden = [
@@ -53,6 +61,7 @@ class User extends Authenticatable
             'social_links' => 'array',
             'id_photos' => 'array',
             'residence_proof' => 'array',
+            'permissions' => 'array',
             'graduation_year' => 'integer',
             'approved_at' => 'datetime',
         ];
@@ -116,6 +125,16 @@ class User extends Authenticatable
     public function events(): HasMany
     {
         return $this->hasMany(Event::class, 'created_by');
+    }
+
+    public function qualification(): BelongsTo
+    {
+        return $this->belongsTo(Qualification::class);
+    }
+
+    public function qualificationFaculty(): BelongsTo
+    {
+        return $this->belongsTo(QualificationFaculty::class);
     }
 
     public function getImageUrlAttribute(): string

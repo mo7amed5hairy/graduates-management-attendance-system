@@ -28,7 +28,6 @@
       @endif
       <div class="flex-1">
         <h2 class="text-2xl font-extrabold text-slate-900">{{ $user->name }}</h2>
-        <p class="text-slate-500">{{ $user->email }}</p>
         <div class="flex gap-2 mt-2">
           @if($user->isAdmin())
             <span class="pill pill-violet">مدير</span>
@@ -56,11 +55,15 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <span class="text-xs text-slate-400 block">الاسم الرباعي</span>
+        <span class="text-xs text-slate-400 block">الإسم الرباعى مع اللقب</span>
         <span class="font-semibold">{{ $user->name }}</span>
       </div>
       <div>
-        <span class="text-xs text-slate-400 block">الرقم القومي</span>
+        <span class="text-xs text-slate-400 block">اسم الأم الرباعى</span>
+        <span class="font-semibold">{{ $user->mother_name ?? 'غير محدد' }}</span>
+      </div>
+      <div>
+        <span class="text-xs text-slate-400 block">رقم البطاقة الوطنية</span>
         <span class="font-semibold">{{ $user->national_id ?? 'غير محدد' }}</span>
       </div>
       <div>
@@ -68,16 +71,31 @@
         <span class="font-semibold">{{ $user->phone ?? 'غير محدد' }}</span>
       </div>
       <div>
-        <span class="text-xs text-slate-400 block">المحافظة</span>
-        <span class="font-semibold">{{ $user->governorate ?? 'غير محدد' }}</span>
+        <span class="text-xs text-slate-400 block">تاريخ الميلاد</span>
+        <span class="font-semibold">{{ $user->date_of_birth ?? 'غير محدد' }}</span>
       </div>
       <div>
-        <span class="text-xs text-slate-400 block">الجامعة</span>
-        <span class="font-semibold">{{ $user->university ?? 'غير محدد' }}</span>
+        <span class="text-xs text-slate-400 block">العمر</span>
+        <span class="font-semibold">{{ $user->age ?? 'غير محدد' }}</span>
       </div>
       <div>
-        <span class="text-xs text-slate-400 block">الكلية</span>
-        <span class="font-semibold">{{ $user->faculty ?? 'غير محدد' }}</span>
+        <span class="text-xs text-slate-400 block">الجنس</span>
+        <span class="font-semibold">{{ $user->gender ?? 'غير محدد' }}</span>
+      </div>
+      <div>
+        <span class="text-xs text-slate-400 block">الحالة الاجتماعية</span>
+        <span class="font-semibold">{{ $user->social_status ?? 'غير محدد' }}</span>
+        @if($user->social_status === 'متزوج ولديه اولاد' && $user->children_count !== null)
+          <span class="text-xs text-slate-500">عدد الأولاد: {{ $user->children_count }}</span>
+        @endif
+      </div>
+      <div>
+        <span class="text-xs text-slate-400 block">التحصيل الدراسى</span>
+        <span class="font-semibold">{{ $user->qualification?->name ?? 'غير محدد' }}</span>
+      </div>
+      <div>
+        <span class="text-xs text-slate-400 block">الكلية / المعهد</span>
+        <span class="font-semibold">{{ $user->qualificationFaculty?->name ?? 'غير محدد' }}</span>
       </div>
       <div>
         <span class="text-xs text-slate-400 block">سنة التخرج</span>
@@ -88,7 +106,11 @@
         <span class="font-semibold">{{ $user->job_status ?? 'غير محدد' }}</span>
       </div>
       <div>
-        <span class="text-xs text-slate-400 block">العنوان</span>
+        <span class="text-xs text-slate-400 block">المحافظة</span>
+        <span class="font-semibold">{{ $user->governorate ?? 'غير محدد' }}</span>
+      </div>
+      <div>
+        <span class="text-xs text-slate-400 block">عنوان السكن الحالى</span>
         <span class="font-semibold">{{ $user->address ?? 'غير محدد' }}</span>
       </div>
       <div>
@@ -102,6 +124,19 @@
     <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl">
       <span class="text-xs text-slate-400 block">سبب الرفض</span>
       <span class="font-semibold text-rose-700">{{ $user->rejection_reason }}</span>
+    </div>
+    @endif
+
+    @if(!$user->isAdmin())
+    <hr class="my-5 border-slate-100">
+    <div class="bg-sky-50 border border-sky-100 rounded-xl p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-xs text-slate-400 block">رابط بياناتي الشخصية</span>
+          <span class="text-sm font-bold text-slate-800" dir="ltr" id="detailsLink">{{ url('/checkmydetails/' . $user->access_token) }}</span>
+        </div>
+        <button class="btn btn-primary text-sm" onclick="copyLink()">📋 نسخ الرابط</button>
+      </div>
     </div>
     @endif
 
@@ -201,6 +236,23 @@
 
 @push('scripts')
 <script>
+function copyLink() {
+  var link = document.getElementById('detailsLink');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link.textContent).then(function() {
+      App.toast('تم نسخ الرابط', 'success');
+    });
+  } else {
+    var range = document.createRange();
+    range.selectNode(link);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy');
+    window.getSelection().removeAllRanges();
+    App.toast('تم نسخ الرابط', 'success');
+  }
+}
+
 $(function() {
   $('#profileTransactionsTable').DataTable({
     language: { url: '{{ asset('js/ar.json') }}' },

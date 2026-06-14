@@ -8,9 +8,14 @@ use App\Http\Controllers\Admin\GraduateController;
 use App\Http\Controllers\Admin\ImportController;
 use App\Http\Controllers\Admin\InstitutionController;
 use App\Http\Controllers\Admin\InstitutionTypeController;
+use App\Http\Controllers\Admin\QualificationController;
+use App\Http\Controllers\Admin\QualificationFacultyController;
+use App\Http\Controllers\Admin\StatisticController;
+use App\Http\Controllers\Admin\SubAdminController;
 use App\Http\Controllers\Admin\UniversityTypeController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CheckDetailsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationController;
@@ -32,6 +37,10 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+// Public route - check personal details without login
+Route::get('/checkmydetails', [CheckDetailsController::class, 'index'])->name('check-details');
+Route::get('/checkmydetails/{token}', [CheckDetailsController::class, 'show'])->name('check-details.token');
+
 // Guest routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -47,6 +56,8 @@ Route::prefix('api')->name('api.')->group(function () {
     Route::get('/university-types', [LocationController::class, 'universityTypes'])->name('university-types');
     Route::get('/governorates/{governorate}/institution-type/{institutionType}/university-type/{universityType}/institutions', [LocationController::class, 'institutionsByGovernorate'])->name('institutions.by-filters');
     Route::get('/institutions/{institution}/departments', [LocationController::class, 'departmentsByInstitution'])->name('departments.by-institution');
+    Route::get('/qualifications', [LocationController::class, 'qualifications'])->name('qualifications');
+    Route::get('/qualifications/{qualification}/faculties', [LocationController::class, 'facultiesByQualification'])->name('qualifications.faculties');
 });
 
 // Auth routes
@@ -64,7 +75,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
 
     // Admin routes
-    Route::middleware(AdminMiddleware::class)->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware([AdminMiddleware::class, 'admin.permission'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
         // Governorates
@@ -107,10 +118,30 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{department}', [DepartmentController::class, 'destroy'])->name('destroy');
         });
 
+        // Statistics
+        Route::get('/statistics', [StatisticController::class, 'index'])->name('statistics.index');
+
+        // Qualifications
+        Route::prefix('qualifications')->name('qualifications.')->group(function () {
+            Route::get('/', [QualificationController::class, 'index'])->name('index');
+            Route::post('/', [QualificationController::class, 'store'])->name('store');
+            Route::put('/{qualification}', [QualificationController::class, 'update'])->name('update');
+            Route::delete('/{qualification}', [QualificationController::class, 'destroy'])->name('destroy');
+        });
+
+        // Qualification Faculties
+        Route::prefix('qualification-faculties')->name('qualification-faculties.')->group(function () {
+            Route::get('/', [QualificationFacultyController::class, 'index'])->name('index');
+            Route::post('/', [QualificationFacultyController::class, 'store'])->name('store');
+            Route::put('/{qualificationFaculty}', [QualificationFacultyController::class, 'update'])->name('update');
+            Route::delete('/{qualificationFaculty}', [QualificationFacultyController::class, 'destroy'])->name('destroy');
+        });
+
         // Users management (approval / suspend / delete)
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('index');
             Route::post('/', [UserController::class, 'store'])->name('store');
+            Route::post('/bulk-activate', [UserController::class, 'bulkActivate'])->name('bulk-activate');
             Route::get('/{user}', [UserController::class, 'show'])->name('show');
             Route::put('/{user}', [UserController::class, 'update'])->name('update');
             Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
@@ -167,6 +198,15 @@ Route::middleware('auth')->group(function () {
         Route::prefix('import')->name('import.')->group(function () {
             Route::get('/', [ImportController::class, 'index'])->name('index');
             Route::post('/', [ImportController::class, 'import'])->name('process');
+        });
+
+        // Sub-admins & permissions
+        Route::prefix('sub-admins')->name('sub-admins.')->group(function () {
+            Route::get('/', [SubAdminController::class, 'index'])->name('index');
+            Route::post('/', [SubAdminController::class, 'store'])->name('store');
+            Route::get('/{user}/edit', [SubAdminController::class, 'edit'])->name('edit');
+            Route::put('/{user}', [SubAdminController::class, 'update'])->name('update');
+            Route::delete('/{user}', [SubAdminController::class, 'destroy'])->name('destroy');
         });
     });
 

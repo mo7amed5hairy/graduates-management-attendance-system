@@ -35,32 +35,46 @@
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="label">الاسم الرباعي</label>
+          <label class="label">الإسم الرباعى مع اللقب</label>
           <input class="input" name="name" value="{{ $user->name }}" required>
         </div>
         <div>
-          <label class="label">الرقم القومي</label>
-          <input class="input" name="national_id" value="{{ $user->national_id }}" dir="ltr">
+          <label class="label">اسم الأم الرباعى</label>
+          <input class="input" name="mother_name" value="{{ $user->mother_name }}">
         </div>
         <div>
-          <label class="label">البريد الإلكتروني</label>
-          <input class="input" type="email" name="email" value="{{ $user->email }}" required>
+          <label class="label">رقم البطاقة الوطنية</label>
+          <input class="input" name="national_id" value="{{ $user->national_id }}" dir="ltr">
         </div>
         <div>
           <label class="label">رقم الهاتف</label>
           <input class="input" name="phone" value="{{ $user->phone }}" dir="ltr">
         </div>
         <div>
-          <label class="label">المحافظة</label>
-          <input class="input" name="governorate" value="{{ $user->governorate }}">
+          <label class="label">تاريخ الميلاد</label>
+          <input class="input" type="date" name="date_of_birth" value="{{ $user->date_of_birth }}">
         </div>
         <div>
-          <label class="label">الجامعة</label>
-          <input class="input" name="university" value="{{ $user->university }}">
+          <label class="label">الجنس</label>
+          <select class="input" name="gender">
+            <option value="">اختر</option>
+            <option value="ذكر" {{ $user->gender === 'ذكر' ? 'selected' : '' }}>ذكر</option>
+            <option value="أنثى" {{ $user->gender === 'أنثى' ? 'selected' : '' }}>أنثى</option>
+          </select>
         </div>
         <div>
-          <label class="label">الكلية</label>
-          <input class="input" name="faculty" value="{{ $user->faculty }}">
+          <label class="label">الحالة الاجتماعية</label>
+          <select class="input" name="social_status">
+            <option value="">اختر...</option>
+            <option value="أعزب" {{ $user->social_status === 'أعزب' ? 'selected' : '' }}>أعزب</option>
+            <option value="متزوج ولديه اولاد" {{ $user->social_status === 'متزوج ولديه اولاد' ? 'selected' : '' }}>متزوج ولديه اولاد</option>
+            <option value="متزوج وليس لديه اولاد" {{ $user->social_status === 'متزوج وليس لديه اولاد' ? 'selected' : '' }}>متزوج وليس لديه اولاد</option>
+            <option value="أرمل" {{ $user->social_status === 'أرمل' ? 'selected' : '' }}>أرمل</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">عدد الأولاد</label>
+          <input class="input" type="number" name="children_count" value="{{ $user->children_count }}" min="0">
         </div>
         <div>
           <label class="label">سنة التخرج</label>
@@ -79,6 +93,18 @@
           </select>
         </div>
         <div>
+          <label class="label">المحافظة</label>
+          <input class="input" name="governorate" value="{{ $user->governorate }}">
+        </div>
+        <div>
+          <label class="label">الجامعة</label>
+          <input class="input" name="university" value="{{ $user->university }}">
+        </div>
+        <div>
+          <label class="label">الكلية</label>
+          <input class="input" name="faculty" value="{{ $user->faculty }}">
+        </div>
+        <div>
           <label class="label">كلمة المرور (اتركها فارغة إن لم ترد التغيير)</label>
           <input class="input" type="password" name="password">
         </div>
@@ -87,7 +113,7 @@
           <input class="input" type="password" name="password_confirmation">
         </div>
         <div class="md:col-span-2">
-          <label class="label">العنوان</label>
+          <label class="label">عنوان السكن الحالى</label>
           <textarea class="input" name="address" rows="2">{{ $user->address }}</textarea>
         </div>
       </div>

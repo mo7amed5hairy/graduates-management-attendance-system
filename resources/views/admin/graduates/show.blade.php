@@ -32,32 +32,47 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
-        <span class="text-xs text-slate-400 block">الاسم الرباعي</span>
+        <span class="text-xs text-slate-400 block">الإسم الرباعى مع اللقب</span>
         <span class="font-semibold">{{ $user->name }}</span>
       </div>
       <div>
-        <span class="text-xs text-slate-400 block">الرقم القومي</span>
-        <span class="font-semibold">{{ $user->national_id ?? '—' }}</span>
+        <span class="text-xs text-slate-400 block">اسم الأم الرباعى</span>
+        <span class="font-semibold">{{ $user->mother_name ?? '—' }}</span>
       </div>
       <div>
-        <span class="text-xs text-slate-400 block">البريد الإلكتروني</span>
-        <span class="font-semibold">{{ $user->email }}</span>
+        <span class="text-xs text-slate-400 block">رقم البطاقة الوطنية</span>
+        <span class="font-semibold">{{ $user->national_id ?? '—' }}</span>
       </div>
       <div>
         <span class="text-xs text-slate-400 block">رقم الهاتف</span>
         <span class="font-semibold">{{ $user->phone ?? '—' }}</span>
       </div>
       <div>
-        <span class="text-xs text-slate-400 block">المحافظة</span>
-        <span class="font-semibold">{{ $user->governorate ?? '—' }}</span>
+        <span class="text-xs text-slate-400 block">تاريخ الميلاد</span>
+        <span class="font-semibold">{{ $user->date_of_birth ?? '—' }}</span>
       </div>
       <div>
-        <span class="text-xs text-slate-400 block">الجامعة</span>
-        <span class="font-semibold">{{ $user->university ?? '—' }}</span>
+        <span class="text-xs text-slate-400 block">العمر</span>
+        <span class="font-semibold">{{ $user->age ?? '—' }}</span>
       </div>
       <div>
-        <span class="text-xs text-slate-400 block">الكلية</span>
-        <span class="font-semibold">{{ $user->faculty ?? '—' }}</span>
+        <span class="text-xs text-slate-400 block">الجنس</span>
+        <span class="font-semibold">{{ $user->gender ?? '—' }}</span>
+      </div>
+      <div>
+        <span class="text-xs text-slate-400 block">الحالة الاجتماعية</span>
+        <span class="font-semibold">{{ $user->social_status ?? '—' }}</span>
+        @if($user->social_status === 'متزوج ولديه اولاد' && $user->children_count !== null)
+          <span class="text-xs text-slate-500">عدد الأولاد: {{ $user->children_count }}</span>
+        @endif
+      </div>
+      <div>
+        <span class="text-xs text-slate-400 block">التحصيل الدراسى</span>
+        <span class="font-semibold">{{ $user->qualification?->name ?? '—' }}</span>
+      </div>
+      <div>
+        <span class="text-xs text-slate-400 block">الكلية / المعهد</span>
+        <span class="font-semibold">{{ $user->qualificationFaculty?->name ?? '—' }}</span>
       </div>
       <div>
         <span class="text-xs text-slate-400 block">سنة التخرج</span>
@@ -66,6 +81,14 @@
       <div>
         <span class="text-xs text-slate-400 block">الحالة الوظيفية</span>
         <span class="font-semibold">{{ $user->job_status ?? '—' }}</span>
+      </div>
+      <div>
+        <span class="text-xs text-slate-400 block">المحافظة</span>
+        <span class="font-semibold">{{ $user->governorate ?? '—' }}</span>
+      </div>
+      <div>
+        <span class="text-xs text-slate-400 block">عنوان السكن الحالى</span>
+        <span class="font-semibold">{{ $user->address ?? '—' }}</span>
       </div>
       <div>
         <span class="text-xs text-slate-400 block">حالة الاعتماد</span>
@@ -83,10 +106,6 @@
         @else
           <span class="pill pill-amber">قيد المراجعة</span>
         @endif
-      </div>
-      <div>
-        <span class="text-xs text-slate-400 block">العنوان</span>
-        <span class="font-semibold">{{ $user->address ?? '—' }}</span>
       </div>
       <div>
         <span class="text-xs text-slate-400 block">إجمالي النقاط</span>
