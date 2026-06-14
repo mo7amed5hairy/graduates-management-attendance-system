@@ -64,17 +64,20 @@
         </div>
         <div>
           <label class="label">الحالة الاجتماعية</label>
-          <select class="input" name="social_status">
+          <select class="input" name="social_status" onchange="toggleChildrenCountEdit()">
             <option value="">اختر...</option>
             <option value="أعزب" {{ $user->social_status === 'أعزب' ? 'selected' : '' }}>أعزب</option>
-            <option value="متزوج ولديه اولاد" {{ $user->social_status === 'متزوج ولديه اولاد' ? 'selected' : '' }}>متزوج ولديه اولاد</option>
-            <option value="متزوج وليس لديه اولاد" {{ $user->social_status === 'متزوج وليس لديه اولاد' ? 'selected' : '' }}>متزوج وليس لديه اولاد</option>
-            <option value="أرمل" {{ $user->social_status === 'أرمل' ? 'selected' : '' }}>أرمل</option>
+            <option value="متزوج (بدون أطفال)" {{ $user->social_status === 'متزوج (بدون أطفال)' ? 'selected' : '' }}>متزوج (بدون أطفال)</option>
+            <option value="متزوج (لديه أطفال)" {{ $user->social_status === 'متزوج (لديه أطفال)' ? 'selected' : '' }}>متزوج (لديه أطفال)</option>
+            <option value="منفصل (بدون أطفال)" {{ $user->social_status === 'منفصل (بدون أطفال)' ? 'selected' : '' }}>منفصل (بدون أطفال)</option>
+            <option value="منفصل (لديه أطفال)" {{ $user->social_status === 'منفصل (لديه أطفال)' ? 'selected' : '' }}>منفصل (لديه أطفال)</option>
+            <option value="أرمل (بدون أطفال)" {{ $user->social_status === 'أرمل (بدون أطفال)' ? 'selected' : '' }}>أرمل (بدون أطفال)</option>
+            <option value="أرمل (لديه أطفال)" {{ $user->social_status === 'أرمل (لديه أطفال)' ? 'selected' : '' }}>أرمل (لديه أطفال)</option>
           </select>
         </div>
-        <div>
+        <div id="childrenCountWrap" style="{{ str_contains($user->social_status ?? '', 'أطفال') ? 'display:block' : 'display:none' }}">
           <label class="label">عدد الأولاد</label>
-          <input class="input" type="number" name="children_count" value="{{ $user->children_count }}" min="0">
+          <input class="input" type="number" name="children_count" id="children_count" value="{{ $user->children_count }}" min="0">
         </div>
         <div>
           <label class="label">سنة التخرج</label>
@@ -207,5 +210,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+
+function toggleChildrenCountEdit() {
+  var val = document.getElementById('social_status')?.value;
+  var wrap = document.getElementById('childrenCountWrap');
+  if (!wrap) return;
+  if (val && val.includes('أطفال')) {
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+    document.getElementById('children_count') && (document.getElementById('children_count').value = '');
+  }
+}
+document.addEventListener('DOMContentLoaded', toggleChildrenCountEdit);
 </script>
 @endpush

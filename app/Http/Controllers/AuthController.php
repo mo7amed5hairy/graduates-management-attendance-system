@@ -42,7 +42,7 @@ class AuthController extends Controller
             'job_status' => 'required|string|max:100',
             'qualification_id' => 'required|exists:qualifications,id',
             'qualification_faculty_id' => 'required|exists:qualification_faculties,id',
-            'social_status' => 'required|string|in:أعزب,متزوج ولديه اولاد,متزوج وليس لديه اولاد,أرمل',
+            'social_status' => 'required|string|in:أعزب,متزوج (بدون أطفال),متزوج (لديه أطفال),منفصل (بدون أطفال),منفصل (لديه أطفال),أرمل (بدون أطفال),أرمل (لديه أطفال)',
             'children_count' => 'nullable|integer|min:0',
         ]);
 

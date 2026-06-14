@@ -62,7 +62,7 @@ class ProfileController extends Controller
             'job_status' => 'nullable|string|max:100',
             'date_of_birth' => 'nullable|date',
             'gender' => 'nullable|string|in:ذكر,أنثى',
-            'social_status' => 'nullable|string|in:أعزب,متزوج ولديه اولاد,متزوج وليس لديه اولاد,أرمل',
+            'social_status' => 'nullable|string|in:أعزب,متزوج (بدون أطفال),متزوج (لديه أطفال),منفصل (بدون أطفال),منفصل (لديه أطفال),أرمل (بدون أطفال),أرمل (لديه أطفال)',
             'children_count' => 'nullable|integer|min:0',
             'social_links' => 'nullable|array',
             'social_links.*' => 'nullable|url|max:500',

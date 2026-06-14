@@ -71,9 +71,12 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
           <select class="input" name="social_status" id="socialStatus" required onchange="toggleChildrenCount()">
             <option value="">اختر...</option>
             <option value="أعزب">أعزب</option>
-            <option value="متزوج ولديه اولاد">متزوج ولديه اولاد</option>
-            <option value="متزوج وليس لديه اولاد">متزوج وليس لديه اولاد</option>
-            <option value="أرمل">أرمل</option>
+            <option value="متزوج (بدون أطفال)">متزوج (بدون أطفال)</option>
+            <option value="متزوج (لديه أطفال)">متزوج (لديه أطفال)</option>
+            <option value="منفصل (بدون أطفال)">منفصل (بدون أطفال)</option>
+            <option value="منفصل (لديه أطفال)">منفصل (لديه أطفال)</option>
+            <option value="أرمل (بدون أطفال)">أرمل (بدون أطفال)</option>
+            <option value="أرمل (لديه أطفال)">أرمل (لديه أطفال)</option>
           </select>
         </div>
         <div class="col-span-12 md:col-span-2" id="childrenCountWrap" style="display:none">
@@ -177,7 +180,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
   function toggleChildrenCount() {
     var val = document.getElementById('socialStatus').value;
     var wrap = document.getElementById('childrenCountWrap');
-    if (val === 'متزوج ولديه اولاد') {
+    if (val.includes('أطفال')) {
       wrap.style.display = 'block';
     } else {
       wrap.style.display = 'none';

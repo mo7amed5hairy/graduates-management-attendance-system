@@ -31,7 +31,7 @@ class UserController extends Controller
             'gender' => 'nullable|string|in:ذكر,أنثى',
             'address' => 'nullable|string|max:1000',
             'mother_name' => 'nullable|string|max:255',
-            'social_status' => 'nullable|string|in:أعزب,متزوج ولديه اولاد,متزوج وليس لديه اولاد,أرمل',
+            'social_status' => 'nullable|string|in:أعزب,متزوج (بدون أطفال),متزوج (لديه أطفال),منفصل (بدون أطفال),منفصل (لديه أطفال),أرمل (بدون أطفال),أرمل (لديه أطفال)',
             'children_count' => 'nullable|integer|min:0',
             'date_of_birth' => 'nullable|date',
             'qualification_id' => 'nullable|exists:qualifications,id',
