@@ -136,6 +136,12 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
+
+            if (!$user->access_token) {
+                $user->access_token = bin2hex(random_bytes(32));
+                $user->save();
+            }
+
             $redirect = $user->isAdmin() ? route('admin.dashboard') : route('profile.show');
 
             $cookie = cookie('access_token', $user->access_token, 60 * 24 * 365);

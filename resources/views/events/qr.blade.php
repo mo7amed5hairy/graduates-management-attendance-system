@@ -6,6 +6,15 @@
 <title>QR — {{ $attendance->event->title }}</title>
 <script src="{{ asset('js/tailwind.js') }}"></script>
 <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+  <style>
+    @media print {
+      @page { size: auto; margin: 8mm; }
+      body { margin: 0; padding: 0; min-height: auto !important; }
+      .card { box-shadow: none; border: 1px solid #e2e8f0; page-break-inside: avoid; }
+      #qrcode canvas { width: 160px !important; height: 160px !important; }
+      .btn, .btn-ghost { display: none !important; }
+    }
+  </style>
 </head>
 <body class="flex items-center justify-center p-6" style="min-height:100vh">
   <div class="card w-full max-w-sm p-8 text-center">
