@@ -64,7 +64,7 @@
         </div>
         <div>
           <label class="label">الحالة الاجتماعية</label>
-          <select class="input" name="social_status" onchange="toggleChildrenCountEdit()">
+          <select class="input" name="social_status" id="social_status" onchange="toggleChildrenCountEdit()">
             <option value="">اختر...</option>
             <option value="أعزب" {{ $user->social_status === 'أعزب' ? 'selected' : '' }}>أعزب</option>
             <option value="متزوج (بدون أطفال)" {{ $user->social_status === 'متزوج (بدون أطفال)' ? 'selected' : '' }}>متزوج (بدون أطفال)</option>
