@@ -28,35 +28,35 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-3">
           <label class="label">الإسم <span class="text-rose-500">*</span></label>
-          <input class="input" name="first_name" placeholder="الإسم" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، الإسم مطلوب')" oninput="this.setCustomValidity('')">
+          <input class="input" name="first_name" placeholder="الإسم" required>
         </div>
         <div class="col-span-12 md:col-span-3">
-          <label class="label">اسم الأب <span class="text-rose-500">*</span></label>
-          <input class="input" name="father_name" placeholder="اسم الأب" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اسم الأب مطلوب')" oninput="this.setCustomValidity('')">
+          <label class="label">اسم الأب</label>
+          <input class="input" name="father_name" placeholder="اسم الأب">
         </div>
         <div class="col-span-12 md:col-span-3">
-          <label class="label">اسم الجد <span class="text-rose-500">*</span></label>
-          <input class="input" name="grandfather_name" placeholder="اسم الجد" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اسم الجد مطلوب')" oninput="this.setCustomValidity('')">
+          <label class="label">اسم الجد</label>
+          <input class="input" name="grandfather_name" placeholder="اسم الجد">
         </div>
         <div class="col-span-12 md:col-span-3">
           <label class="label">اللقب <span class="text-rose-500">*</span></label>
-          <input class="input" name="family_name" placeholder="اللقب" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اللقب مطلوب')" oninput="this.setCustomValidity('')">
+          <input class="input" name="family_name" placeholder="اللقب" required>
         </div>
       </div>
 
       {{-- Row 1.5: اسم الأم, أب الأم, جد الأم --}}
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-4">
-          <label class="label">اسم الأم <span class="text-rose-500">*</span></label>
-          <input class="input" name="mother_name" placeholder="اسم الأم" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اسم الأم مطلوب')" oninput="this.setCustomValidity('')">
+          <label class="label">اسم الأم</label>
+          <input class="input" name="mother_name" placeholder="اسم الأم">
         </div>
         <div class="col-span-12 md:col-span-4">
-          <label class="label">أب الأم <span class="text-rose-500">*</span></label>
-          <input class="input" name="mother_father_name" placeholder="أب الأم" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اسم أب الأم مطلوب')" oninput="this.setCustomValidity('')">
+          <label class="label">أب الأم</label>
+          <input class="input" name="mother_father_name" placeholder="أب الأم">
         </div>
         <div class="col-span-12 md:col-span-4">
-          <label class="label">جد الأم <span class="text-rose-500">*</span></label>
-          <input class="input" name="mother_grandfather_name" placeholder="جد الأم" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اسم جد الأم مطلوب')" oninput="this.setCustomValidity('')">
+          <label class="label">جد الأم</label>
+          <input class="input" name="mother_grandfather_name" placeholder="جد الأم">
         </div>
       </div>
 
@@ -64,23 +64,23 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-4">
           <label class="label">رقم البطاقة الوطنية <span class="text-rose-500">*</span></label>
-          <input class="input" name="national_id" placeholder="رقم البطاقة الوطنية" required dir="rtl" oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، رقم البطاقة الوطنية مطلوب')" oninput="this.setCustomValidity('')">
+          <input class="input" name="national_id" placeholder="رقم البطاقة الوطنية" required dir="rtl">
         </div>
         <div class="col-span-12 md:col-span-4">
           <label class="label">البريد الإلكتروني <small>(اختياري — لاسترجاع كلمة المرور)</small></label>
-          <input class="input" type="email" name="email" placeholder="example@mail.com" oninvalid="this.setCustomValidity('يرجى إدخال بريد إلكتروني صحيح')" oninput="this.setCustomValidity('')">
+          <input class="input" type="email" name="email" placeholder="example@mail.com">
         </div>
         <div class="col-span-12 md:col-span-4">
           <label class="label">رقم الهاتف <span class="text-rose-500">*</span></label>
-          <input class="input" name="phone" placeholder="077xxxxxxxx" maxlength="11" required dir="ltr" oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، رقم الهاتف مطلوب')" oninput="this.setCustomValidity('')">
+          <input class="input" name="phone" placeholder="077xxxxxxxx" maxlength="11" required dir="ltr">
         </div>
       </div>
 
-      {{-- Row 3: تاريخ الميلاد (سنة فقط), العمر (auto), الجنس, الحالة الوظيفية --}}
+      {{-- Row 3: تاريخ الميلاد (سنة فقط), العمر (auto), الجنس --}}
       <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12 md:col-span-3">
+        <div class="col-span-12 md:col-span-4">
           <label class="label">سنة الميلاد <span class="text-rose-500">*</span></label>
-          <select class="input text-base" name="date_of_birth" id="dateOfBirth" required oninvalid="this.setCustomValidity('يرجى اختيار سنة الميلاد')" onchange="calcAgeFromYear();">
+          <select class="input" name="date_of_birth" id="dateOfBirth" required onchange="calcAgeFromYear()">
             <option value="">اختر سنة الميلاد...</option>
             @foreach(range(date('Y'), 1900) as $year)
               <option value="{{ $year }}">{{ $year }}</option>
@@ -91,9 +91,9 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
           <label class="label">العمر</label>
           <input class="input" type="number" name="age" id="age" placeholder="--" readonly style="background:#f1f5f9">
         </div>
-        <div class="col-span-12 md:col-span-3">
-          <label class="label">الجنس <span class="text-rose-500">*</span></label>
-          <select class="input text-base" name="gender" required oninvalid="this.setCustomValidity('يرجى تحديد الجنس')" onchange="this.setCustomValidity('')">
+        <div class="col-span-12 md:col-span-2">
+          <label class="label">الجنس</label>
+          <select class="input" name="gender">
             <option value="">اختر</option>
             <option value="ذكر">ذكر</option>
             <option value="أنثى">أنثى</option>
@@ -101,7 +101,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         </div>
         <div class="col-span-12 md:col-span-4">
           <label class="label">الحالة الوظيفية <span class="text-rose-500">*</span></label>
-          <select class="input text-base" name="job_status" required oninvalid="this.setCustomValidity('يرجى تحديد الحالة الوظيفية')" onchange="this.setCustomValidity('')">
+          <select class="input" name="job_status" required>
             <option value="">اختر...</option>
             <option value="موظف">موظف</option>
             <option value="غير موظف">غير موظف</option>
@@ -113,35 +113,17 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         </div>
       </div>
 
-      {{-- Row 3.5: الحالة الاجتماعية + عدد الأولاد (تم تعديل الـ values لتطابق قواعد البيانات) --}}
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12 md:col-span-6 transition-all duration-300" id="socialStatusContainer">
-          <label class="label">الحالة الاجتماعية <span class="text-rose-500">*</span></label>
-          <select class="input w-full text-base" name="social_status" id="socialStatus" required oninvalid="this.setCustomValidity('يرجى تحديد الحالة الاجتماعية')" onchange="toggleChildrenInput();">
-            <option value="">اختر الحالة الاجتماعية...</option>
-            <option value="أعزب">أعزب / عزباء</option>
-            <option value="متزوج">متزوج / متزوجة</option>
-            <option value="مطلق">مطلق / مطلقة</option>
-            <option value="أرمل">أرمل / أرملة</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-6 hidden transition-all duration-300" id="childrenCountContainer">
-          <label class="label">عدد الأولاد <span class="text-rose-500">*</span></label>
-          <input class="input w-full" type="number" name="children_count" id="childrenCount" placeholder="من 0 إلى 10" min="0" max="10" value="0" oninvalid="this.setCustomValidity('يرجى تحديد عدد الأولاد من 0 إلى 10')" oninput="this.setCustomValidity('')">
-        </div>
-      </div>
-
       {{-- Row 4: المحافظة + عنوان السكن الحالى --}}
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-3">
           <label class="label">المحافظة <span class="text-rose-500">*</span></label>
-          <select class="input text-base" name="governorate" id="governorate" required oninvalid="this.setCustomValidity('يرجى اختيار المحافظة')" onchange="this.setCustomValidity('')">
+          <select class="input" name="governorate" id="governorate" required>
             <option value="">اختر...</option>
           </select>
         </div>
         <div class="col-span-12 md:col-span-9">
           <label class="label">عنوان السكن الحالى <span class="text-rose-500">*</span></label>
-          <textarea class="input" name="address" rows="3" placeholder="العنوان بالتفصيل" required oninvalid="this.setCustomValidity('يرجى كتابة عنوان السكن التفصيلي')" oninput="this.setCustomValidity('')"></textarea>
+          <textarea class="input" name="address" rows="3" placeholder="العنوان بالتفصيل" required></textarea>
         </div>
       </div>
 
@@ -149,19 +131,19 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-4">
           <label class="label">التحصيل الدراسى <span class="text-rose-500">*</span></label>
-          <select class="input text-base" name="qualification_id" id="qualificationId" required oninvalid="this.setCustomValidity('يرجى اختيار التحصيل الدراسي')" onchange="loadFacultiesR();">
+          <select class="input" name="qualification_id" id="qualificationId" required onchange="loadFacultiesR()">
             <option value="">اختر المؤهل...</option>
           </select>
         </div>
         <div class="col-span-12 md:col-span-4">
           <label class="label">الكلية / المعهد <span class="text-rose-500">*</span></label>
-          <select class="input text-base" name="qualification_faculty_id" id="facultyId" required disabled oninvalid="this.setCustomValidity('يرجى اختيار الكلية أو المعهد')" onchange="this.setCustomValidity('')">
+          <select class="input" name="qualification_faculty_id" id="facultyId" required disabled>
             <option value="">اختر المؤهل أولاً...</option>
           </select>
         </div>
         <div class="col-span-12 md:col-span-4">
           <label class="label">سنة التخرج <span class="text-rose-500">*</span></label>
-          <select class="input text-base" name="graduation_year" required oninvalid="this.setCustomValidity('يرجى تحديد سنة التخرج')" onchange="this.setCustomValidity('')">
+          <select class="input" name="graduation_year" required>
             <option value="">اختر سنة التخرج...</option>
             @foreach(range(date('Y') + 5, 1950) as $year)
               <option value="{{ $year }}">{{ $year }}</option>
@@ -174,11 +156,11 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-6">
           <label class="label">كلمة المرور <span class="text-rose-500">*</span></label>
-          <input class="input" type="password" name="password" placeholder="أقل شيء 8 أحرف" required oninvalid="this.setCustomValidity('حقل كلمة المرور مطلوب')" oninput="this.setCustomValidity('')">
+          <input class="input" type="password" name="password" placeholder="أقل شيء 8 أحرف" required>
         </div>
         <div class="col-span-12 md:col-span-6">
           <label class="label">تأكيد كلمة المرور <span class="text-rose-500">*</span></label>
-          <input class="input" type="password" name="password_confirmation" placeholder="تأكيد كلمة المرور" required oninvalid="this.setCustomValidity('يرجى تأكيد كلمة المرور المطابقة')" oninput="this.setCustomValidity('')">
+          <input class="input" type="password" name="password_confirmation" placeholder="تأكيد كلمة المرور" required>
         </div>
       </div>
 
@@ -190,20 +172,9 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
     </div>
 
     @if($errors->any())
-    <div class="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl text-sm text-red-800 leading-6">
+    <div class="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl text-xs text-red-800 leading-6">
       @foreach($errors->all() as $error)
-        <div>
-          ⚠️ 
-          @if(str_contains($error, 'phone'))
-            صيغة رقم الهاتف غير صحيحة، يرجى كتابة الرقم بالكامل (مثال: 07705666666)
-          @elseif(str_contains($error, 'email'))
-            البريد الإلكتروني المستخدم مسجل مسبقاً أو غير صحيح
-          @elseif(str_contains($error, 'password'))
-            كلمة المرور غير متطابقة أو أقل من 8 أحرف
-          @else
-            {{ $error }}
-          @endif
-        </div>
+        <div>⚠️ {{ $error }}</div>
       @endforeach
     </div>
     @endif
@@ -211,46 +182,15 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
 
   <script>
   function calcAgeFromYear() {
-    var selectField = document.getElementById('dateOfBirth');
-    var year = selectField.value;
+    var year = document.getElementById('dateOfBirth').value;
     var ageField = document.getElementById('age');
-    
-    selectField.setCustomValidity('');
-    
     if (!year) { ageField.value = ''; return; }
     ageField.value = new Date().getFullYear() - parseInt(year);
   }
 
-  function toggleChildrenInput() {
-    var selectField = document.getElementById('socialStatus');
-    var status = selectField.value;
-    var childrenContainer = document.getElementById('childrenCountContainer');
-    var childrenInput = document.getElementById('childrenCount');
-    var statusContainer = document.getElementById('socialStatusContainer');
-    
-    selectField.setCustomValidity('');
-    
-    if (status === 'متزوج' || status === 'مطلق' || status === 'أرمل') {
-      childrenContainer.classList.remove('hidden');
-      statusContainer.classList.remove('col-span-12');
-      statusContainer.classList.add('md:col-span-6');
-      childrenInput.required = true;
-    } else {
-      childrenContainer.classList.add('hidden');
-      statusContainer.classList.remove('md:col-span-6');
-      statusContainer.classList.add('col-span-12');
-      childrenInput.required = false;
-      childrenInput.value = '0';
-    }
-  }
-
   function loadFacultiesR() {
-    var selectField = document.getElementById('qualificationId');
-    var qualId = selectField.value;
+    var qualId = document.getElementById('qualificationId').value;
     var facSel = document.getElementById('facultyId');
-    
-    selectField.setCustomValidity('');
-    
     if (!qualId) {
       facSel.innerHTML = '<option value="">اختر المؤهل أولاً...</option>';
       facSel.disabled = true;
@@ -258,7 +198,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
     }
     facSel.disabled = true;
     facSel.innerHTML = '<option value="">جاري التحميل...</option>';
-    fetch('{{ url('/api/qualifications') }}' + '/' + qualId + '/faculties', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    fetch('{{ url('/api/qualifications') }}/' + qualId + '/faculties', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
       .then(function(r) { return r.json(); })
       .then(function(d) {
         facSel.innerHTML = '<option value="">اختر الكلية/المعهد...</option>';
