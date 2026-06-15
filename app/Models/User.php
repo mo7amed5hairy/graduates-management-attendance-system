@@ -22,6 +22,8 @@ class User extends Authenticatable
         'family_name',
         'name',
         'mother_name',
+        'mother_father_name',
+        'mother_grandfather_name',
         'email',
         'password',
         'phone',
@@ -74,12 +76,21 @@ class User extends Authenticatable
     public function getNameAttribute($value)
     {
         if ($this->attributes['first_name'] ?? null) {
-            return trim(
+            $name = trim(
                 ($this->attributes['first_name'] ?? '') . ' ' .
                 ($this->attributes['father_name'] ?? '') . ' ' .
                 ($this->attributes['grandfather_name'] ?? '') . ' ' .
                 ($this->attributes['family_name'] ?? '')
             );
+            $motherName = trim(
+                ($this->attributes['mother_name'] ?? '') . ' ' .
+                ($this->attributes['mother_father_name'] ?? '') . ' ' .
+                ($this->attributes['mother_grandfather_name'] ?? '')
+            );
+            if ($motherName) {
+                $name .= ' (' . $motherName . ')';
+            }
+            return $name;
         }
         return $value;
     }

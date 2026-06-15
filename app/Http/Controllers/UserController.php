@@ -26,19 +26,17 @@ class UserController extends Controller
             'family_name' => 'required|string|max:255',
             'email' => 'nullable|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'phone' => 'required|string|max:20',
+            'phone' => 'required|string|regex:/^077\d{8}$/',
             'national_id' => 'required|string|max:20|unique:users',
             'graduation_year' => 'required|integer|min:1950|max:' . (date('Y') + 5),
             'job_status' => 'required|string|max:100',
             'age' => 'nullable|integer|min:1|max:150',
             'gender' => 'nullable|string|in:ذكر,أنثى',
             'address' => 'nullable|string|max:1000',
+            'date_of_birth' => 'nullable|integer|min:1900|max:' . date('Y'),
             'mother_name' => 'nullable|string|max:255',
-            'social_status' => 'nullable|string|in:أعزب,متزوج (بدون أطفال),متزوج (لديه أطفال),منفصل (بدون أطفال),منفصل (لديه أطفال),أرمل (بدون أطفال),أرمل (لديه أطفال)',
-            'children_count' => 'nullable|integer|min:0',
-            'date_of_birth' => 'nullable|date',
-            'qualification_id' => 'nullable|exists:qualifications,id',
-            'qualification_faculty_id' => 'nullable|exists:qualification_faculties,id',
+            'mother_father_name' => 'nullable|string|max:255',
+            'mother_grandfather_name' => 'nullable|string|max:255',
         ];
 
         if ($request->filled('governorate') || $request->has('institution_type')) {
@@ -51,7 +49,8 @@ class UserController extends Controller
 
         $validated = $request->validate($rules);
 
-        $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}");
+        $motherName = trim(($validated['mother_name'] ?? '') . ' ' . ($validated['mother_father_name'] ?? '') . ' ' . ($validated['mother_grandfather_name'] ?? ''));
+        $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}" . ($motherName ? " ($motherName)" : ''));
 
         $validated['password'] = Hash::make($validated['password']);
 
@@ -64,9 +63,9 @@ class UserController extends Controller
             unset($validated['institution_type'], $validated['university_type'], $validated['institution_id'], $validated['department_id']);
         }
 
-        // Calculate age from date_of_birth if provided
-        if (!empty($validated['date_of_birth']) && empty($validated['age'])) {
-            $validated['age'] = \Carbon\Carbon::parse($validated['date_of_birth'])->age;
+        // Calculate age from date_of_birth (year only)
+        if (!empty($validated['date_of_birth'])) {
+            $validated['age'] = (int) date('Y') - (int) $validated['date_of_birth'];
         }
 
         if ($request->hasFile('id_photos')) {

@@ -31,12 +31,12 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
           <input class="input" name="first_name" placeholder="الإسم" required>
         </div>
         <div class="col-span-12 md:col-span-3">
-          <label class="label">اسم الأب <span class="text-rose-500">*</span></label>
-          <input class="input" name="father_name" placeholder="اسم الأب" required>
+          <label class="label">اسم الأب</label>
+          <input class="input" name="father_name" placeholder="اسم الأب">
         </div>
         <div class="col-span-12 md:col-span-3">
-          <label class="label">اسم الجد <span class="text-rose-500">*</span></label>
-          <input class="input" name="grandfather_name" placeholder="اسم الجد" required>
+          <label class="label">اسم الجد</label>
+          <input class="input" name="grandfather_name" placeholder="اسم الجد">
         </div>
         <div class="col-span-12 md:col-span-3">
           <label class="label">اللقب <span class="text-rose-500">*</span></label>
@@ -44,23 +44,48 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         </div>
       </div>
 
-      {{-- Row 2: اسم الأم, رقم البطاقة --}}
+      {{-- Row 1.5: اسم الأم, أب الأم, جد الأم --}}
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-4">
-          <label class="label">اسم الأم الرباعى <span class="text-rose-500">*</span></label>
-          <input class="input" name="mother_name" placeholder="اسم الأم الرباعي" required>
+          <label class="label">اسم الأم</label>
+          <input class="input" name="mother_name" placeholder="اسم الأم">
         </div>
         <div class="col-span-12 md:col-span-4">
-          <label class="label">رقم البطاقة الوطنية <span class="text-rose-500">*</span></label>
-          <input class="input" name="national_id" placeholder="رقم البطاقة الوطنية" required dir="ltr">
+          <label class="label">أب الأم</label>
+          <input class="input" name="mother_father_name" placeholder="أب الأم">
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">جد الأم</label>
+          <input class="input" name="mother_grandfather_name" placeholder="جد الأم">
         </div>
       </div>
 
-      {{-- Row 3: تاريخ الميلاد, العمر (auto), الجنس --}}
+      {{-- Row 2: رقم البطاقة, البريد (اختياري), الهاتف --}}
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-4">
-          <label class="label">تاريخ الميلاد <span class="text-rose-500">*</span></label>
-          <input class="input" type="date" name="date_of_birth" id="dateOfBirth" required onchange="calculateAge()">
+          <label class="label">رقم البطاقة الوطنية <span class="text-rose-500">*</span></label>
+          <input class="input" name="national_id" placeholder="رقم البطاقة الوطنية" required dir="rtl">
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">البريد الإلكتروني <small>(اختياري — لاسترجاع كلمة المرور)</small></label>
+          <input class="input" type="email" name="email" placeholder="example@mail.com">
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">رقم الهاتف <span class="text-rose-500">*</span></label>
+          <input class="input" name="phone" placeholder="077xxxxxxxx" maxlength="11" required dir="ltr">
+        </div>
+      </div>
+
+      {{-- Row 3: تاريخ الميلاد (سنة فقط), العمر (auto), الجنس --}}
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">سنة الميلاد <span class="text-rose-500">*</span></label>
+          <select class="input" name="date_of_birth" id="dateOfBirth" required onchange="calcAgeFromYear()">
+            <option value="">اختر سنة الميلاد...</option>
+            @foreach(range(date('Y'), 1900) as $year)
+              <option value="{{ $year }}">{{ $year }}</option>
+            @endforeach
+          </select>
         </div>
         <div class="col-span-12 md:col-span-2">
           <label class="label">العمر</label>
@@ -75,51 +100,6 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
           </select>
         </div>
         <div class="col-span-12 md:col-span-4">
-          <label class="label">رقم الهاتف <span class="text-rose-500">*</span></label>
-          <input class="input" name="phone" placeholder="077xxxxxxxx" required dir="ltr" maxlength="11" pattern="077\d{8}" title="يجب أن يبدأ ب 077 ويتكون من 11 رقماً">
-        </div>
-      </div>
-
-      {{-- Row 3: الحالة الاجتماعية --}}
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12 md:col-span-4">
-          <label class="label">الحالة الاجتماعية <span class="text-rose-500">*</span></label>
-          <select class="input" name="social_status" id="socialStatus" required onchange="toggleChildrenCount()">
-            <option value="">اختر...</option>
-            <option value="أعزب">أعزب</option>
-            <option value="متزوج (بدون أطفال)">متزوج (بدون أطفال)</option>
-            <option value="متزوج (لديه أطفال)">متزوج (لديه أطفال)</option>
-            <option value="منفصل (بدون أطفال)">منفصل (بدون أطفال)</option>
-            <option value="منفصل (لديه أطفال)">منفصل (لديه أطفال)</option>
-            <option value="أرمل (بدون أطفال)">أرمل (بدون أطفال)</option>
-            <option value="أرمل (لديه أطفال)">أرمل (لديه أطفال)</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-2" id="childrenCountWrap" style="display:none">
-          <label class="label">عدد الأولاد</label>
-          <input class="input" type="number" name="children_count" id="childrenCount" min="0" placeholder="أدخل عدد الأولاد">
-        </div>
-      </div>
-
-      {{-- Row 4: التحصيل الدراسى والكلية --}}
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12 md:col-span-4">
-          <label class="label">التحصيل الدراسى <span class="text-rose-500">*</span></label>
-          <select class="input" name="qualification_id" id="qualificationId" required>
-            <option value="">اختر المؤهل...</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-4">
-          <label class="label">الكلية / المعهد <span class="text-rose-500">*</span></label>
-          <select class="input" name="qualification_faculty_id" id="qualificationFacultyId" required disabled>
-            <option value="">اختر المؤهل أولاً...</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-2">
-          <label class="label">سنة التخرج <span class="text-rose-500">*</span></label>
-          <input class="input" type="number" name="graduation_year" placeholder="2024" min="1950" max="{{ date('Y') + 5 }}" required>
-        </div>
-        <div class="col-span-12 md:col-span-2">
           <label class="label">الحالة الوظيفية <span class="text-rose-500">*</span></label>
           <select class="input" name="job_status" required>
             <option value="">اختر...</option>
@@ -133,20 +113,42 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         </div>
       </div>
 
-      {{-- Row 5: المحافظة وعنوان السكن الحالى --}}
+      {{-- Row 4: المحافظة + عنوان السكن الحالى --}}
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-3">
           <label class="label">المحافظة <span class="text-rose-500">*</span></label>
           <select class="input" name="governorate" id="governorate" required>
-            <option value="">اختر المحافظة...</option>
-            @foreach($governorates as $gov)
-              <option value="{{ $gov->name }}">{{ $gov->name }}</option>
-            @endforeach
+            <option value="">اختر...</option>
           </select>
         </div>
         <div class="col-span-12 md:col-span-9">
           <label class="label">عنوان السكن الحالى <span class="text-rose-500">*</span></label>
-          <input class="input" name="address" placeholder="العنوان بالتفصيل" required>
+          <textarea class="input" name="address" rows="3" placeholder="العنوان بالتفصيل" required></textarea>
+        </div>
+      </div>
+
+      {{-- Row 5: التحصيل الدراسى, الكلية/المعهد, سنة التخرج --}}
+      <div class="grid grid-cols-12 gap-4">
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">التحصيل الدراسى <span class="text-rose-500">*</span></label>
+          <select class="input" name="qualification_id" id="qualificationId" required onchange="loadFacultiesR()">
+            <option value="">اختر المؤهل...</option>
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">الكلية / المعهد <span class="text-rose-500">*</span></label>
+          <select class="input" name="qualification_faculty_id" id="facultyId" required disabled>
+            <option value="">اختر المؤهل أولاً...</option>
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">سنة التخرج <span class="text-rose-500">*</span></label>
+          <select class="input" name="graduation_year" required>
+            <option value="">اختر سنة التخرج...</option>
+            @foreach(range(date('Y') + 5, 1950) as $year)
+              <option value="{{ $year }}">{{ $year }}</option>
+            @endforeach
+          </select>
         </div>
       </div>
 
@@ -179,69 +181,24 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
   </div>
 
   <script>
-  var apiBase = '{{ url('/api') }}';
-
-  function calculateAge() {
-    var dob = document.getElementById('dateOfBirth').value;
+  function calcAgeFromYear() {
+    var year = document.getElementById('dateOfBirth').value;
     var ageField = document.getElementById('age');
-    if (!dob) { ageField.value = ''; return; }
-    var birthDate = new Date(dob);
-    var today = new Date();
-    var age = today.getFullYear() - birthDate.getFullYear();
-    var m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) { age--; }
-    ageField.value = age >= 0 ? age : 0;
+    if (!year) { ageField.value = ''; return; }
+    ageField.value = new Date().getFullYear() - parseInt(year);
   }
 
-  function toggleChildrenCount() {
-    var val = document.getElementById('socialStatus').value;
-    var wrap = document.getElementById('childrenCountWrap');
-    if (val.includes('لديه أطفال')) {
-      wrap.style.display = 'block';
-    } else {
-      wrap.style.display = 'none';
-      document.getElementById('childrenCount').value = '';
-    }
-  }
-
-  function loadSelect(url, selectId, placeholder) {
-    var sel = document.getElementById(selectId);
-    sel.disabled = true;
-    sel.innerHTML = '<option value="">جاري التحميل...</option>';
-    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-      .then(function(r) { return r.json(); })
-      .then(function(d) {
-        sel.innerHTML = '<option value="">' + placeholder + '</option>';
-        if (d.success && d.data) {
-          d.data.forEach(function(item) {
-            var opt = document.createElement('option');
-            opt.value = item.id;
-            opt.textContent = item.name;
-            sel.appendChild(opt);
-          });
-        }
-        sel.disabled = false;
-      })
-      .catch(function() {
-        sel.innerHTML = '<option value="">خطأ في التحميل</option>';
-        sel.disabled = false;
-      });
-  }
-
-  function loadFaculties() {
+  function loadFacultiesR() {
     var qualId = document.getElementById('qualificationId').value;
-    var facSel = document.getElementById('qualificationFacultyId');
-
+    var facSel = document.getElementById('facultyId');
     if (!qualId) {
       facSel.innerHTML = '<option value="">اختر المؤهل أولاً...</option>';
       facSel.disabled = true;
       return;
     }
-
     facSel.disabled = true;
     facSel.innerHTML = '<option value="">جاري التحميل...</option>';
-
-    fetch(apiBase + '/qualifications/' + qualId + '/faculties', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    fetch('{{ url('/api/qualifications') }}/' + qualId + '/faculties', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
       .then(function(r) { return r.json(); })
       .then(function(d) {
         facSel.innerHTML = '<option value="">اختر الكلية/المعهد...</option>';
@@ -262,10 +219,50 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
   }
 
   document.addEventListener('DOMContentLoaded', function() {
-    loadSelect(apiBase + '/qualifications', 'qualificationId', 'اختر المؤهل...');
-  });
+    var gSel = document.getElementById('governorate');
+    gSel.disabled = true;
+    gSel.innerHTML = '<option value="">جاري التحميل...</option>';
+    fetch('{{ url('/api/governorates') }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        gSel.innerHTML = '<option value="">اختر المحافظة...</option>';
+        if (d.success && d.data) {
+          d.data.forEach(function(item) {
+            var opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.name;
+            gSel.appendChild(opt);
+          });
+        }
+        gSel.disabled = false;
+      })
+      .catch(function() {
+        gSel.innerHTML = '<option value="">خطأ في التحميل</option>';
+        gSel.disabled = false;
+      });
 
-  document.getElementById('qualificationId').addEventListener('change', loadFaculties);
+    var qSel = document.getElementById('qualificationId');
+    qSel.disabled = true;
+    qSel.innerHTML = '<option value="">جاري التحميل...</option>';
+    fetch('{{ url('/api/qualifications') }}', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        qSel.innerHTML = '<option value="">اختر المؤهل...</option>';
+        if (d.success && d.data) {
+          d.data.forEach(function(item) {
+            var opt = document.createElement('option');
+            opt.value = item.id;
+            opt.textContent = item.name;
+            qSel.appendChild(opt);
+          });
+        }
+        qSel.disabled = false;
+      })
+      .catch(function() {
+        qSel.innerHTML = '<option value="">خطأ في التحميل</option>';
+        qSel.disabled = false;
+      });
+  });
   </script>
 
   <script src="{{ asset('js/app.js') }}"></script>

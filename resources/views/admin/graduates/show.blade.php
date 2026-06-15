@@ -37,7 +37,7 @@
       </div>
       <div>
         <span class="text-xs text-slate-400 block">اسم الأم الرباعى</span>
-        <span class="font-semibold">{{ $user->mother_name ?? '—' }}</span>
+        <span class="font-semibold">{{ trim($user->mother_name . ' ' . $user->mother_father_name . ' ' . $user->mother_grandfather_name) ?: '—' }}</span>
       </div>
       <div>
         <span class="text-xs text-slate-400 block">رقم البطاقة الوطنية</span>

@@ -52,8 +52,10 @@ class ProfileController extends Controller
             'grandfather_name' => 'required|string|max:255',
             'family_name' => 'required|string|max:255',
             'mother_name' => 'nullable|string|max:255',
+            'mother_father_name' => 'nullable|string|max:255',
+            'mother_grandfather_name' => 'nullable|string|max:255',
             'email' => 'nullable|string|email|max:255|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'nullable|string|regex:/^077\d{8}$/',
             'password' => 'nullable|string|min:8|confirmed',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'address' => 'nullable|string|max:1000',
@@ -71,7 +73,7 @@ class ProfileController extends Controller
             'social_links.*' => 'nullable|url|max:500',
         ]);
 
-        $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}");
+        $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}" . (!empty($validated['mother_name']) ? " ({$validated['mother_name']} {$validated['mother_father_name']} {$validated['mother_grandfather_name']})" : ''));
 
         if ($request->filled('password')) {
             $validated['password'] = Hash::make($validated['password']);

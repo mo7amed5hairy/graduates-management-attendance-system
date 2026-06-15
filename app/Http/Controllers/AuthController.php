@@ -22,46 +22,46 @@ class AuthController extends Controller
 
     public function showRegisterForm()
     {
-        $governorates = Governorate::orderBy('name')->get();
-        return view('auth.register', compact('governorates'));
+        return view('auth.register');
     }
 
     public function register(Request $request): JsonResponse|RedirectResponse
     {
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
-            'father_name' => 'required|string|max:255',
-            'grandfather_name' => 'required|string|max:255',
+            'father_name' => 'nullable|string|max:255',
+            'grandfather_name' => 'nullable|string|max:255',
             'family_name' => 'required|string|max:255',
-            'mother_name' => 'required|string|max:255',
+            'mother_name' => 'nullable|string|max:255',
+            'mother_father_name' => 'nullable|string|max:255',
+            'mother_grandfather_name' => 'nullable|string|max:255',
+            'email' => 'nullable|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'required|string|regex:/^077\d{8}$/',
             'national_id' => 'required|string|max:20|unique:users',
-            'governorate' => 'required|string|max:100',
-            'address' => 'required|string|max:1000',
-            'date_of_birth' => 'required|date',
-            'gender' => 'nullable|string|in:ذكر,أنثى',
+            'governorate' => 'required|exists:governorates,id',
+            'date_of_birth' => 'nullable|integer|min:1900|max:' . date('Y'),
             'graduation_year' => 'required|integer|min:1950|max:' . (date('Y') + 5),
             'job_status' => 'required|string|max:100',
+            'gender' => 'nullable|string|in:ذكر,أنثى',
+            'address' => 'required|string|max:1000',
             'qualification_id' => 'required|exists:qualifications,id',
             'qualification_faculty_id' => 'required|exists:qualification_faculties,id',
-            'social_status' => 'required|string|in:أعزب,متزوج (بدون أطفال),متزوج (لديه أطفال),منفصل (بدون أطفال),منفصل (لديه أطفال),أرمل (بدون أطفال),أرمل (لديه أطفال)',
-            'children_count' => 'nullable|integer|min:0',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
 
         // Concatenate name parts
-        $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}");
+        $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}" . ($validated['mother_name'] ? " ({$validated['mother_name']} {$validated['mother_father_name']} {$validated['mother_grandfather_name']})" : ''));
 
-        // Calculate age from date_of_birth
-        if ($validated['date_of_birth']) {
+        // Calculate age from date_of_birth (year only)
+        if (!empty($validated['date_of_birth'])) {
+            $validated['date_of_birth'] = $validated['date_of_birth'] . '-01-01';
             $validated['age'] = \Carbon\Carbon::parse($validated['date_of_birth'])->age;
         }
 
         $validated['role'] = 'user';
         $validated['approval_status'] = 'pending';
-        $validated['email'] = 'user_' . $validated['national_id'] . '@system.local';
         $validated['access_token'] = bin2hex(random_bytes(32));
 
         $newUser = User::create($validated);

@@ -9,17 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('first_name')->nullable()->after('name');
-            $table->string('father_name')->nullable()->after('first_name');
-            $table->string('grandfather_name')->nullable()->after('father_name');
-            $table->string('family_name')->nullable()->after('grandfather_name');
+            $table->string('mother_father_name')->nullable()->after('mother_name');
+            $table->string('mother_grandfather_name')->nullable()->after('mother_father_name');
         });
     }
 
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['first_name', 'father_name', 'grandfather_name', 'family_name']);
+            $table->dropColumn(['mother_father_name', 'mother_grandfather_name']);
         });
     }
 };

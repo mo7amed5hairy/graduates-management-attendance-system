@@ -16,19 +16,19 @@
   </div>
 @endif
 
-<div class="max-w-3xl mx-auto">
-  <div class="card p-6 mb-6">
-    <div class="flex items-center gap-5">
+<div class="w-full max-w-full overflow-x-hidden">
+  <div class="card p-4 sm:p-6 mb-6 overflow-x-auto">
+    <div class="flex items-start sm:items-center gap-4 flex-wrap">
       @if($user->image)
-        <img src="{{ $user->image_url }}" class="avatar avatar-lg" style="object-fit:cover">
+        <img src="{{ $user->image_url }}" class="avatar avatar-lg shrink-0" style="object-fit:cover">
       @else
-        <div class="avatar avatar-lg bg-gradient-to-br from-sky-500 to-indigo-600 text-white">
+        <div class="avatar avatar-lg bg-gradient-to-br from-sky-500 to-indigo-600 text-white shrink-0">
           {{ substr($user->name, 0, 2) }}
         </div>
       @endif
-      <div class="flex-1">
-        <h2 class="text-2xl font-extrabold text-slate-900">{{ $user->name }}</h2>
-        <div class="flex gap-2 mt-2">
+      <div class="flex-1 min-w-0">
+        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 break-words">{{ $user->name }}</h2>
+        <div class="flex flex-wrap gap-2 mt-2">
           @if($user->isAdmin())
             <span class="pill pill-violet">مدير</span>
           @else
@@ -60,7 +60,7 @@
       </div>
       <div>
         <span class="text-xs text-slate-400 block">اسم الأم الرباعى</span>
-        <span class="font-semibold">{{ $user->mother_name ?? 'غير محدد' }}</span>
+        <span class="font-semibold">{{ trim($user->mother_name . ' ' . $user->mother_father_name . ' ' . $user->mother_grandfather_name) ?: 'غير محدد' }}</span>
       </div>
       <div>
         <span class="text-xs text-slate-400 block">رقم البطاقة الوطنية</span>
@@ -130,12 +130,12 @@
     @if(!$user->isAdmin())
     <hr class="my-5 border-slate-100">
     <div class="bg-sky-50 border border-sky-100 rounded-xl p-4">
-      <div class="flex items-center justify-between">
-        <div>
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div class="min-w-0">
           <span class="text-xs text-slate-400 block">رابط بياناتي الشخصية</span>
-          <span class="text-sm font-bold text-slate-800" dir="ltr" id="detailsLink">{{ url('/checkmydetails/' . $user->access_token) }}</span>
+          <span class="text-sm font-bold text-slate-800 break-all" dir="ltr" id="detailsLink">{{ url('/checkmydetails/' . $user->access_token) }}</span>
         </div>
-        <button class="btn btn-primary text-sm" onclick="copyLink()">📋 نسخ الرابط</button>
+        <button class="btn btn-primary text-sm shrink-0" onclick="copyLink()">📋 نسخ الرابط</button>
       </div>
     </div>
     @endif
@@ -185,7 +185,7 @@
     @endif
   </div>
 
-  <div class="card p-5">
+  <div class="card p-4 sm:p-5 overflow-x-auto">
     <h2 class="text-lg font-extrabold text-slate-900 mb-4">📋 سجل النقاط</h2>
     <div class="table-wrap">
       <table class="data" id="profileTransactionsTable">
