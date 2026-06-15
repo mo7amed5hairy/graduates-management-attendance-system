@@ -17,10 +17,12 @@ use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CheckDetailsController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PointController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserEventController;
@@ -47,6 +49,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+
+    // Password reset
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'showForm'])->name('password.request');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [ResetPasswordController::class, 'showForm'])->name('password.reset');
+    Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 });
 
 // API routes for location cascading dropdowns

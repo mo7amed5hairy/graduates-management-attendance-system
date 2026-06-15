@@ -16,13 +16,13 @@
       <p class="text-slate-500 text-sm mt-1">تسجيل الدخول</p>
     </div>
 
-    <form id="loginForm" data-ajax="true" action="{{ route('login') }}" method="POST" class="space-y-4">
-      @csrf
-      <div>
-        <label class="label">رقم البطاقة الوطنية</label>
-        <input class="input @error('national_id') border-red-400 @enderror" type="text" name="national_id" value="{{ old('national_id') }}" placeholder="أدخل رقم البطاقة الوطنية" required autofocus dir="rtl">
-        @error('national_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
-      </div>
+      <form id="loginForm" data-ajax="true" action="{{ route('login') }}" method="POST" class="space-y-4">
+        @csrf
+        <div>
+          <label class="label">رقم البطاقة الوطنية</label>
+          <input class="input @error('national_id') border-red-400 @enderror" type="text" name="national_id" id="nationalIdInput" value="{{ old('national_id') }}" placeholder="أدخل رقم البطاقة الوطنية" required autofocus dir="rtl" onkeyup="saveIdentifier()">
+          @error('national_id')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+        </div>
       <div>
         <label class="label">كلمة المرور</label>
         <input class="input" type="password" name="password" placeholder="••••••••" required>
@@ -30,6 +30,9 @@
       <label class="flex items-center gap-2 text-sm text-slate-600">
         <input type="checkbox" name="remember" class="rounded"> تذكرني
       </label>
+      <div class="text-center text-sm -mt-2">
+        <a href="#" id="forgotPasswordLink" class="text-sky-600 hover:underline">نسيت كلمة المرور؟</a>
+      </div>
       <button type="submit" class="btn btn-primary w-full justify-center">دخول</button>
     </form>
 
@@ -54,6 +57,30 @@
     @endforeach
   </div>
   @endif
+
+  <script>
+  function saveIdentifier() {
+    var val = document.getElementById('nationalIdInput').value;
+    if (val) {
+      try { localStorage.setItem('login_identifier', val); } catch(e) {}
+    }
+  }
+
+  document.getElementById('forgotPasswordLink')?.addEventListener('click', function(e) {
+    e.preventDefault();
+    var identifier = '';
+    var token = '';
+    try { identifier = localStorage.getItem('login_identifier') || ''; } catch(e) {}
+    try { token = localStorage.getItem('access_token') || ''; } catch(e) {}
+    var url = '{{ route('password.request') }}';
+    if (identifier) {
+      url += '?identifier=' + encodeURIComponent(identifier);
+    } else if (token) {
+      url += '?token=' + encodeURIComponent(token);
+    }
+    window.location.href = url;
+  });
+  </script>
 
   <script src="{{ asset('js/app.js') }}"></script>
 </body>
