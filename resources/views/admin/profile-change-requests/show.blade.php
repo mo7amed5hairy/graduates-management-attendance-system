@@ -137,7 +137,7 @@
     <h3 class="font-extrabold text-slate-800 mb-4">⚙️ إجراءات المراجعة</h3>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       {{-- Approve form --}}
-      <form action="{{ route('admin.profile-change-requests.approve', $changeRequest) }}" method="POST" data-ajax="true">
+      <form action="{{ route('admin.profile-change-requests.approve', $changeRequest) }}" method="POST">
         @csrf
         <div class="mb-3">
           <label class="label">ملاحظات (اختياري)</label>
@@ -147,7 +147,7 @@
       </form>
 
       {{-- Reject form --}}
-      <form action="{{ route('admin.profile-change-requests.reject', $changeRequest) }}" method="POST" data-ajax="true">
+      <form action="{{ route('admin.profile-change-requests.reject', $changeRequest) }}" method="POST">
         @csrf
         <div class="mb-3">
           <label class="label">سبب الرفض <span class="text-rose-500">*</span></label>
@@ -158,12 +158,23 @@
     </div>
   </div>
   @else
-    @if($changeRequest->admin_notes)
-    <div class="card p-5 lg:col-span-3">
-      <h3 class="font-extrabold text-slate-800 mb-2">💬 ملاحظات المشرف</h3>
-      <p class="text-slate-600">{{ $changeRequest->admin_notes }}</p>
+  <div class="card p-5 lg:col-span-3">
+    <div class="flex items-center gap-3 mb-3">
+      @if($changeRequest->status === 'approved')
+        <span class="text-green-600 text-lg">✅</span>
+        <h3 class="font-extrabold text-green-700">تم البت في هذا الطلب — تمت الموافقة</h3>
+      @else
+        <span class="text-rose-600 text-lg">❌</span>
+        <h3 class="font-extrabold text-rose-700">تم البت في هذا الطلب — تم الرفض</h3>
+      @endif
     </div>
+    @if($changeRequest->admin_notes)
+      <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
+        <span class="text-xs text-slate-400 block mb-1">💬 ملاحظات المشرف</span>
+        {{ $changeRequest->admin_notes }}
+      </div>
     @endif
+  </div>
   @endif
 </div>
 

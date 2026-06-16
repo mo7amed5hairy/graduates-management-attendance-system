@@ -34,13 +34,13 @@ class ProfileChangeRequestController extends Controller
 
         $this->approveRequest($changeRequest, $request->input('admin_notes'));
 
-        $msg = 'تمت الموافقة على الطلب وتحديث بيانات المستخدم';
+        $msg = '✅ تمت الموافقة على الطلب وتحديث بيانات المستخدم';
 
         if ($request->ajax()) {
             return response()->json(['success' => true, 'message' => $msg]);
         }
 
-        return redirect()->route('admin.profile-change-requests.index')->with('success', $msg);
+        return redirect()->route('admin.profile-change-requests.show', $changeRequest)->with('success', $msg);
     }
 
     public function approveRequest(ProfileChangeRequest $changeRequest, ?string $notes = null): void
@@ -159,6 +159,6 @@ class ProfileChangeRequestController extends Controller
             return response()->json(['success' => true, 'message' => $msg]);
         }
 
-        return redirect()->route('admin.profile-change-requests.index')->with('success', $msg);
+        return redirect()->route('admin.profile-change-requests.show', $changeRequest)->with('success', $msg);
     }
 }
