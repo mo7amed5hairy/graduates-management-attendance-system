@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Department;
-use App\Models\Institution;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,75 +17,38 @@ class UserController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $rules = [
+        $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'father_name' => 'required|string|max:255',
             'grandfather_name' => 'required|string|max:255',
             'family_name' => 'required|string|max:255',
+            'mother_name' => 'required|string|max:255',
+            'mother_father_name' => 'required|string|max:255',
+            'mother_grandfather_name' => 'required|string|max:255',
             'email' => 'nullable|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'required|string|regex:/^077\d{8}$/',
             'national_id' => 'required|string|max:20|unique:users',
-            'graduation_year' => 'required|integer|min:1950|max:' . (date('Y') + 5),
+            'date_of_birth' => 'required|integer|min:1900|max:' . date('Y'),
+            'gender' => 'required|string|in:ذكر,أنثى',
             'job_status' => 'required|string|max:100',
-            'age' => 'nullable|integer|min:1|max:150',
-            'gender' => 'nullable|string|in:ذكر,أنثى',
+            'social_status' => 'required|string|in:أعزب,متزوج,مطلق,أرمل',
+            'children_count' => 'nullable|integer|min:0|max:10',
+            'governorate' => 'required|string|max:100',
             'address' => 'nullable|string|max:1000',
-            'date_of_birth' => 'nullable|integer|min:1900|max:' . date('Y'),
-            'mother_name' => 'nullable|string|max:255',
-            'mother_father_name' => 'nullable|string|max:255',
-            'mother_grandfather_name' => 'nullable|string|max:255',
-        ];
-
-        if ($request->filled('governorate') || $request->has('institution_type')) {
-            $rules['governorate'] = 'nullable|exists:governorates,id';
-            $rules['institution_type'] = 'nullable|exists:institution_types,id';
-            $rules['university_type'] = 'nullable|exists:university_types,id';
-            $rules['institution_id'] = 'nullable|exists:institutions,id';
-            $rules['department_id'] = 'nullable|exists:departments,id';
-        }
-
-        $validated = $request->validate($rules);
+            'qualification_id' => 'nullable|exists:qualifications,id',
+            'qualification_faculty_id' => 'nullable|exists:qualification_faculties,id',
+            'graduation_year' => 'required|integer|min:1950|max:' . (date('Y') + 5),
+        ]);
 
         $motherName = trim(($validated['mother_name'] ?? '') . ' ' . ($validated['mother_father_name'] ?? '') . ' ' . ($validated['mother_grandfather_name'] ?? ''));
         $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}" . ($motherName ? " ($motherName)" : ''));
 
         $validated['password'] = Hash::make($validated['password']);
 
-        // Resolve governorate ID to name if needed
-        if (!empty($validated['governorate']) && is_numeric($validated['governorate'])) {
-            $gov = \App\Models\Governorate::find($validated['governorate']);
-            $validated['governorate'] = $gov ? $gov->name : $validated['governorate'];
-        }
-
-        if ($request->filled('institution_id')) {
-            $institution = Institution::with('governorate')->find($validated['institution_id']);
-            $department = Department::find($validated['department_id']);
-            $validated['governorate'] = $institution->governorate->name;
-            $validated['university'] = $institution->name;
-            $validated['faculty'] = $department->name;
-            unset($validated['institution_type'], $validated['university_type'], $validated['institution_id'], $validated['department_id']);
-        }
-
         // Calculate age from date_of_birth (year only)
         if (!empty($validated['date_of_birth'])) {
             $validated['age'] = (int) date('Y') - (int) $validated['date_of_birth'];
-        }
-
-        if ($request->hasFile('id_photos')) {
-            $photos = [];
-            foreach ($request->file('id_photos') as $file) {
-                $photos[] = $file->store('id-photos', 'public');
-            }
-            $validated['id_photos'] = $photos;
-        }
-
-        if ($request->hasFile('residence_proof')) {
-            $proofs = [];
-            foreach ($request->file('residence_proof') as $file) {
-                $proofs[] = $file->store('residence-proof', 'public');
-            }
-            $validated['residence_proof'] = $proofs;
         }
 
         $validated['role'] = 'user';
@@ -131,12 +92,45 @@ class UserController extends Controller
             'father_name' => 'required|string|max:255',
             'grandfather_name' => 'required|string|max:255',
             'family_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'mother_name' => 'nullable|string|max:255',
+            'mother_father_name' => 'nullable|string|max:255',
+            'mother_grandfather_name' => 'nullable|string|max:255',
+            'email' => 'nullable|string|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
+            'national_id' => 'required|string|max:20|unique:users,national_id,' . $user->id,
+            'date_of_birth' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'gender' => 'nullable|string|in:ذكر,أنثى',
+            'job_status' => 'required|string|max:100',
+            'social_status' => 'nullable|string|in:أعزب,متزوج,مطلق,أرمل',
+            'children_count' => 'nullable|integer|min:0|max:10',
+            'governorate' => 'required|string|max:100',
+            'address' => 'nullable|string|max:1000',
+            'qualification_id' => 'nullable|exists:qualifications,id',
+            'qualification_faculty_id' => 'nullable|exists:qualification_faculties,id',
+            'graduation_year' => 'required|integer|min:1950|max:' . (date('Y') + 5),
             'status' => 'required|in:active,inactive',
+            'password' => 'nullable|string|min:8|confirmed',
         ]);
 
-        $data['name'] = trim("{$data['first_name']} {$data['father_name']} {$data['grandfather_name']} {$data['family_name']}");
+        $motherName = trim(($data['mother_name'] ?? '') . ' ' . ($data['mother_father_name'] ?? '') . ' ' . ($data['mother_grandfather_name'] ?? ''));
+        $data['name'] = trim("{$data['first_name']} {$data['father_name']} {$data['grandfather_name']} {$data['family_name']}" . ($motherName ? " ($motherName)" : ''));
+
+        // Calculate age from date_of_birth (year only)
+        if (!empty($data['date_of_birth'])) {
+            $data['age'] = (int) date('Y') - (int) $data['date_of_birth'];
+        }
+
+        // Auto-generate email if not provided
+        if (empty($data['email'])) {
+            $data['email'] = 'user_' . $data['national_id'] . '@system.local';
+        }
+
+        // Only hash password if provided
+        if (!empty($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password']);
+        }
 
         $user->update($data);
 
