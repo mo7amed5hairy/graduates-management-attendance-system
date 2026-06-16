@@ -63,9 +63,29 @@
               <tr class="border-b border-slate-100">
                 <td class="py-2 px-3 font-semibold">{{ $fieldLabels[$field] ?? $field }}</td>
                 <td class="py-2 px-3 text-slate-400">
-                  {{ $changeRequest->user->$field ?? '—' }}
+                  @if(is_array($changeRequest->user->$field ?? null))
+                    {{ json_encode($changeRequest->user->$field, JSON_UNESCAPED_UNICODE) }}
+                  @else
+                    {{ $changeRequest->user->$field ?? '—' }}
+                  @endif
                 </td>
-                <td class="py-2 px-3 text-emerald-600 font-semibold">{{ $newValue ?? '—' }}</td>
+                <td class="py-2 px-3 text-emerald-600 font-semibold">
+                  @if(is_array($newValue))
+                    @if($field === 'social_links')
+                      <div class="text-xs space-y-1">
+                        @foreach($newValue as $platform => $link)
+                          @if($link)
+                            <div>{{ $platform }}: <a href="{{ $link }}" target="_blank" class="text-sky-600 hover:underline">{{ $link }}</a></div>
+                          @endif
+                        @endforeach
+                      </div>
+                    @else
+                      {{ json_encode($newValue, JSON_UNESCAPED_UNICODE) }}
+                    @endif
+                  @else
+                    {{ $newValue ?? '—' }}
+                  @endif
+                </td>
               </tr>
             @endforeach
             @if(isset($changeRequest->requested_data['_new_image']))
