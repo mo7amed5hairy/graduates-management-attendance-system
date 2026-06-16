@@ -30,7 +30,7 @@
       <label class="label text-xs mb-1">المحافظة</label>
       <select class="input text-sm" id="filterGovernorate">
         <option value="">الكل</option>
-        @foreach($governorates as $gov)
+        @foreach($allGovernorates as $gov)
           <option value="{{ $gov }}">{{ $gov }}</option>
         @endforeach
       </select>

@@ -54,6 +54,12 @@ class UserController extends Controller
 
         $validated['password'] = Hash::make($validated['password']);
 
+        // Resolve governorate ID to name if needed
+        if (!empty($validated['governorate']) && is_numeric($validated['governorate'])) {
+            $gov = \App\Models\Governorate::find($validated['governorate']);
+            $validated['governorate'] = $gov ? $gov->name : $validated['governorate'];
+        }
+
         if ($request->filled('institution_id')) {
             $institution = Institution::with('governorate')->find($validated['institution_id']);
             $department = Department::find($validated['department_id']);
