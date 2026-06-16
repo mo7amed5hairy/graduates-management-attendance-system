@@ -25,6 +25,9 @@
             @elseif($notification->type === 'approval') ✅
             @elseif($notification->type === 'rejection') ❌
             @elseif($notification->type === 'event_invitation') 📅
+            @elseif($notification->type === 'profile_change_request') 📝
+            @elseif($notification->type === 'profile_change_approved') ✅
+            @elseif($notification->type === 'profile_change_rejected') ❌
             @else 🔔
             @endif
           </td>

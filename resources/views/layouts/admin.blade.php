@@ -91,6 +91,9 @@
       <a href="{{ route('admin.statistics.index') }}" class="{{ request()->routeIs('admin.statistics.*') ? 'active' : '' }}">
         <span>📊</span><span>الإحصائيات</span>
       </a>
+      <a href="{{ route('admin.profile-change-requests.index') }}" class="{{ request()->routeIs('admin.profile-change-requests.*') ? 'active' : '' }}">
+        <span>📝</span><span>طلبات التعديل</span>
+      </a>
       <a href="{{ route('admin.tasks.index') }}" class="{{ request()->routeIs('admin.tasks.*') ? 'active' : '' }}">
         <span>📋</span><span>المهام</span>
       </a>
@@ -273,6 +276,21 @@ async function fetchNotifList() {
         case 'rejection':
           icon = '&#x274C;';
           text = 'تم رفض حسابك';
+          linkUrl = '{{ route('profile.show') }}';
+          break;
+        case 'profile_change_request':
+          icon = '&#x1F4DD;';
+          text = (n.data && n.data.message) || 'طلب تعديل بيانات';
+          linkUrl = '{{ route('admin.profile-change-requests.index') }}';
+          break;
+        case 'profile_change_approved':
+          icon = '&#x2705;';
+          text = (n.data && n.data.message) || 'تمت الموافقة على طلبك';
+          linkUrl = '{{ route('profile.show') }}';
+          break;
+        case 'profile_change_rejected':
+          icon = '&#x274C;';
+          text = (n.data && n.data.message) || 'تم رفض طلبك';
           linkUrl = '{{ route('profile.show') }}';
           break;
         default:

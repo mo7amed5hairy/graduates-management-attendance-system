@@ -75,6 +75,28 @@
       <div>
         <span class="text-xs text-slate-400 block">عنوان السكن الحالى</span>
         <span class="font-semibold">{{ $user->address ?? 'غير محدد' }}</span>
+        @if($user->graduation_attachments && count($user->graduation_attachments) > 0)
+          <div class="mt-2 pt-2 border-t border-slate-100">
+            <div class="text-xs text-slate-500 mb-2">📎 مرفقات التخرج ({{ count($user->graduation_attachments) }})</div>
+            <div class="flex flex-wrap gap-2">
+              @foreach($user->graduation_attachments as $att)
+                @php $ext = pathinfo($att['original_name'], PATHINFO_EXTENSION); @endphp
+                <a href="{{ route('file.serve', $att['file_path']) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg hover:bg-sky-50 hover:border-sky-200 transition text-xs text-slate-600 hover:text-sky-700" title="{{ $att['original_name'] }}">
+                  @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
+                    🖼️
+                  @elseif($ext === 'pdf')
+                    📄
+                  @elseif(in_array($ext, ['doc','docx']))
+                    📝
+                  @else
+                    📎
+                  @endif
+                  <span class="truncate max-w-[100px]">{{ $att['original_name'] }}</span>
+                </a>
+              @endforeach
+            </div>
+          </div>
+        @endif
       </div>
       <div>
         <span class="text-xs text-slate-400 block">تاريخ التسجيل</span>

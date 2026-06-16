@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Governorate;
+use App\Models\ProfileChangeRequest;
+use App\Models\Qualification;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -16,7 +19,10 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
         $transactions = $user->pointsTransactions()->with('creator', 'task', 'event')->latest()->take(20)->get();
-        return view('profile.show', compact('user', 'transactions'));
+        $governorates = Governorate::orderBy('name')->pluck('name');
+        $qualifications = Qualification::orderBy('name')->get();
+        $pendingRequest = ProfileChangeRequest::where('user_id', $user->id)->latest()->first();
+        return view('profile.show', compact('user', 'transactions', 'governorates', 'qualifications', 'pendingRequest'));
     }
 
     public function edit()

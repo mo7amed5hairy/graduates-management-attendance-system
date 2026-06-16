@@ -48,6 +48,7 @@ class User extends Authenticatable
         'qualification_faculty_id',
         'id_photos',
         'residence_proof',
+        'graduation_attachments',
         'approval_status',
         'rejection_reason',
         'approved_at',
@@ -67,6 +68,7 @@ class User extends Authenticatable
             'social_links' => 'array',
             'id_photos' => 'array',
             'residence_proof' => 'array',
+            'graduation_attachments' => 'array',
             'permissions' => 'array',
             'graduation_year' => 'integer',
             'approved_at' => 'datetime',
@@ -167,7 +169,7 @@ class User extends Authenticatable
 
     public function getImageUrlAttribute(): string
     {
-        return $this->image ? asset('storage/' . $this->image) : asset('images/default-avatar.png');
+        return $this->image ? url('files/' . $this->image) : asset('images/default-avatar.png');
     }
 
     public function getGovernorateNameAttribute(): string

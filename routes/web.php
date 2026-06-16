@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\GraduateController;
 use App\Http\Controllers\Admin\ImportController;
 use App\Http\Controllers\Admin\InstitutionController;
 use App\Http\Controllers\Admin\InstitutionTypeController;
+use App\Http\Controllers\Admin\ProfileChangeRequestController as AdminProfileChangeRequestController;
 use App\Http\Controllers\Admin\QualificationController;
 use App\Http\Controllers\Admin\QualificationFacultyController;
 use App\Http\Controllers\Admin\StatisticController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PointController;
+use App\Http\Controllers\ProfileChangeRequestController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\TaskController;
@@ -29,6 +31,15 @@ use App\Http\Controllers\UserEventController;
 use App\Http\Controllers\UserTaskController;
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Support\Facades\Route;
+
+// Serve storage files (bypasses symlink issues on Windows/Laragon)
+Route::get('/files/{path}', function (string $path) {
+    $fullPath = storage_path('app/public/' . $path);
+    if (!file_exists($fullPath)) {
+        abort(404);
+    }
+    return response()->file($fullPath);
+})->where('path', '.*')->name('file.serve');
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -75,8 +86,9 @@ Route::middleware('auth')->group(function () {
     // Profile
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'show'])->name('show');
-        Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
+        Route::get('/edit', [ProfileChangeRequestController::class, 'edit'])->name('edit');
         Route::put('/', [ProfileController::class, 'update'])->name('update');
+        Route::post('/change-request', [ProfileChangeRequestController::class, 'submit'])->name('change-request.submit');
     });
 
     // User home
@@ -128,6 +140,15 @@ Route::middleware('auth')->group(function () {
 
         // Statistics
         Route::get('/statistics', [StatisticController::class, 'index'])->name('statistics.index');
+
+        // Profile Change Requests
+        Route::prefix('profile-change-requests')->name('profile-change-requests.')->group(function () {
+            Route::get('/', [AdminProfileChangeRequestController::class, 'index'])->name('index');
+            Route::get('/{changeRequest}', [AdminProfileChangeRequestController::class, 'show'])->name('show');
+            Route::post('/bulk-approve', [AdminProfileChangeRequestController::class, 'bulkApprove'])->name('bulk-approve');
+            Route::post('/{changeRequest}/approve', [AdminProfileChangeRequestController::class, 'approve'])->name('approve');
+            Route::post('/{changeRequest}/reject', [AdminProfileChangeRequestController::class, 'reject'])->name('reject');
+        });
 
         // Qualifications
         Route::prefix('qualifications')->name('qualifications.')->group(function () {

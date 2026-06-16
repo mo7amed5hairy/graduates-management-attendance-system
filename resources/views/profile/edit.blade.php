@@ -5,11 +5,14 @@
 @section('page_subtitle', 'تحديث بياناتك الشخصية')
 
 @section('content')
-<div class="max-w-2xl mx-auto">
+<div class="max-w-3xl mx-auto">
   <div class="card p-6">
-    <form id="profileForm" action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-5 text-sm text-amber-800">
+      <strong>⚠️ تنبيه:</strong> بعد إرسال طلب التعديل، ستتم مراجعة بياناتك من قبل الإدارة. تبقى بياناتك الحالية كما هي لحين الموافقة على طلبك.
+    </div>
+
+    <form id="profileForm" action="{{ route('profile.change-request.submit') }}" method="POST" enctype="multipart/form-data">
       @csrf
-      @method('PUT')
 
       <div class="flex flex-col items-center mb-6">
         @if($user->image)
@@ -20,39 +23,42 @@
           </div>
           <img id="profilePreview" class="img-preview hidden">
         @endif
-
         <div class="upload-area mt-2">
           <label class="btn btn-ghost text-sm cursor-pointer">
             📷 تغيير الصورة
             <input type="file" name="image" id="imageInput" accept="image/*" class="hidden">
           </label>
-          <div class="progress-bar-wrap" id="uploadProgress" style="display:none">
-            <div class="progress-bar-fill" id="progressFill"></div>
-            <span class="progress-text" id="progressText">0%</span>
-          </div>
         </div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="label">الإسم</label>
+          <label class="label">الإسم <span class="text-rose-500">*</span></label>
           <input class="input" name="first_name" value="{{ $user->first_name ?? $user->name }}" required>
         </div>
         <div>
-          <label class="label">اسم الأب</label>
+          <label class="label">اسم الأب <span class="text-rose-500">*</span></label>
           <input class="input" name="father_name" value="{{ $user->father_name }}" required>
         </div>
         <div>
-          <label class="label">اسم الجد</label>
+          <label class="label">اسم الجد <span class="text-rose-500">*</span></label>
           <input class="input" name="grandfather_name" value="{{ $user->grandfather_name }}" required>
         </div>
         <div>
-          <label class="label">اللقب</label>
+          <label class="label">اللقب <span class="text-rose-500">*</span></label>
           <input class="input" name="family_name" value="{{ $user->family_name }}" required>
         </div>
         <div>
-          <label class="label">اسم الأم الرباعى</label>
+          <label class="label">اسم الأم</label>
           <input class="input" name="mother_name" value="{{ $user->mother_name }}">
+        </div>
+        <div>
+          <label class="label">أب الأم</label>
+          <input class="input" name="mother_father_name" value="{{ $user->mother_father_name }}">
+        </div>
+        <div>
+          <label class="label">جد الأم</label>
+          <input class="input" name="mother_grandfather_name" value="{{ $user->mother_grandfather_name }}">
         </div>
         <div>
           <label class="label">رقم البطاقة الوطنية</label>
@@ -63,8 +69,8 @@
           <input class="input" name="phone" value="{{ $user->phone }}" dir="ltr">
         </div>
         <div>
-          <label class="label">تاريخ الميلاد</label>
-          <input class="input" type="date" name="date_of_birth" value="{{ $user->date_of_birth }}">
+          <label class="label">سنة الميلاد</label>
+          <input class="input" type="number" name="date_of_birth" value="{{ $user->date_of_birth }}" min="1900" max="{{ date('Y') }}">
         </div>
         <div>
           <label class="label">الجنس</label>
@@ -79,17 +85,14 @@
           <select class="input" name="social_status" id="social_status" onchange="toggleChildrenCountEdit()">
             <option value="">اختر...</option>
             <option value="أعزب" {{ $user->social_status === 'أعزب' ? 'selected' : '' }}>أعزب</option>
-            <option value="متزوج (بدون أطفال)" {{ $user->social_status === 'متزوج (بدون أطفال)' ? 'selected' : '' }}>متزوج (بدون أطفال)</option>
-            <option value="متزوج (لديه أطفال)" {{ $user->social_status === 'متزوج (لديه أطفال)' ? 'selected' : '' }}>متزوج (لديه أطفال)</option>
-            <option value="منفصل (بدون أطفال)" {{ $user->social_status === 'منفصل (بدون أطفال)' ? 'selected' : '' }}>منفصل (بدون أطفال)</option>
-            <option value="منفصل (لديه أطفال)" {{ $user->social_status === 'منفصل (لديه أطفال)' ? 'selected' : '' }}>منفصل (لديه أطفال)</option>
-            <option value="أرمل (بدون أطفال)" {{ $user->social_status === 'أرمل (بدون أطفال)' ? 'selected' : '' }}>أرمل (بدون أطفال)</option>
-            <option value="أرمل (لديه أطفال)" {{ $user->social_status === 'أرمل (لديه أطفال)' ? 'selected' : '' }}>أرمل (لديه أطفال)</option>
+            <option value="متزوج" {{ $user->social_status === 'متزوج' ? 'selected' : '' }}>متزوج</option>
+            <option value="مطلق" {{ $user->social_status === 'مطلق' ? 'selected' : '' }}>مطلق</option>
+            <option value="أرمل" {{ $user->social_status === 'أرمل' ? 'selected' : '' }}>أرمل</option>
           </select>
         </div>
-        <div id="childrenCountWrap" style="{{ str_contains($user->social_status ?? '', 'لديه أطفال') ? 'display:block' : 'display:none' }}">
+        <div id="childrenCountWrap" style="{{ in_array($user->social_status, ['متزوج', 'مطلق', 'أرمل']) ? 'display:block' : 'display:none' }}">
           <label class="label">عدد الأولاد</label>
-          <input class="input" type="number" name="children_count" id="children_count" value="{{ $user->children_count }}" min="0">
+          <input class="input" type="number" name="children_count" id="children_count" value="{{ $user->children_count }}" min="0" max="10">
         </div>
         <div>
           <label class="label">سنة التخرج</label>
@@ -112,14 +115,6 @@
           <input class="input" name="governorate" value="{{ $user->governorate }}">
         </div>
         <div>
-          <label class="label">الجامعة</label>
-          <input class="input" name="university" value="{{ $user->university }}">
-        </div>
-        <div>
-          <label class="label">الكلية</label>
-          <input class="input" name="faculty" value="{{ $user->faculty }}">
-        </div>
-        <div>
           <label class="label">كلمة المرور (اتركها فارغة إن لم ترد التغيير)</label>
           <input class="input" type="password" name="password">
         </div>
@@ -133,22 +128,19 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+      <hr class="my-5 border-slate-100">
+
+      <h3 class="font-extrabold text-slate-800 mb-3">📎 مرفقات التخرج</h3>
+      <p class="text-xs text-slate-500 mb-3">يمكنك رفع صور أو مستندات متعلقة بالتخرج (شهادة، وثائق، صور، إلخ)</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="label">صور الهوية (إضافة صور جديدة)</label>
-          <input class="input" type="file" name="id_photos[]" multiple accept="image/*" onchange="previewImages(this, 'idPreview')">
-          <div class="flex flex-wrap gap-2 mt-2" id="idPreview"></div>
-          @if($user->id_photos && count($user->id_photos) > 0)
-            <div class="text-xs text-slate-400 mt-1">لديك {{ count($user->id_photos) }} صورة هوية مرفوعة</div>
-          @endif
+          <label class="label">رفع ملفات</label>
+          <input class="input" type="file" name="attachments[]" id="attachmentsInput" multiple accept="image/*,.pdf,.doc,.docx" onchange="previewAttachments(this)">
+          <div class="flex flex-wrap gap-2 mt-2" id="attachmentsPreview"></div>
         </div>
-        <div>
-          <label class="label">إثبات السكن (إضافة صور جديدة)</label>
-          <input class="input" type="file" name="residence_proof[]" multiple accept="image/*" onchange="previewImages(this, 'residencePreview')">
-          <div class="flex flex-wrap gap-2 mt-2" id="residencePreview"></div>
-          @if($user->residence_proof && count($user->residence_proof) > 0)
-            <div class="text-xs text-slate-400 mt-1">لديك {{ count($user->residence_proof) }} إثبات سكن مرفوع</div>
-          @endif
+        <div class="text-xs text-slate-400">
+          <p>الصيغ المسموحة: JPG, PNG, PDF, DOC, DOCX</p>
+          <p>الحد الأقصى: 10 MB لكل ملف</p>
         </div>
       </div>
 
@@ -176,7 +168,7 @@
 
       <div class="flex gap-2 mt-5 justify-end">
         <a href="{{ route('profile.show') }}" class="btn btn-ghost">إلغاء</a>
-        <button type="submit" class="btn btn-primary">💾 حفظ التغييرات</button>
+        <button type="submit" class="btn btn-primary">📩 إرسال طلب التعديل</button>
       </div>
     </form>
   </div>
@@ -185,20 +177,30 @@
 
 @push('scripts')
 <script>
-function previewImages(input, previewId) {
-  var preview = document.getElementById(previewId);
+function previewAttachments(input) {
+  var preview = document.getElementById('attachmentsPreview');
   preview.innerHTML = '';
   if (input.files) {
     for (var i = 0; i < input.files.length; i++) {
       (function(file) {
-        var reader = new FileReader();
-        reader.onload = function(e) {
+        var div = document.createElement('div');
+        div.className = 'flex items-center gap-2 bg-slate-50 rounded px-3 py-2 text-xs';
+        if (file.type.startsWith('image/')) {
           var img = document.createElement('img');
-          img.src = e.target.result;
-          img.className = 'w-20 h-20 object-cover rounded-lg border border-slate-200';
-          preview.appendChild(img);
-        };
-        reader.readAsDataURL(file);
+          img.src = URL.createObjectURL(file);
+          img.className = 'w-10 h-10 object-cover rounded';
+          div.appendChild(img);
+        } else {
+          var icon = document.createElement('span');
+          icon.textContent = '📄';
+          icon.className = 'text-lg';
+          div.appendChild(icon);
+        }
+        var name = document.createElement('span');
+        name.className = 'truncate max-w-[120px]';
+        name.textContent = file.name;
+        div.appendChild(name);
+        preview.appendChild(div);
       })(input.files[i]);
     }
   }
@@ -227,7 +229,7 @@ function toggleChildrenCountEdit() {
   var val = document.getElementById('social_status')?.value;
   var wrap = document.getElementById('childrenCountWrap');
   if (!wrap) return;
-  if (val && val.includes('لديه أطفال')) {
+  if (val === 'متزوج' || val === 'مطلق' || val === 'أرمل') {
     wrap.style.display = 'block';
   } else {
     wrap.style.display = 'none';
