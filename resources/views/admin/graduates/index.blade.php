@@ -5,46 +5,77 @@
 @section('page_subtitle', 'مراجعة واعتماد بيانات الخريجين')
 
 @section('content')
-<div class="card p-5 mb-6">
-  <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-    <div>
-      <label class="label">حالة الاعتماد</label>
-      <select class="input" name="approval_status" onchange="this.form.submit()">
+<div class="card p-4 mb-4">
+  <div class="grid grid-cols-12 gap-3 items-end">
+    <div class="col-span-6 md:col-span-2">
+      <label class="label text-xs mb-1">الجنس</label>
+      <select class="input text-sm" id="filterGender">
         <option value="">الكل</option>
-        <option value="pending" {{ request('approval_status') === 'pending' ? 'selected' : '' }}>قيد المراجعة</option>
-        <option value="approved" {{ request('approval_status') === 'approved' ? 'selected' : '' }}>مقبول</option>
-        <option value="rejected" {{ request('approval_status') === 'rejected' ? 'selected' : '' }}>مرفوض</option>
+        @foreach($genders as $g)
+          <option value="{{ $g }}">{{ $g }}</option>
+        @endforeach
       </select>
     </div>
-    <div>
-      <label class="label">المحافظة</label>
-      <select class="input" name="governorate" onchange="this.form.submit()">
+    <div class="col-span-6 md:col-span-2">
+      <label class="label text-xs mb-1">المحافظة</label>
+      <select class="input text-sm" id="filterGovernorate">
         <option value="">الكل</option>
         @foreach($governorates as $g)
           @php $govName = is_numeric($g) && isset($governorateMap[$g]) ? $governorateMap[$g] : $g; @endphp
-          <option value="{{ $g }}" {{ request('governorate') == $g ? 'selected' : '' }}>{{ $govName }}</option>
+          <option value="{{ $g }}">{{ $govName }}</option>
         @endforeach
       </select>
     </div>
-    <div>
-      <label class="label">الجامعة</label>
-      <input class="input" name="university" placeholder="بحث..." value="{{ request('university') }}">
+    <div class="col-span-6 md:col-span-2">
+      <label class="label text-xs mb-1">سنة الميلاد</label>
+      <select class="input text-sm" id="filterBirthYear">
+        <option value="">الكل</option>
+        @foreach($birthYears as $y)
+          <option value="{{ $y }}">{{ $y }}</option>
+        @endforeach
+      </select>
     </div>
-    <div>
-      <label class="label">سنة التخرج</label>
-      <select class="input" name="graduation_year" onchange="this.form.submit()">
+    <div class="col-span-6 md:col-span-2">
+      <label class="label text-xs mb-1">الحالة الاجتماعية</label>
+      <select class="input text-sm" id="filterSocialStatus">
+        <option value="">الكل</option>
+        <option value="أعزب">أعزب</option>
+        <option value="متزوج">متزوج</option>
+        <option value="مطلق">مطلق</option>
+        <option value="أرمل">أرمل</option>
+      </select>
+    </div>
+    <div class="col-span-6 md:col-span-1">
+      <label class="label text-xs mb-1">عدد الأولاد</label>
+      <select class="input text-sm" id="filterChildren">
+        <option value="">الكل</option>
+        @for($c = 0; $c <= 10; $c++)
+          <option value="{{ $c }}">{{ $c }}</option>
+        @endfor
+      </select>
+    </div>
+    <div class="col-span-6 md:col-span-2">
+      <label class="label text-xs mb-1">سنة التخرج</label>
+      <select class="input text-sm" id="filterGradYear">
         <option value="">الكل</option>
         @foreach($years as $y)
-          <option value="{{ $y }}" {{ request('graduation_year') == $y ? 'selected' : '' }}>{{ $y }}</option>
+          <option value="{{ $y }}">{{ $y }}</option>
         @endforeach
       </select>
     </div>
-    <div class="md:col-span-4 flex gap-2">
-      <input class="input flex-1" name="search" placeholder="بحث بالاسم أو البريد أو الرقم القومي..." value="{{ request('search') }}">
-      <button type="submit" class="btn btn-primary">🔍 بحث</button>
-      <a href="{{ route('admin.graduates.index') }}" class="btn btn-ghost">إلغاء</a>
+    <div class="col-span-6 md:col-span-1">
+      <label class="label text-xs mb-1">المؤهل</label>
+      <select class="input text-sm" id="filterQualification">
+        <option value="">الكل</option>
+        @foreach($qualifications as $q)
+          <option value="{{ $q->id }}">{{ $q->name }}</option>
+        @endforeach
+      </select>
     </div>
-  </form>
+    <div class="col-span-12 md:col-span-1 flex gap-2">
+      <button class="btn btn-primary text-sm py-2 px-3 w-full" id="resetFilters">🔄</button>
+    </div>
+  </div>
 </div>
 
 <div class="card p-5">
@@ -56,7 +87,12 @@
           <th>الاسم</th>
           <th>البريد</th>
           <th>الرقم القومي</th>
+          <th>الجنس</th>
+          <th>سنة الميلاد</th>
           <th>المحافظة</th>
+          <th>الحالة الاجتماعية</th>
+          <th>عدد الأولاد</th>
+          <th>المؤهل</th>
           <th>الجامعة</th>
           <th>الكلية</th>
           <th>سنة التخرج</th>
@@ -72,7 +108,20 @@
           <td class="font-bold">{{ $g->name }}</td>
           <td class="text-xs">{{ $g->email }}</td>
           <td class="text-xs">{{ $g->national_id ?? '—' }}</td>
+          <td>
+            @if($g->gender === 'ذكر')
+              <span class="pill pill-blue">ذكر</span>
+            @elseif($g->gender === 'أنثى')
+              <span class="pill pill-rose">أنثى</span>
+            @else
+              <span class="text-slate-400">—</span>
+            @endif
+          </td>
+          <td>{{ $g->date_of_birth ?? '—' }}</td>
           <td>{{ $g->governorate_name }}</td>
+          <td>{{ $g->social_status ?? '—' }}</td>
+          <td>{{ $g->children_count ?? '—' }}</td>
+          <td>{{ $g->qualification?->name ?? '—' }}</td>
           <td>{{ $g->university ?? '—' }}</td>
           <td>{{ $g->faculty ?? '—' }}</td>
           <td>{{ $g->graduation_year ?? '—' }}</td>
@@ -101,10 +150,78 @@
 @push('scripts')
 <script>
 $(function() {
-  $('#graduatesTable').DataTable({
+  var table = $('#graduatesTable').DataTable({
     language: { url: '{{ asset('js/ar.json') }}' },
     order: [[0, 'asc']],
-    columnDefs: [{ orderable: false, targets: [10] }]
+    columnDefs: [
+      { orderable: false, targets: [15] }
+    ]
+  });
+
+  function applyFilters() {
+    var gender = $('#filterGender').val();
+    var gov = $('#filterGovernorate').val();
+    var birth = $('#filterBirthYear').val();
+    var social = $('#filterSocialStatus').val();
+    var children = $('#filterChildren').val();
+    var gradYear = $('#filterGradYear').val();
+    var qual = $('#filterQualification').val();
+
+    $.fn.dataTable.ext.search = [];
+
+    if (gender) {
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[4] === gender;
+      });
+    }
+    if (birth) {
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[5] === birth;
+      });
+    }
+    if (gov) {
+      var govText = $('#filterGovernorate option:selected').text();
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[6] === govText;
+      });
+    }
+    if (social) {
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[7] === social;
+      });
+    }
+    if (children !== '') {
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[8] === children;
+      });
+    }
+    if (qual) {
+      var qualText = $('#filterQualification option:selected').text();
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[9] === qualText;
+      });
+    }
+    if (gradYear) {
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[12] === gradYear;
+      });
+    }
+
+    table.draw();
+  }
+
+  $('#filterGender, #filterGovernorate, #filterBirthYear, #filterSocialStatus, #filterChildren, #filterGradYear, #filterQualification').on('change', applyFilters);
+
+  $('#resetFilters').on('click', function() {
+    $('#filterGender').val('');
+    $('#filterGovernorate').val('');
+    $('#filterBirthYear').val('');
+    $('#filterSocialStatus').val('');
+    $('#filterChildren').val('');
+    $('#filterGradYear').val('');
+    $('#filterQualification').val('');
+    $.fn.dataTable.ext.search = [];
+    table.draw();
   });
 });
 </script>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Governorate;
 use App\Models\Notification;
+use App\Models\Qualification;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -56,8 +57,11 @@ class GraduateController extends Controller
         $governorateMap = Governorate::pluck('name', 'id')->toArray();
         $universities = User::where('role', 'user')->whereNotNull('university')->distinct()->pluck('university')->sort();
         $years = User::where('role', 'user')->whereNotNull('graduation_year')->distinct()->pluck('graduation_year')->sort();
+        $genders = User::where('role', 'user')->whereNotNull('gender')->distinct()->pluck('gender')->sort();
+        $birthYears = User::where('role', 'user')->whereNotNull('date_of_birth')->distinct()->pluck('date_of_birth')->sort();
+        $qualifications = Qualification::orderBy('name')->get(['id', 'name']);
 
-        return view('admin.graduates.index', compact('graduates', 'governorates', 'governorateMap', 'universities', 'years'));
+        return view('admin.graduates.index', compact('graduates', 'governorates', 'governorateMap', 'universities', 'years', 'genders', 'birthYears', 'qualifications'));
     }
 
     public function show(User $user)

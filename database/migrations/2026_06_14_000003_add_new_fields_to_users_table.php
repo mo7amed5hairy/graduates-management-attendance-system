@@ -12,7 +12,7 @@ return new class extends Migration
             $table->string('mother_name')->nullable()->after('name');
             $table->string('social_status')->nullable()->after('job_status');
             $table->unsignedTinyInteger('children_count')->nullable()->after('social_status');
-            $table->date('date_of_birth')->nullable()->after('age');
+            $table->integer('date_of_birth')->nullable()->after('age');
             $table->foreignId('qualification_id')->nullable()->constrained()->nullOnDelete()->after('date_of_birth');
             $table->foreignId('qualification_faculty_id')->nullable()->constrained('qualification_faculties')->nullOnDelete()->after('qualification_id');
         });

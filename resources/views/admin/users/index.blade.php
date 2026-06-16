@@ -16,6 +16,78 @@
   </div>
 </div>
 
+<div class="card p-4 mb-4">
+  <div class="grid grid-cols-12 gap-3 items-end">
+    <div class="col-span-6 md:col-span-2">
+      <label class="label text-xs mb-1">الجنس</label>
+      <select class="input text-sm" id="filterGender">
+        <option value="">الكل</option>
+        @foreach($genders as $g)
+          <option value="{{ $g }}">{{ $g }}</option>
+        @endforeach
+      </select>
+    </div>
+    <div class="col-span-6 md:col-span-2">
+      <label class="label text-xs mb-1">المحافظة</label>
+      <select class="input text-sm" id="filterGovernorate">
+        <option value="">الكل</option>
+        @foreach($allGovernorates as $gov)
+          <option value="{{ $gov }}">{{ $gov }}</option>
+        @endforeach
+      </select>
+    </div>
+    <div class="col-span-6 md:col-span-2">
+      <label class="label text-xs mb-1">سنة الميلاد</label>
+      <select class="input text-sm" id="filterBirthYear">
+        <option value="">الكل</option>
+        @foreach($birthYears as $y)
+          <option value="{{ $y }}">{{ $y }}</option>
+        @endforeach
+      </select>
+    </div>
+    <div class="col-span-6 md:col-span-2">
+      <label class="label text-xs mb-1">الحالة الاجتماعية</label>
+      <select class="input text-sm" id="filterSocialStatus">
+        <option value="">الكل</option>
+        <option value="أعزب">أعزب</option>
+        <option value="متزوج">متزوج</option>
+        <option value="مطلق">مطلق</option>
+        <option value="أرمل">أرمل</option>
+      </select>
+    </div>
+    <div class="col-span-6 md:col-span-1">
+      <label class="label text-xs mb-1">عدد الأولاد</label>
+      <select class="input text-sm" id="filterChildren">
+        <option value="">الكل</option>
+        @for($c = 0; $c <= 10; $c++)
+          <option value="{{ $c }}">{{ $c }}</option>
+        @endfor
+      </select>
+    </div>
+    <div class="col-span-6 md:col-span-2">
+      <label class="label text-xs mb-1">سنة التخرج</label>
+      <select class="input text-sm" id="filterGradYear">
+        <option value="">الكل</option>
+        @foreach($graduationYears as $y)
+          <option value="{{ $y }}">{{ $y }}</option>
+        @endforeach
+      </select>
+    </div>
+    <div class="col-span-6 md:col-span-1">
+      <label class="label text-xs mb-1">المؤهل</label>
+      <select class="input text-sm" id="filterQualification">
+        <option value="">الكل</option>
+        @foreach($qualifications as $q)
+          <option value="{{ $q->id }}">{{ $q->name }}</option>
+        @endforeach
+      </select>
+    </div>
+    <div class="col-span-12 md:col-span-1 flex gap-2">
+      <button class="btn btn-primary text-sm py-2 px-3 w-full" id="resetFilters">🔄</button>
+    </div>
+  </div>
+</div>
+
 <div class="card p-0">
   <div class="table-wrap">
     <table class="data" id="usersTable">
@@ -27,6 +99,13 @@
           <th>البريد الإلكتروني</th>
           <th>الهاتف</th>
           <th>النقاط</th>
+          <th>الجنس</th>
+          <th>المحافظة</th>
+          <th>سنة الميلاد</th>
+          <th>الحالة الاجتماعية</th>
+          <th>عدد الأولاد</th>
+          <th>المؤهل</th>
+          <th>سنة التخرج</th>
           <th>حالة الاعتماد</th>
           <th>الحالة</th>
           <th>الإجراءات</th>
@@ -52,6 +131,21 @@
           <td>{{ $user->email }}</td>
           <td>{{ $user->phone ?? '—' }}</td>
           <td><span class="pill pill-amber">{{ number_format($user->points) }}</span></td>
+          <td>
+            @if($user->gender === 'ذكر')
+              <span class="pill pill-blue">ذكر</span>
+            @elseif($user->gender === 'أنثى')
+              <span class="pill pill-rose">أنثى</span>
+            @else
+              <span class="text-slate-400">—</span>
+            @endif
+          </td>
+          <td>{{ $user->governorate ?? '—' }}</td>
+          <td>{{ $user->date_of_birth ?? '—' }}</td>
+          <td>{{ $user->social_status ?? '—' }}</td>
+          <td>{{ $user->children_count ?? '—' }}</td>
+          <td>{{ $user->qualification?->name ?? '—' }}</td>
+          <td>{{ $user->graduation_year ?? '—' }}</td>
           <td>
             @if($user->role === 'admin')
               <span class="pill pill-violet">مدير</span>
@@ -610,10 +704,77 @@ function loadFacultiesEdit(userId) {
 
 // DataTable
 $(document).ready(function() {
-  $('#usersTable').DataTable({
+  var table = $('#usersTable').DataTable({
     language: { url: '{{ asset('js/ar.json') }}' },
     order: [[1, 'desc']],
-    columnDefs: [{ orderable: false, targets: [0, 8] }]
+    columnDefs: [
+      { orderable: false, targets: [0, 15] }
+    ]
+  });
+
+  function applyFilters() {
+    var gender = $('#filterGender').val();
+    var gov = $('#filterGovernorate').val();
+    var birth = $('#filterBirthYear').val();
+    var social = $('#filterSocialStatus').val();
+    var children = $('#filterChildren').val();
+    var gradYear = $('#filterGradYear').val();
+    var qual = $('#filterQualification').val();
+
+    $.fn.dataTable.ext.search = [];
+
+    if (gender) {
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[6] === gender;
+      });
+    }
+    if (gov) {
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[7] === gov;
+      });
+    }
+    if (birth) {
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[8] === birth;
+      });
+    }
+    if (social) {
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[9] === social;
+      });
+    }
+    if (children !== '') {
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[10] === children;
+      });
+    }
+    if (qual) {
+      var qualText = $('#filterQualification option:selected').text();
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[11] === qualText;
+      });
+    }
+    if (gradYear) {
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[12] === gradYear;
+      });
+    }
+
+    table.draw();
+  }
+
+  $('#filterGender, #filterGovernorate, #filterBirthYear, #filterSocialStatus, #filterChildren, #filterGradYear, #filterQualification').on('change', applyFilters);
+
+  $('#resetFilters').on('click', function() {
+    $('#filterGender').val('');
+    $('#filterGovernorate').val('');
+    $('#filterBirthYear').val('');
+    $('#filterSocialStatus').val('');
+    $('#filterChildren').val('');
+    $('#filterGradYear').val('');
+    $('#filterQualification').val('');
+    $.fn.dataTable.ext.search = [];
+    table.draw();
   });
 });
 

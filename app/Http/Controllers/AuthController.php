@@ -56,8 +56,7 @@ class AuthController extends Controller
 
         // Calculate age from date_of_birth (year only)
         if (!empty($validated['date_of_birth'])) {
-            $validated['date_of_birth'] = $validated['date_of_birth'] . '-01-01';
-            $validated['age'] = \Carbon\Carbon::parse($validated['date_of_birth'])->age;
+            $validated['age'] = (int) date('Y') - (int) $validated['date_of_birth'];
         }
 
         $validated['role'] = 'user';

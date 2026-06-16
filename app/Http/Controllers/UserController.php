@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Governorate;
+use App\Models\Qualification;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -74,7 +76,13 @@ class UserController extends Controller
     public function index()
     {
         $users = User::latest()->get();
-        return view('admin.users.index', compact('users'));
+        $genders = User::whereNotNull('gender')->distinct()->pluck('gender')->sort();
+        $governorates = User::whereNotNull('governorate')->distinct()->pluck('governorate')->sort();
+        $allGovernorates = Governorate::orderBy('name')->pluck('name');
+        $birthYears = User::whereNotNull('date_of_birth')->distinct()->pluck('date_of_birth')->sort();
+        $graduationYears = User::whereNotNull('graduation_year')->distinct()->pluck('graduation_year')->sort();
+        $qualifications = Qualification::orderBy('name')->get(['id', 'name']);
+        return view('admin.users.index', compact('users', 'genders', 'governorates', 'allGovernorates', 'birthYears', 'graduationYears', 'qualifications'));
     }
 
     public function show(User $user): JsonResponse
