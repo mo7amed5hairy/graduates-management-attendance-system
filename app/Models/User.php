@@ -169,4 +169,15 @@ class User extends Authenticatable
     {
         return $this->image ? asset('storage/' . $this->image) : asset('images/default-avatar.png');
     }
+
+    public function getGovernorateNameAttribute(): string
+    {
+        $val = $this->governorate;
+        if (!$val) return 'غير محدد';
+        if (is_numeric($val)) {
+            $gov = \App\Models\Governorate::find((int) $val);
+            return $gov ? $gov->name : $val;
+        }
+        return $val;
+    }
 }

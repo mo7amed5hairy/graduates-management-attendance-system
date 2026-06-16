@@ -328,7 +328,7 @@ function loadSelectC(url, selectId, placeholder) {
       if (d.success && d.data) {
         d.data.forEach(function(item) {
           var opt = document.createElement('option');
-          opt.value = item.id;
+          opt.value = item.name;
           opt.textContent = item.name;
           sel.appendChild(opt);
         });

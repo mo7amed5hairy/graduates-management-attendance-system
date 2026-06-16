@@ -21,7 +21,8 @@
       <select class="input" name="governorate" onchange="this.form.submit()">
         <option value="">الكل</option>
         @foreach($governorates as $g)
-          <option value="{{ $g }}" {{ request('governorate') === $g ? 'selected' : '' }}>{{ $g }}</option>
+          @php $govName = is_numeric($g) && isset($governorateMap[$g]) ? $governorateMap[$g] : $g; @endphp
+          <option value="{{ $g }}" {{ request('governorate') == $g ? 'selected' : '' }}>{{ $govName }}</option>
         @endforeach
       </select>
     </div>
@@ -71,7 +72,7 @@
           <td class="font-bold">{{ $g->name }}</td>
           <td class="text-xs">{{ $g->email }}</td>
           <td class="text-xs">{{ $g->national_id ?? '—' }}</td>
-          <td>{{ $g->governorate ?? '—' }}</td>
+          <td>{{ $g->governorate_name }}</td>
           <td>{{ $g->university ?? '—' }}</td>
           <td>{{ $g->faculty ?? '—' }}</td>
           <td>{{ $g->graduation_year ?? '—' }}</td>

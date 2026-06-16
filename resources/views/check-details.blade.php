@@ -70,7 +70,7 @@
       </div>
       <div>
         <span class="text-xs text-slate-400 block">المحافظة</span>
-        <span class="font-semibold">{{ $user->governorate ?? 'غير محدد' }}</span>
+        <span class="font-semibold">{{ $user->governorate_name }}</span>
       </div>
       <div>
         <span class="text-xs text-slate-400 block">عنوان السكن الحالى</span>

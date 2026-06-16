@@ -289,7 +289,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         if (d.success && d.data) {
           d.data.forEach(function(item) {
             var opt = document.createElement('option');
-            opt.value = item.id;
+            opt.value = item.name;
             opt.textContent = item.name;
             gSel.appendChild(opt);
           });
