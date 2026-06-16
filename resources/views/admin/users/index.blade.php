@@ -97,6 +97,7 @@
           <th>#</th>
           <th>المستخدم</th>
           <th>البريد الإلكتروني</th>
+          <th>رقم البطاقة الوطنية</th>
           <th>الهاتف</th>
           <th>النقاط</th>
           <th>الجنس</th>
@@ -129,6 +130,7 @@
             </div>
           </td>
           <td>{{ $user->email }}</td>
+          <td class="text-xs">{{ $user->national_id ?? '—' }}</td>
           <td>{{ $user->phone ?? '—' }}</td>
           <td><span class="pill pill-amber">{{ number_format($user->points) }}</span></td>
           <td>
