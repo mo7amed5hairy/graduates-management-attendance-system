@@ -60,11 +60,19 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         </div>
       </div>
 
-      {{-- Row 2: رقم البطاقة, البريد (اختياري), الهاتف --}}
+      {{-- Row 2: رقم البطاقة (مقيد بـ 12 رقماً فقط), البريد (اختياري), الهاتف --}}
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-4">
           <label class="label">رقم البطاقة الوطنية <span class="text-rose-500">*</span></label>
-          <input class="input" name="national_id" placeholder="رقم البطاقة الوطنية" required dir="rtl" oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، رقم البطاقة الوطنية مطلوب')" oninput="this.setCustomValidity('')">
+          <input class="input" 
+                 name="national_id" 
+                 id="nationalId" 
+                 placeholder="رقم البطاقة الوطنية (12 رقماً)" 
+                 maxlength="12" 
+                 required 
+                 dir="rtl" 
+                 oninput="this.value = this.value.replace(/[^0-9]/g, ''); this.setCustomValidity('');" 
+                 oninvalid="this.setCustomValidity('يرجى إدخال رقم البطاقة الوطنية المكون من 12 رقماً')">
         </div>
         <div class="col-span-12 md:col-span-4">
           <label class="label">البريد الإلكتروني <small>(اختياري — لاسترجاع كلمة المرور)</small></label>
@@ -72,17 +80,17 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         </div>
         <div class="col-span-12 md:col-span-4">
           <label class="label">رقم الهاتف <span class="text-rose-500">*</span></label>
-          <input class="input" name="phone" placeholder="077xxxxxxxx" maxlength="11" required dir="ltr" oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، رقم الهاتف مطلوب')" oninput="this.setCustomValidity('')">
+          <input class="input" name="phone" id="phoneInput" placeholder="077xxxxxxxx أو 078xxxxxxxx" maxlength="11" required dir="ltr" oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، رقم الهاتف مطلوب')" oninput="this.setCustomValidity('')">
         </div>
       </div>
 
-      {{-- Row 3: تاريخ الميلاد (سنة فقط), العمر (auto), الجنس, الحالة الوظيفية --}}
+      {{-- Row 3: تاريخ الميلاد (من 1970 إلى 2015), العمر (auto), الجنس, الحالة الوظيفية --}}
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-3">
           <label class="label">سنة الميلاد <span class="text-rose-500">*</span></label>
           <select class="input text-base" name="date_of_birth" id="dateOfBirth" required oninvalid="this.setCustomValidity('يرجى اختيار سنة الميلاد')" onchange="calcAgeFromYear();">
             <option value="">اختر سنة الميلاد...</option>
-            @foreach(range(date('Y'), 1900) as $year)
+            @foreach(range(2015, 1970) as $year)
               <option value="{{ $year }}">{{ $year }}</option>
             @endforeach
           </select>
@@ -113,9 +121,9 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         </div>
       </div>
 
-      {{-- Row 3.5: الحالة الاجتماعية + عدد الأولاد (تم تعديل الـ values لتطابق قواعد البيانات) --}}
+      {{-- Row 3.5: الحالة الاجتماعية + عدد الأولاد (من 0 إلى 20 قائمة خيارات) --}}
       <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12 md:col-span-6 transition-all duration-300" id="socialStatusContainer">
+        <div class="col-span-12" id="socialStatusContainer">
           <label class="label">الحالة الاجتماعية <span class="text-rose-500">*</span></label>
           <select class="input w-full text-base" name="social_status" id="socialStatus" required oninvalid="this.setCustomValidity('يرجى تحديد الحالة الاجتماعية')" onchange="toggleChildrenInput();">
             <option value="">اختر الحالة الاجتماعية...</option>
@@ -125,9 +133,13 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
             <option value="أرمل">أرمل / أرملة</option>
           </select>
         </div>
-        <div class="col-span-12 md:col-span-6 hidden transition-all duration-300" id="childrenCountContainer">
+        <div class="col-span-12 md:col-span-6 hidden" id="childrenCountContainer">
           <label class="label">عدد الأولاد <span class="text-rose-500">*</span></label>
-          <input class="input w-full" type="number" name="children_count" id="childrenCount" placeholder="من 0 إلى 10" min="0" max="10" value="0" oninvalid="this.setCustomValidity('يرجى تحديد عدد الأولاد من 0 إلى 10')" oninput="this.setCustomValidity('')">
+          <select class="input w-full text-base" name="children_count" id="childrenCount" oninvalid="this.setCustomValidity('يرجى تحديد عدد الأولاد')" onchange="this.setCustomValidity('')">
+            @foreach(range(0, 20) as $count)
+              <option value="{{ $count }}">{{ $count }}</option>
+            @endforeach
+          </select>
         </div>
       </div>
 
@@ -145,7 +157,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         </div>
       </div>
 
-      {{-- Row 5: التحصيل الدراسى, الكلية/المعهد, سنة التخرج --}}
+      {{-- Row 5: التحصيل الدراسى, الكلية/المعهد, سنة التخرج (من 2000 إلى 2025) --}}
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-4">
           <label class="label">التحصيل الدراسى <span class="text-rose-500">*</span></label>
@@ -163,7 +175,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
           <label class="label">سنة التخرج <span class="text-rose-500">*</span></label>
           <select class="input text-base" name="graduation_year" required oninvalid="this.setCustomValidity('يرجى تحديد سنة التخرج')" onchange="this.setCustomValidity('')">
             <option value="">اختر سنة التخرج...</option>
-            @foreach(range(date('Y') + 5, 1950) as $year)
+            @foreach(range(2025, 2000) as $year)
               <option value="{{ $year }}">{{ $year }}</option>
             @endforeach
           </select>
@@ -195,7 +207,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         <div>
           ⚠️ 
           @if(str_contains($error, 'phone'))
-            صيغة رقم الهاتف غير صحيحة، يرجى كتابة الرقم بالكامل (مثال: 07705666666)
+            صيغة رقم الهاتف غير صحيحة، يرجى كتابة الرقم بالكامل (مثال: 07705666666 أو 07805666666)
           @elseif(str_contains($error, 'email'))
             البريد الإلكتروني المستخدم مسجل مسبقاً أو غير صحيح
           @elseif(str_contains($error, 'password'))
@@ -210,6 +222,24 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
   </div>
 
   <script>
+  function cleanArabicNumbers(str) {
+    if(!str) return "";
+    var res = str.trim();
+    var map = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9' };
+    for (var key in map) {
+      res = res.replace(new RegExp(key, 'g'), map[key]);
+    }
+    return res.replace(/\s+/g, '');
+  }
+
+  document.getElementById('registerForm').addEventListener('submit', function() {
+    var pInput = document.getElementById('phoneInput');
+    if(pInput) pInput.value = cleanArabicNumbers(pInput.value);
+    
+    var nInput = document.getElementById('nationalId');
+    if(nInput) nInput.value = cleanArabicNumbers(nInput.value); 
+  });
+
   function calcAgeFromYear() {
     var selectField = document.getElementById('dateOfBirth');
     var year = selectField.value;
@@ -232,14 +262,10 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
     
     if (status === 'متزوج' || status === 'مطلق' || status === 'أرمل') {
       childrenContainer.classList.remove('hidden');
-      statusContainer.classList.remove('col-span-12');
-      statusContainer.classList.add('md:col-span-6');
-      childrenInput.required = true;
+      statusContainer.className = "col-span-12 md:col-span-6";
     } else {
       childrenContainer.classList.add('hidden');
-      statusContainer.classList.remove('md:col-span-6');
-      statusContainer.classList.add('col-span-12');
-      childrenInput.required = false;
+      statusContainer.className = "col-span-12";
       childrenInput.value = '0';
     }
   }
@@ -289,7 +315,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         if (d.success && d.data) {
           d.data.forEach(function(item) {
             var opt = document.createElement('option');
-            opt.value = item.name;
+            opt.value = item.id;
             opt.textContent = item.name;
             gSel.appendChild(opt);
           });
