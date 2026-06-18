@@ -336,9 +336,8 @@ document.getElementById('markAllNotif')?.addEventListener('click', async functio
   } catch(e) { console.warn('markAllNotif failed', e); }
 });
 
-// Poll for new notifications every 30s
+// Check notifications on page load only (no auto-polling)
 fetchNotifCount();
-setInterval(fetchNotifCount, 30000);
 </script>
 @stack('scripts')
 </body>
