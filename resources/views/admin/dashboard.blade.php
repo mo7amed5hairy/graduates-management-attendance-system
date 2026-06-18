@@ -76,34 +76,38 @@
   {{-- Top Users by Points --}}
   <div class="card p-5">
     <h2 class="text-lg font-extrabold text-slate-900 mb-4">🏆 الأكثر نقاطاً</h2>
-    <table class="data w-full" id="topUsersTable">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>الخريج</th>
-          <th>النقاط</th>
-        </tr>
-      </thead>
-      <tbody>
-        @forelse($top_users as $index => $user)
-        <tr>
-          <td>{{ $index + 1 }}</td>
-          <td class="flex items-center gap-2">
-            @if($user->image)
-              <img src="{{ $user->image_url }}" class="avatar avatar-sm" style="object-fit:cover">
-            @else
-              <div class="avatar avatar-sm bg-gradient-to-br from-sky-500 to-indigo-600 text-white text-xs">
-                {{ substr($user->name, 0, 2) }}
+    <div class="table-wrap">
+      <table class="data w-full" id="topUsersTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>الخريج</th>
+            <th>النقاط</th>
+          </tr>
+        </thead>
+        <tbody>
+          @forelse($top_users as $index => $user)
+          <tr>
+            <td>{{ $index + 1 }}</td>
+            <td>
+              <div class="flex items-center gap-2">
+                @if($user->image)
+                  <img src="{{ $user->image_url }}" class="avatar avatar-sm shrink-0" style="object-fit:cover">
+                @else
+                  <div class="avatar avatar-sm bg-gradient-to-br from-sky-500 to-indigo-600 text-white text-xs shrink-0">
+                    {{ substr($user->name, 0, 2) }}
+                  </div>
+                @endif
+                <span class="font-semibold truncate min-w-0" style="max-width:120px;display:block">{{ $user->name }}</span>
               </div>
-            @endif
-            <span class="font-semibold">{{ $user->name }}</span>
-          </td>
-          <td><span class="pill pill-amber">{{ number_format($user->points) }} نقطة</span></td>
-        </tr>
-        @empty
-        @endforelse
-      </tbody>
-    </table>
+            </td>
+            <td><span class="pill pill-amber">{{ number_format($user->points) }} نقطة</span></td>
+          </tr>
+          @empty
+          @endforelse
+        </tbody>
+      </table>
+    </div>
   </div>
 
   {{-- Upcoming Events --}}

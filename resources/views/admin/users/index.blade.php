@@ -187,7 +187,7 @@
   </div>
 </div>
 
-{{-- Edit User Modals (مطابق لصفحة التسجيل) --}}
+{{-- Edit User Modals --}}
 @foreach($users as $user)
 <div class="modal-overlay" id="editUserModal{{ $user->id }}">
   <div class="modal-content modal-content-xl p-6 max-h-[90vh] overflow-y-auto">
@@ -199,7 +199,6 @@
       @csrf
       @method('PUT')
 
-      {{-- Row 1: first_name, father_name, grandfather_name, family_name --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-3">
           <label class="label">الإسم <span class="text-rose-500">*</span></label>
@@ -219,23 +218,21 @@
         </div>
       </div>
 
-      {{-- Row 1.5: mother_name, mother_father_name, mother_grandfather_name --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-4">
-          <label class="label">اسم الأم</label>
-          <input class="input" name="mother_name" value="{{ $user->mother_name }}">
+          <label class="label">اسم الأم <span class="text-rose-500">*</span></label>
+          <input class="input" name="mother_name" value="{{ $user->mother_name }}" required>
         </div>
         <div class="col-span-12 md:col-span-4">
-          <label class="label">أب الأم</label>
-          <input class="input" name="mother_father_name" value="{{ $user->mother_father_name }}">
+          <label class="label">أب الأم <span class="text-rose-500">*</span></label>
+          <input class="input" name="mother_father_name" value="{{ $user->mother_father_name }}" required>
         </div>
         <div class="col-span-12 md:col-span-4">
-          <label class="label">جد الأم</label>
-          <input class="input" name="mother_grandfather_name" value="{{ $user->mother_grandfather_name }}">
+          <label class="label">جد الأم <span class="text-rose-500">*</span></label>
+          <input class="input" name="mother_grandfather_name" value="{{ $user->mother_grandfather_name }}" required>
         </div>
       </div>
 
-      {{-- Row 2: national_id, email (optional), phone --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-4">
           <label class="label">رقم البطاقة الوطنية <span class="text-rose-500">*</span></label>
@@ -247,17 +244,16 @@
         </div>
         <div class="col-span-12 md:col-span-4">
           <label class="label">رقم الهاتف <span class="text-rose-500">*</span></label>
-          <input class="input" name="phone" value="{{ $user->phone }}" placeholder="077xxxxxxxx" required dir="ltr">
+          <input class="input" name="phone" value="{{ $user->phone }}" placeholder="077xxxxxxxx أو 078xxxxxxxx" maxlength="11" required dir="ltr">
         </div>
       </div>
 
-      {{-- Row 3: date_of_birth (year), age (auto), gender, job_status --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-3">
-          <label class="label">سنة الميلاد</label>
-          <select class="input" name="date_of_birth" id="editDateOfBirth{{ $user->id }}" onchange="calcAgeEdit({{ $user->id }})">
+          <label class="label">سنة الميلاد <span class="text-rose-500">*</span></label>
+          <select class="input" name="date_of_birth" id="editDateOfBirth{{ $user->id }}" required onchange="calcAgeEdit({{ $user->id }})">
             <option value="">اختر سنة الميلاد...</option>
-            @foreach(range(date('Y'), 1900) as $year)
+            @foreach(range(2015, 1970) as $year)
               <option value="{{ $year }}" {{ (int)$user->date_of_birth === $year ? 'selected' : '' }}>{{ $year }}</option>
             @endforeach
           </select>
@@ -267,8 +263,8 @@
           <input class="input" type="number" id="editAge{{ $user->id }}" value="{{ $user->age }}" readonly style="background:#f1f5f9">
         </div>
         <div class="col-span-12 md:col-span-3">
-          <label class="label">الجنس</label>
-          <select class="input" name="gender">
+          <label class="label">الجنس <span class="text-rose-500">*</span></label>
+          <select class="input" name="gender" required>
             <option value="">اختر</option>
             <option value="ذكر" {{ $user->gender === 'ذكر' ? 'selected' : '' }}>ذكر</option>
             <option value="أنثى" {{ $user->gender === 'أنثى' ? 'selected' : '' }}>أنثى</option>
@@ -288,7 +284,6 @@
         </div>
       </div>
 
-      {{-- Row 3.5: social_status + children_count --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-6">
           <label class="label">الحالة الاجتماعية <span class="text-rose-500">*</span></label>
@@ -302,11 +297,10 @@
         </div>
         <div class="col-span-12 md:col-span-6" id="editChildrenWrap{{ $user->id }}" style="{{ in_array($user->social_status, ['متزوج', 'مطلق', 'أرمل']) ? '' : 'display:none' }}">
           <label class="label">عدد الأولاد</label>
-          <input class="input" type="number" name="children_count" value="{{ $user->children_count ?? 0 }}" min="0" max="10">
+          <input class="input" type="number" name="children_count" value="{{ $user->children_count ?? 0 }}" min="0" max="20">
         </div>
       </div>
 
-      {{-- Row 4: governorate + address --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-3">
           <label class="label">المحافظة <span class="text-rose-500">*</span></label>
@@ -315,22 +309,21 @@
           </select>
         </div>
         <div class="col-span-12 md:col-span-9">
-          <label class="label">عنوان السكن الحالى</label>
-          <input class="input" name="address" value="{{ $user->address }}" placeholder="العنوان بالتفصيل">
+          <label class="label">عنوان السكن الحالى <span class="text-rose-500">*</span></label>
+          <textarea class="input" name="address" rows="3" placeholder="العنوان بالتفصيل" required>{{ $user->address }}</textarea>
         </div>
       </div>
 
-      {{-- Row 5: qualification, faculty, graduation_year --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-4">
-          <label class="label">التحصيل الدراسى</label>
-          <select class="input" name="qualification_id" id="editQualification{{ $user->id }}" onchange="loadFacultiesEdit({{ $user->id }})">
+          <label class="label">التحصيل الدراسى <span class="text-rose-500">*</span></label>
+          <select class="input" name="qualification_id" id="editQualification{{ $user->id }}" required onchange="loadFacultiesEdit({{ $user->id }})">
             <option value="">اختر المؤهل...</option>
           </select>
         </div>
         <div class="col-span-12 md:col-span-4">
-          <label class="label">الكلية / المعهد</label>
-          <select class="input" name="qualification_faculty_id" id="editFaculty{{ $user->id }}" disabled>
+          <label class="label">الكلية / المعهد <span class="text-rose-500">*</span></label>
+          <select class="input" name="qualification_faculty_id" id="editFaculty{{ $user->id }}" required disabled>
             <option value="">اختر المؤهل أولاً...</option>
           </select>
         </div>
@@ -338,14 +331,13 @@
           <label class="label">سنة التخرج <span class="text-rose-500">*</span></label>
           <select class="input" name="graduation_year" required>
             <option value="">اختر سنة التخرج...</option>
-            @foreach(range(date('Y') + 5, 1950) as $year)
+            @foreach(range(2025, 2000) as $year)
               <option value="{{ $year }}" {{ (int)$user->graduation_year === $year ? 'selected' : '' }}>{{ $year }}</option>
             @endforeach
           </select>
         </div>
       </div>
 
-      {{-- Row 6: password (اختياري في التعديل) + status --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-5">
           <label class="label">كلمة المرور <small>(اتركه فارغاً إن لم ترد التغيير)</small></label>
@@ -375,7 +367,7 @@
 </div>
 @endforeach
 
-{{-- Create User Modal (مطابق لصفحة التسجيل) --}}
+{{-- Create User Modal --}}
 <div class="modal-overlay" id="createUserModal">
   <div class="modal-content modal-content-xl p-6 max-h-[90vh] overflow-y-auto">
     <div class="flex items-center justify-between mb-5">
@@ -385,7 +377,6 @@
     <form data-ajax="true" action="{{ route('admin.users.store') }}" method="POST">
       @csrf
 
-      {{-- Row 1: first_name, father_name, grandfather_name, family_name --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-3">
           <label class="label">الإسم <span class="text-rose-500">*</span></label>
@@ -405,7 +396,6 @@
         </div>
       </div>
 
-      {{-- Row 1.5: mother_name, mother_father_name, mother_grandfather_name --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-4">
           <label class="label">اسم الأم <span class="text-rose-500">*</span></label>
@@ -421,7 +411,6 @@
         </div>
       </div>
 
-      {{-- Row 2: national_id, email (optional), phone --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-4">
           <label class="label">رقم البطاقة الوطنية <span class="text-rose-500">*</span></label>
@@ -433,17 +422,16 @@
         </div>
         <div class="col-span-12 md:col-span-4">
           <label class="label">رقم الهاتف <span class="text-rose-500">*</span></label>
-          <input class="input" name="phone" placeholder="077xxxxxxxx" required dir="ltr">
+          <input class="input" name="phone" placeholder="077xxxxxxxx أو 078xxxxxxxx" maxlength="11" required dir="ltr">
         </div>
       </div>
 
-      {{-- Row 3: date_of_birth (year), age (auto), gender, job_status --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-3">
           <label class="label">سنة الميلاد <span class="text-rose-500">*</span></label>
           <select class="input" name="date_of_birth" id="createDateOfBirth" required onchange="calcAgeC()">
             <option value="">اختر سنة الميلاد...</option>
-            @foreach(range(date('Y'), 1900) as $year)
+            @foreach(range(2015, 1970) as $year)
               <option value="{{ $year }}">{{ $year }}</option>
             @endforeach
           </select>
@@ -474,7 +462,6 @@
         </div>
       </div>
 
-      {{-- Row 3.5: social_status + children_count --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-6">
           <label class="label">الحالة الاجتماعية <span class="text-rose-500">*</span></label>
@@ -488,11 +475,10 @@
         </div>
         <div class="col-span-12 md:col-span-6" id="createChildrenWrap" style="display:none">
           <label class="label">عدد الأولاد</label>
-          <input class="input" type="number" name="children_count" id="createChildrenCount" min="0" max="10" placeholder="من 0 إلى 10">
+          <input class="input" type="number" name="children_count" id="createChildrenCount" min="0" max="20" placeholder="من 0 إلى 20">
         </div>
       </div>
 
-      {{-- Row 4: governorate + address --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-3">
           <label class="label">المحافظة <span class="text-rose-500">*</span></label>
@@ -501,22 +487,21 @@
           </select>
         </div>
         <div class="col-span-12 md:col-span-9">
-          <label class="label">عنوان السكن الحالى</label>
-          <input class="input" name="address" placeholder="العنوان بالتفصيل">
+          <label class="label">عنوان السكن الحالى <span class="text-rose-500">*</span></label>
+          <textarea class="input" name="address" rows="3" placeholder="العنوان بالتفصيل" required></textarea>
         </div>
       </div>
 
-      {{-- Row 5: qualification, faculty, graduation_year --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-4">
-          <label class="label">التحصيل الدراسى</label>
-          <select class="input" name="qualification_id" id="createQualification" onchange="loadFacultiesCreate()">
+          <label class="label">التحصيل الدراسى <span class="text-rose-500">*</span></label>
+          <select class="input" name="qualification_id" id="createQualification" required onchange="loadFacultiesCreate()">
             <option value="">اختر المؤهل...</option>
           </select>
         </div>
         <div class="col-span-12 md:col-span-4">
-          <label class="label">الكلية / المعهد</label>
-          <select class="input" name="qualification_faculty_id" id="createFaculty" disabled>
+          <label class="label">الكلية / المعهد <span class="text-rose-500">*</span></label>
+          <select class="input" name="qualification_faculty_id" id="createFaculty" required disabled>
             <option value="">اختر المؤهل أولاً...</option>
           </select>
         </div>
@@ -524,14 +509,13 @@
           <label class="label">سنة التخرج <span class="text-rose-500">*</span></label>
           <select class="input" name="graduation_year" required>
             <option value="">اختر سنة التخرج...</option>
-            @foreach(range(date('Y') + 5, 1950) as $year)
+            @foreach(range(2025, 2000) as $year)
               <option value="{{ $year }}">{{ $year }}</option>
             @endforeach
           </select>
         </div>
       </div>
 
-      {{-- Row 6: password --}}
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-6">
           <label class="label">كلمة المرور <span class="text-rose-500">*</span></label>
@@ -580,7 +564,7 @@ function loadSelect(url, selectId, placeholder, selectedValue) {
     });
 }
 
-function loadSelectQuals(url, selectId, placeholder, selectedId) {
+function loadSelectQuals(url, selectId, placeholder, selectedId, selectedFacultyId) {
   var sel = document.getElementById(selectId);
   sel.disabled = true;
   sel.innerHTML = '<option value="">جاري التحميل...</option>';
@@ -601,7 +585,7 @@ function loadSelectQuals(url, selectId, placeholder, selectedId) {
       // Auto-load faculties if qualification is pre-selected
       if (selectedId) {
         var facId = sel.id.replace('editQualification', 'editFaculty');
-        loadFacultiesFor(facId, selectedId, null);
+        loadFacultiesFor(facId, selectedId, selectedFacultyId || null);
       }
     })
     .catch(function() {
@@ -676,7 +660,7 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', function loadEditDropdowns() {
   @foreach($users as $user)
     loadSelect(apiBase + '/governorates', 'editGovernorate{{ $user->id }}', 'اختر المحافظة...', '{{ $user->governorate }}');
-    loadSelectQuals(apiBase + '/qualifications', 'editQualification{{ $user->id }}', 'اختر المؤهل...', '{{ $user->qualification_id }}');
+    loadSelectQuals(apiBase + '/qualifications', 'editQualification{{ $user->id }}', 'اختر المؤهل...', '{{ $user->qualification_id }}', '{{ $user->qualification_faculty_id }}');
   @endforeach
 });
 

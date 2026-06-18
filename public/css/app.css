@@ -4,20 +4,16 @@
 .hidden { display: none !important; }
 
 body {
-  /* background:
-    radial-gradient(1200px 600px at 100% -10%, #e0f2fe 0%, transparent 60%),
-    radial-gradient(900px 500px at -10% 110%, #dcfce7 0%, transparent 60%),
-    #f8fafc; */
-
     background: radial-gradient(1200px 600px at 100% -10%, #abc5d7 0%, transparent 60%), radial-gradient(900px 500px at -10% 110%, #c9d9ce 0%, transparent 60%), #e2e8ed;
-    
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .layout-wrapper {
   display: flex;
   flex-direction: row;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* ── Sidebar ── */
@@ -97,6 +93,7 @@ body {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  overflow-x: hidden;
 }
 
 .topbar {
@@ -289,14 +286,25 @@ table.data td:last-child, table.data th:last-child { padding-left: 1.25rem; }
   .sidebar-toggle { display: inline-flex; }
 }
 
+@media (max-width: 991px) {
+  main { padding: 1rem !important; }
+  .card { padding: 1rem !important; }
+}
+
 @media (max-width: 576px) {
-  .topbar { padding: .75rem 1rem; }
+  .topbar { padding: .5rem .75rem; }
+  .topbar h1 { font-size: 1.1rem; }
   .topbar .text-left { display: none; }
   .stat .v { font-size: 1.4rem; }
-  .p-6 { padding: 1rem !important; }
-  table.data { font-size: .82rem; }
-  table.data th, table.data td { padding: .5rem .6rem; }
+  .p-6 { padding: .75rem !important; }
+  table.data { font-size: .78rem; }
+  table.data th, table.data td { padding: .4rem .4rem; }
+  .card { border-radius: .75rem; }
+  .btn { font-size: .82rem; padding: .45rem .75rem; }
 }
+
+/* ── Responsive text containment ── */
+.break-words { word-break: break-word; overflow-wrap: break-word; }
 
 /* ── Utility ── */
 @media (min-width: 992px) {

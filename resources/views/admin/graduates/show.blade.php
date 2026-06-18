@@ -7,26 +7,26 @@
 @section('content')
 <div class="max-w-4xl mx-auto">
   <div class="card p-6 mb-6">
-    <div class="flex items-center justify-between mb-6">
-      <div class="flex items-center gap-4">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-3">
+      <div class="flex items-center gap-4 flex-wrap min-w-0">
         @if($user->image)
-          <img src="{{ $user->image_url }}" class="avatar avatar-lg" style="object-fit:cover">
+          <img src="{{ $user->image_url }}" class="avatar avatar-lg shrink-0" style="object-fit:cover">
         @else
-          <div class="avatar avatar-lg bg-gradient-to-br from-sky-500 to-indigo-600 text-white">
+          <div class="avatar avatar-lg bg-gradient-to-br from-sky-500 to-indigo-600 text-white shrink-0">
             {{ substr($user->name, 0, 2) }}
           </div>
         @endif
-        <div>
-          <h2 class="text-2xl font-extrabold text-slate-900">{{ $user->name }}</h2>
-          <p class="text-slate-500">{{ $user->email }}</p>
+        <div class="min-w-0">
+          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 break-words">{{ $user->name }}</h2>
+          <p class="text-slate-500 text-sm break-words">{{ $user->email }}</p>
         </div>
       </div>
-      <div class="flex gap-2">
+      <div class="flex gap-2 flex-wrap shrink-0">
         @if($user->isPending())
-          <button class="btn btn-success" onclick="approveUser()">✓ اعتماد</button>
-          <button class="btn btn-danger" onclick="showRejectModal()">✕ رفض</button>
+          <button class="btn btn-success text-sm" onclick="approveUser()">✓ اعتماد</button>
+          <button class="btn btn-danger text-sm" onclick="showRejectModal()">✕ رفض</button>
         @endif
-        <a href="{{ route('admin.graduates.index') }}" class="btn btn-ghost">⬅ عودة</a>
+        <a href="{{ route('admin.graduates.index') }}" class="btn btn-ghost text-sm">⬅ عودة</a>
       </div>
     </div>
 
