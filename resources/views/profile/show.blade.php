@@ -175,12 +175,10 @@
     @if($user->id_photos && count($user->id_photos) > 0)
     <hr class="my-5 border-slate-100">
     <div>
-      <span class="text-xs text-slate-400 block mb-2">صور الهوية</span>
+      <span class="text-xs text-slate-400 block mb-2">صور الهوية ({{ count($user->id_photos) }})</span>
       <div class="flex flex-wrap gap-3">
-        @foreach($user->id_photos as $photo)
-          <a href="{{ route('file.serve', $photo) }}" target="_blank">
-            <img src="{{ route('file.serve', $photo) }}" class="w-32 h-32 object-cover rounded-lg border border-slate-200 hover:shadow-lg transition">
-          </a>
+        @foreach($user->id_photos as $index => $photo)
+          <img src="{{ route('file.serve', $photo) }}" class="w-32 h-32 object-cover rounded-lg border border-slate-200 hover:shadow-lg transition cursor-pointer" onclick="openUserZoom('{{ route('file.serve', $photo) }}')" title="اضغط للتكبير">
         @endforeach
       </div>
     </div>
@@ -263,6 +261,12 @@
       </table>
     </div>
   </div>
+</div>
+
+{{-- Zoom Modal --}}
+<div id="userZoomModal" class="fixed inset-0 z-[9999] bg-black/80 hidden items-center justify-center p-4" onclick="closeUserZoom(event)">
+  <button class="absolute top-4 left-4 text-white text-3xl hover:text-slate-300 z-10" onclick="closeUserZoom()">&times;</button>
+  <img id="userZoomImg" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" onclick="event.stopPropagation()">
 </div>
 
 {{-- Edit Modal --}}
@@ -481,6 +485,21 @@
           </div>
         </div>
 
+        {{-- National ID photos --}}
+        <hr class="my-5 border-slate-100">
+        <h3 class="font-extrabold text-slate-800 mb-3">🪪 البطاقة الوطنية</h3>
+        <p class="text-xs text-slate-500 mb-3">يمكنك رفع صورة البطاقة الوطنية (الوجه الأمامي والخلفي). غير إلزامي.</p>
+        <div class="grid grid-cols-12 gap-4">
+          <div class="col-span-12 md:col-span-6">
+            <label class="label">الوجه الأمامي للبطاقة</label>
+            <input class="input" type="file" name="id_photo_front" accept="image/*">
+          </div>
+          <div class="col-span-12 md:col-span-6">
+            <label class="label">الوجه الخلفي للبطاقة</label>
+            <input class="input" type="file" name="id_photo_back" accept="image/*">
+          </div>
+        </div>
+
         {{-- Attachments --}}
         <hr class="my-5 border-slate-100">
         <h3 class="font-extrabold text-slate-800 mb-3">📎 مرفقات التخرج</h3>
@@ -665,6 +684,30 @@ $(function() {
     columnDefs: [{ targets: [3, 4, 5], orderable: false }],
     order: [[6, 'desc']]
   });
+});
+
+// Zoom
+function openUserZoom(src) {
+  document.getElementById('userZoomImg').src = src;
+  var m = document.getElementById('userZoomModal');
+  m.classList.remove('hidden');
+  m.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeUserZoom(e) {
+  var m = document.getElementById('userZoomModal');
+  if (e && e.target !== document.getElementById('userZoomImg')) {
+    m.classList.add('hidden');
+    m.style.display = 'none';
+    document.body.style.overflow = '';
+  } else if (!e) {
+    m.classList.add('hidden');
+    m.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeUserZoom(); }
 });
 
 function copyLink() {

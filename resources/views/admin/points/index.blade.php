@@ -6,9 +6,9 @@
 
 @section('content')
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
   {{-- Add/Deduct Points Form --}}
-  <div class="card p-5 lg:col-span-1">
+  <div class="card p-4 sm:p-5 lg:col-span-1">
     <h2 class="text-lg font-extrabold text-slate-900 mb-4">إضافة / خصم نقاط</h2>
     <form id="pointsForm" action="{{ route('admin.points.store') }}" method="POST">
       @csrf
@@ -57,25 +57,25 @@
   </div>
 
   {{-- Transactions History --}}
-  <div class="card p-5 lg:col-span-2">
+  <div class="card p-4 sm:p-5 lg:col-span-2">
     <h2 class="text-lg font-extrabold text-slate-900 mb-4">📋 سجل المعاملات</h2>
 
     {{-- Filters --}}
     <form class="flex flex-wrap gap-3 mb-4" method="GET" action="{{ route('admin.points.index') }}">
-      <select class="input w-auto" name="user_id">
+      <select class="input w-full sm:w-auto" name="user_id">
         <option value="">كل المستخدمين</option>
         @foreach($users as $u)
         <option value="{{ $u->id }}" {{ request('user_id') == $u->id ? 'selected' : '' }}>{{ $u->name }}</option>
         @endforeach
       </select>
-      <select class="input w-auto" name="type" data-filter>
+      <select class="input w-full sm:w-auto" name="type" data-filter>
         <option value="">كل الأنواع</option>
         <option value="add" {{ request('type') === 'add' ? 'selected' : '' }}>إضافة</option>
         <option value="deduct" {{ request('type') === 'deduct' ? 'selected' : '' }}>خصم</option>
       </select>
-      <input class="input w-auto" type="date" name="date_from" value="{{ request('date_from') }}" placeholder="من تاريخ">
-      <input class="input w-auto" type="date" name="date_to" value="{{ request('date_to') }}" placeholder="ل تاريخ">
-      <button class="btn btn-ghost">🔍 فلترة</button>
+      <input class="input w-full sm:w-auto" type="date" name="date_from" value="{{ request('date_from') }}" placeholder="من تاريخ">
+      <input class="input w-full sm:w-auto" type="date" name="date_to" value="{{ request('date_to') }}" placeholder="ل تاريخ">
+      <button class="btn btn-ghost w-full sm:w-auto justify-center">🔍 فلترة</button>
     </form>
 
     <div class="table-wrap">
@@ -134,7 +134,9 @@ $(document).ready(function() {
   $('#pointsTable').DataTable({
     language: { url: '{{ asset('js/ar.json') }}' },
     order: [[0, 'desc']],
-    columnDefs: [{ orderable: false, targets: [4, 5, 6] }]
+    columnDefs: [{ orderable: false, targets: [4, 5, 6] }],
+    responsive: true,
+    autoWidth: true
   });
 });
 </script>

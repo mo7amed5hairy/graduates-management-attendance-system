@@ -57,6 +57,15 @@ class ProfileChangeRequestController extends Controller
                 }
                 $data['image'] = $imagePath;
             }
+            if (isset($data['_new_id_photos'])) {
+                $idPhotoPaths = [];
+                foreach ($data['_new_id_photos'] as $side => $path) {
+                    $idPhotoPaths[] = $path;
+                }
+                unset($data['_new_id_photos']);
+                $existing = $user->id_photos ?? [];
+                $data['id_photos'] = array_merge($existing, $idPhotoPaths);
+            }
             $user->update($data);
         }
 
@@ -126,6 +135,13 @@ class ProfileChangeRequestController extends Controller
         $data = $changeRequest->requested_data;
         if ($data && isset($data['_new_image'])) {
             Storage::disk('public')->delete($data['_new_image']);
+        }
+
+        // Delete uploaded ID photos if any
+        if ($data && isset($data['_new_id_photos'])) {
+            foreach ($data['_new_id_photos'] as $side => $path) {
+                Storage::disk('public')->delete($path);
+            }
         }
 
         // Delete attachments

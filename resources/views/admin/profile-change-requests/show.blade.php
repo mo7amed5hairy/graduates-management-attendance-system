@@ -59,7 +59,7 @@
               'qualification_faculty_id' => 'الكلية',
             ]; @endphp
             @foreach($changeRequest->requested_data as $field => $newValue)
-              @if($field === '_new_image') @continue @endif
+              @if(in_array($field, ['_new_image', '_new_id_photos'])) @continue @endif
               <tr class="border-b border-slate-100">
                 <td class="py-2 px-3 font-semibold">{{ $fieldLabels[$field] ?? $field }}</td>
                 <td class="py-2 px-3 text-slate-400">
@@ -110,6 +110,22 @@
       <p class="text-slate-400">لا توجد تعديلات في البيانات (مرفقات فقط)</p>
     @endif
   </div>
+
+  {{-- National ID Photos --}}
+  @if(isset($changeRequest->requested_data['_new_id_photos']))
+  <div class="card p-5 lg:col-span-3">
+    <h3 class="font-extrabold text-slate-800 mb-4">🪪 صور البطاقة الوطنية</h3>
+    <div class="flex flex-wrap gap-4">
+      @foreach($changeRequest->requested_data['_new_id_photos'] as $side => $path)
+        <div class="border border-slate-200 rounded-lg p-3 text-center">
+          <div class="text-xs text-slate-500 mb-2 font-semibold">{{ $side === 'front' ? 'الوجه الأمامي' : 'الوجه الخلفي' }}</div>
+          <img src="{{ route('file.serve', $path) }}" class="w-48 h-32 object-contain rounded mb-2 cursor-pointer hover:opacity-80 transition" onclick="openZoom('{{ route('file.serve', $path) }}')">
+          <a href="{{ route('file.serve', $path) }}" target="_blank" class="text-xs text-sky-600">عرض في نافذة جديدة</a>
+        </div>
+      @endforeach
+    </div>
+  </div>
+  @endif
 
   {{-- Attachments --}}
   @if($changeRequest->attachments->count() > 0)
@@ -181,4 +197,35 @@
 <div class="mt-4">
   <a href="{{ route('admin.profile-change-requests.index') }}" class="btn btn-ghost">← العودة للقائمة</a>
 </div>
+
+{{-- Zoom Modal --}}
+<div id="zoomModal" class="fixed inset-0 z-[9999] bg-black/80 hidden items-center justify-center p-4" onclick="closeZoom(event)">
+  <button class="absolute top-4 left-4 text-white text-3xl hover:text-slate-300 z-10" onclick="closeZoom()">&times;</button>
+  <img id="zoomImg" class="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl" onclick="event.stopPropagation()">
+</div>
+
+@push('scripts')
+<script>
+function openZoom(src) {
+  document.getElementById('zoomImg').src = src;
+  document.getElementById('zoomModal').classList.remove('hidden');
+  document.getElementById('zoomModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeZoom(e) {
+  if (e && e.target !== document.getElementById('zoomImg')) {
+    document.getElementById('zoomModal').classList.add('hidden');
+    document.getElementById('zoomModal').style.display = 'none';
+    document.body.style.overflow = '';
+  } else if (!e) {
+    document.getElementById('zoomModal').classList.add('hidden');
+    document.getElementById('zoomModal').style.display = 'none';
+    document.body.style.overflow = '';
+  }
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeZoom();
+});
+</script>
+@endpush
 @endsection

@@ -116,11 +116,11 @@
         </div>
         <div>
           <label class="label">كلمة المرور (اتركها فارغة إن لم ترد التغيير)</label>
-          <input class="input" type="password" name="password">
+          <input class="input" type="password" name="password" placeholder="أقل شيء 8 أحرف">
         </div>
         <div>
           <label class="label">تأكيد كلمة المرور</label>
-          <input class="input" type="password" name="password_confirmation">
+          <input class="input" type="password" name="password_confirmation" placeholder="تأكيد كلمة المرور">
         </div>
         <div class="md:col-span-2">
           <label class="label">عنوان السكن الحالى</label>
@@ -141,6 +141,21 @@
         <div class="text-xs text-slate-400">
           <p>الصيغ المسموحة: JPG, PNG, PDF, DOC, DOCX</p>
           <p>الحد الأقصى: 10 MB لكل ملف</p>
+        </div>
+      </div>
+
+      <hr class="my-5 border-slate-100">
+
+      <h3 class="font-extrabold text-slate-800 mb-3">🪪 البطاقة الوطنية</h3>
+      <p class="text-xs text-slate-500 mb-3">يمكنك رفع صورة البطاقة الوطنية (الوجه الأمامي والخلفي). غير إلزامي.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="label">الوجه الأمامي للبطاقة</label>
+          <input class="input" type="file" name="id_photo_front" accept="image/*">
+        </div>
+        <div>
+          <label class="label">الوجه الخلفي للبطاقة</label>
+          <input class="input" type="file" name="id_photo_back" accept="image/*">
         </div>
       </div>
 

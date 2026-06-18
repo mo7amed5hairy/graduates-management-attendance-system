@@ -50,10 +50,12 @@ class ProfileChangeRequestController extends Controller
             'social_links.*' => 'nullable|url|max:500',
             'attachments' => 'nullable|array',
             'attachments.*' => 'file|mimes:jpg,jpeg,png,pdf,doc,docx|max:10240',
+            'id_photo_front' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'id_photo_back' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ]);
 
-        // Build the requested data (all submitted fields except password, image, attachments)
-        $requestedData = $request->except(['password', 'password_confirmation', 'image', 'attachments', '_token', '_method']);
+        // Build the requested data (all submitted fields except file uploads, password, token)
+        $requestedData = $request->except(['password', 'password_confirmation', 'image', 'attachments', 'id_photo_front', 'id_photo_back', '_token', '_method']);
         // Filter to only changed fields
         $changed = [];
         foreach ($requestedData as $key => $value) {
@@ -74,10 +76,17 @@ class ProfileChangeRequestController extends Controller
             }
         }
 
+        $hasPasswordChange = $request->filled('password');
+        if ($hasPasswordChange) {
+            $user->password = bcrypt($request->password);
+            $user->save();
+        }
+
         $hasProfileChanges = !empty($changed);
         $hasAttachments = $request->hasFile('attachments');
+        $hasIdPhotos = $request->hasFile('id_photo_front') || $request->hasFile('id_photo_back');
 
-        if (!$hasProfileChanges && !$hasAttachments) {
+        if (!$hasProfileChanges && !$hasAttachments && !$hasIdPhotos && !$hasPasswordChange) {
             $msg = 'لم تقم بإجراء أي تغييرات أو رفع مرفقات';
             return $request->ajax()
                 ? response()->json(['success' => false, 'message' => $msg], 422)
@@ -112,9 +121,28 @@ class ProfileChangeRequestController extends Controller
             }
         }
 
+        // Handle ID photo uploads (store temporarily in requested_data)
+        if ($hasIdPhotos) {
+            $data = $changeRequest->requested_data ?? [];
+            $data['_new_id_photos'] = [];
+            if ($request->hasFile('id_photo_front')) {
+                $data['_new_id_photos']['front'] = $request->file('id_photo_front')->store('id-photos/' . $user->id, 'public');
+            }
+            if ($request->hasFile('id_photo_back')) {
+                $data['_new_id_photos']['back'] = $request->file('id_photo_back')->store('id-photos/' . $user->id, 'public');
+            }
+            $changeRequest->requested_data = $data;
+            $changeRequest->save();
+        }
+
         // Notify admins
         $admins = User::where('role', 'admin')->get();
-        $changeType = $hasProfileChanges && $hasAttachments ? 'تعديل بيانات ورفع مرفقات' : ($hasProfileChanges ? 'تعديل بيانات' : 'رفع مرفقات');
+        $parts = [];
+        if ($hasProfileChanges) $parts[] = 'تعديل بيانات';
+        if ($hasPasswordChange) $parts[] = 'تغيير كلمة المرور';
+        if ($hasAttachments) $parts[] = 'رفع مرفقات';
+        if ($hasIdPhotos) $parts[] = 'رفع صور البطاقة';
+        $changeType = implode(' و ', $parts);
         foreach ($admins as $admin) {
             Notification::create([
                 'user_id' => $admin->id,

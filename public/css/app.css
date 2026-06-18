@@ -22,7 +22,7 @@ body {
   flex-shrink: 0;
   background: white;
   border-left: 1px solid #e2e8f0;
-  min-height: 100vh;
+  height: 100vh;
   padding: 1.25rem;
   position: sticky;
   top: 0;
@@ -273,7 +273,7 @@ table.data td:last-child, table.data th:last-child { padding-left: 1.25rem; }
     right: -280px;
     top: 0;
     width: 280px;
-    min-height: 100vh;
+    height: 100vh;
     transition: right .25s ease;
     z-index: 50;
     border-left: none;

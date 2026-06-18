@@ -711,38 +711,38 @@ $(document).ready(function() {
 
     if (gender) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[6] === gender;
+        return data[7].trim() === gender;
       });
     }
     if (gov) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[7] === gov;
+        return data[8] === gov;
       });
     }
     if (birth) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[8] === birth;
+        return data[9] === birth;
       });
     }
     if (social) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[9] === social;
+        return data[10] === social;
       });
     }
     if (children !== '') {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[10] === children;
+        return data[11] === children;
       });
     }
     if (qual) {
       var qualText = $('#filterQualification option:selected').text();
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[11] === qualText;
+        return data[12] === qualText;
       });
     }
     if (gradYear) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[12] === gradYear;
+        return data[13] === gradYear;
       });
     }
 
