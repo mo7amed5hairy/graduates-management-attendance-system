@@ -171,7 +171,7 @@ $(function() {
 
     if (gender) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[4].trim() === gender;
+        return data[4].trim().localeCompare(gender, 'ar', { sensitivity: 'base' }) === 0;
       });
     }
     if (birth) {

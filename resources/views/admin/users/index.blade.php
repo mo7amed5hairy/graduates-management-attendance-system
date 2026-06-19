@@ -788,7 +788,7 @@ $(document).ready(function() {
 
     if (gender) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[7].trim() === gender;
+        return data[7].trim().localeCompare(gender, 'ar', { sensitivity: 'base' }) === 0;
       });
     }
     if (gov) {
