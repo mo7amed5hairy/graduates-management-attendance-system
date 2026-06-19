@@ -75,7 +75,7 @@ class UserController extends Controller
 
     public function index()
     {
-        $users = User::latest()->get();
+        $users = User::with('qualification', 'qualificationFaculty')->latest()->get();
         $genders = ['ذكر', 'أنثى'];
         $governorates = User::whereNotNull('governorate')->distinct()->pluck('governorate')->sort();
         $allGovernorates = Governorate::orderBy('name')->pluck('name');

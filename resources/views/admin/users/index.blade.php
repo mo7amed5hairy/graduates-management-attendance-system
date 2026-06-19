@@ -168,7 +168,7 @@
           </td>
           <td>
             <div class="flex gap-1">
-              <button class="btn btn-ghost py-1 px-2 text-xs" data-modal="editUserModal{{ $user->id }}" title="تعديل">✏️</button>
+              <button class="btn btn-ghost py-1 px-2 text-xs" onclick="openEditModal({{ $user->id }})" title="تعديل">✏️</button>
               @if(!$user->isAdmin())
               <button class="btn btn-ghost py-1 px-2 text-xs toggle-status-btn" data-url="{{ route('admin.users.toggle-status', $user) }}" data-name="{{ $user->name }}" title="{{ $user->status === 'active' ? 'تعليق' : 'تفعيل' }}">
                 {{ $user->status === 'active' ? '⏸️' : '▶️' }}
@@ -186,186 +186,6 @@
     </table>
   </div>
 </div>
-
-{{-- Edit User Modals --}}
-@foreach($users as $user)
-<div class="modal-overlay" id="editUserModal{{ $user->id }}">
-  <div class="modal-content modal-content-xl p-6 max-h-[90vh] overflow-y-auto">
-    <div class="flex items-center justify-between mb-5">
-      <h3 class="text-lg font-extrabold text-slate-900">✏️ تعديل: {{ $user->first_name }} {{ $user->father_name }} {{ $user->grandfather_name }} {{ $user->family_name }}</h3>
-      <button class="text-slate-400 hover:text-slate-600 text-xl" data-modal-close>&times;</button>
-    </div>
-    <form data-ajax="true" action="{{ route('admin.users.update', $user) }}" method="POST">
-      @csrf
-      @method('PUT')
-
-      <div class="grid grid-cols-12 gap-4 mb-4">
-        <div class="col-span-12 md:col-span-3">
-          <label class="label">الإسم <span class="text-rose-500">*</span></label>
-          <input class="input" name="first_name" value="{{ $user->first_name }}" required>
-        </div>
-        <div class="col-span-12 md:col-span-3">
-          <label class="label">اسم الأب <span class="text-rose-500">*</span></label>
-          <input class="input" name="father_name" value="{{ $user->father_name }}" required>
-        </div>
-        <div class="col-span-12 md:col-span-3">
-          <label class="label">اسم الجد <span class="text-rose-500">*</span></label>
-          <input class="input" name="grandfather_name" value="{{ $user->grandfather_name }}" required>
-        </div>
-        <div class="col-span-12 md:col-span-3">
-          <label class="label">اللقب <span class="text-rose-500">*</span></label>
-          <input class="input" name="family_name" value="{{ $user->family_name }}" required>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-12 gap-4 mb-4">
-        <div class="col-span-12 md:col-span-4">
-          <label class="label">اسم الأم <span class="text-rose-500">*</span></label>
-          <input class="input" name="mother_name" value="{{ $user->mother_name }}" required>
-        </div>
-        <div class="col-span-12 md:col-span-4">
-          <label class="label">أب الأم <span class="text-rose-500">*</span></label>
-          <input class="input" name="mother_father_name" value="{{ $user->mother_father_name }}" required>
-        </div>
-        <div class="col-span-12 md:col-span-4">
-          <label class="label">جد الأم <span class="text-rose-500">*</span></label>
-          <input class="input" name="mother_grandfather_name" value="{{ $user->mother_grandfather_name }}" required>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-12 gap-4 mb-4">
-        <div class="col-span-12 md:col-span-4">
-          <label class="label">رقم البطاقة الوطنية <span class="text-rose-500">*</span></label>
-          <input class="input" name="national_id" value="{{ $user->national_id }}" required dir="ltr">
-        </div>
-        <div class="col-span-12 md:col-span-4">
-          <label class="label">البريد الإلكتروني <small>(اختياري)</small></label>
-          <input class="input" type="email" name="email" value="{{ $user->email }}">
-        </div>
-        <div class="col-span-12 md:col-span-4">
-          <label class="label">رقم الهاتف <span class="text-rose-500">*</span></label>
-          <input class="input" name="phone" value="{{ $user->phone }}" placeholder="077xxxxxxxx أو 078xxxxxxxx" maxlength="11" required dir="ltr">
-        </div>
-      </div>
-
-      <div class="grid grid-cols-12 gap-4 mb-4">
-        <div class="col-span-12 md:col-span-3">
-          <label class="label">سنة الميلاد <span class="text-rose-500">*</span></label>
-          <select class="input" name="date_of_birth" id="editDateOfBirth{{ $user->id }}" required onchange="calcAgeEdit({{ $user->id }})">
-            <option value="">اختر سنة الميلاد...</option>
-            @foreach(range(2015, 1970) as $year)
-              <option value="{{ $year }}" {{ (int)$user->date_of_birth === $year ? 'selected' : '' }}>{{ $year }}</option>
-            @endforeach
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-2">
-          <label class="label">العمر</label>
-          <input class="input" type="number" id="editAge{{ $user->id }}" value="{{ $user->age }}" readonly style="background:#f1f5f9">
-        </div>
-        <div class="col-span-12 md:col-span-3">
-          <label class="label">الجنس <span class="text-rose-500">*</span></label>
-          <select class="input" name="gender" required>
-            <option value="">اختر</option>
-            <option value="ذكر" {{ $user->gender === 'ذكر' ? 'selected' : '' }}>ذكر</option>
-            <option value="أنثى" {{ $user->gender === 'أنثى' ? 'selected' : '' }}>أنثى</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-4">
-          <label class="label">الحالة الوظيفية <span class="text-rose-500">*</span></label>
-          <select class="input" name="job_status" required>
-            <option value="">اختر...</option>
-            <option value="موظف" {{ $user->job_status === 'موظف' ? 'selected' : '' }}>موظف</option>
-            <option value="غير موظف" {{ $user->job_status === 'غير موظف' ? 'selected' : '' }}>غير موظف</option>
-            <option value="طالب" {{ $user->job_status === 'طالب' ? 'selected' : '' }}>طالب</option>
-            <option value="صاحب عمل" {{ $user->job_status === 'صاحب عمل' ? 'selected' : '' }}>صاحب عمل</option>
-            <option value="متقاعد" {{ $user->job_status === 'متقاعد' ? 'selected' : '' }}>متقاعد</option>
-            <option value="أخرى" {{ $user->job_status === 'أخرى' ? 'selected' : '' }}>أخرى</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-12 gap-4 mb-4">
-        <div class="col-span-12 md:col-span-6">
-          <label class="label">الحالة الاجتماعية <span class="text-rose-500">*</span></label>
-          <select class="input" name="social_status" id="editSocialStatus{{ $user->id }}" required onchange="toggleChildrenEdit({{ $user->id }})">
-            <option value="">اختر...</option>
-            <option value="أعزب" {{ $user->social_status === 'أعزب' ? 'selected' : '' }}>أعزب</option>
-            <option value="متزوج" {{ $user->social_status === 'متزوج' ? 'selected' : '' }}>متزوج</option>
-            <option value="مطلق" {{ $user->social_status === 'مطلق' ? 'selected' : '' }}>مطلق</option>
-            <option value="أرمل" {{ $user->social_status === 'أرمل' ? 'selected' : '' }}>أرمل</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-6" id="editChildrenWrap{{ $user->id }}" style="{{ in_array($user->social_status, ['متزوج', 'مطلق', 'أرمل']) ? '' : 'display:none' }}">
-          <label class="label">عدد الأولاد</label>
-          <input class="input" type="number" name="children_count" value="{{ $user->children_count ?? 0 }}" min="0" max="20">
-        </div>
-      </div>
-
-      <div class="grid grid-cols-12 gap-4 mb-4">
-        <div class="col-span-12 md:col-span-3">
-          <label class="label">المحافظة <span class="text-rose-500">*</span></label>
-          <select class="input" name="governorate" id="editGovernorate{{ $user->id }}" required>
-            <option value="">اختر...</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-9">
-          <label class="label">عنوان السكن الحالى <span class="text-rose-500">*</span></label>
-          <textarea class="input" name="address" rows="3" placeholder="العنوان بالتفصيل" required>{{ $user->address }}</textarea>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-12 gap-4 mb-4">
-        <div class="col-span-12 md:col-span-4">
-          <label class="label">التحصيل الدراسى <span class="text-rose-500">*</span></label>
-          <select class="input" name="qualification_id" id="editQualification{{ $user->id }}" required onchange="loadFacultiesEdit({{ $user->id }})">
-            <option value="">اختر المؤهل...</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-4">
-          <label class="label">الكلية / المعهد <span class="text-rose-500">*</span></label>
-          <select class="input" name="qualification_faculty_id" id="editFaculty{{ $user->id }}" required disabled>
-            <option value="">اختر المؤهل أولاً...</option>
-          </select>
-        </div>
-        <div class="col-span-12 md:col-span-4">
-          <label class="label">سنة التخرج <span class="text-rose-500">*</span></label>
-          <select class="input" name="graduation_year" required>
-            <option value="">اختر سنة التخرج...</option>
-            @foreach(range(2025, 2000) as $year)
-              <option value="{{ $year }}" {{ (int)$user->graduation_year === $year ? 'selected' : '' }}>{{ $year }}</option>
-            @endforeach
-          </select>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-12 gap-4 mb-4">
-        <div class="col-span-12 md:col-span-5">
-          <label class="label">كلمة المرور <small>(اتركه فارغاً إن لم ترد التغيير)</small></label>
-          <input class="input" type="password" name="password" placeholder="أقل شيء 8 أحرف">
-        </div>
-        <div class="col-span-12 md:col-span-5">
-          <label class="label">تأكيد كلمة المرور</label>
-          <input class="input" type="password" name="password_confirmation" placeholder="تأكيد كلمة المرور">
-        </div>
-        <div class="col-span-12 md:col-span-2">
-          <label class="label">الحالة</label>
-          <label class="relative inline-flex items-center cursor-pointer gap-3 status-wrapper mt-1">
-            <input type="checkbox" class="sr-only peer status-toggle" {{ $user->status === 'active' ? 'checked' : '' }}>
-            <input type="hidden" name="status" value="{{ $user->status }}">
-            <div class="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-            <span class="text-sm font-semibold text-slate-700 status-label min-w-[60px]">{{ $user->status === 'active' ? 'نشط' : 'غير نشط' }}</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="flex gap-2 mt-5 justify-end">
-        <button type="button" class="btn btn-ghost" data-modal-close>إلغاء</button>
-        <button type="submit" class="btn btn-primary">💾 تحديث</button>
-      </div>
-    </form>
-  </div>
-</div>
-@endforeach
 
 {{-- Create User Modal --}}
 <div class="modal-overlay" id="createUserModal">
@@ -535,9 +355,295 @@
   </div>
 </div>
 
+{{-- Single Edit User Modal (loaded dynamically) --}}
+<div class="modal-overlay" id="editUserModal">
+  <div class="modal-content modal-content-xl p-6 max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-lg font-extrabold text-slate-900" id="editModalTitle">✏️ تعديل المستخدم</h3>
+      <button class="text-slate-400 hover:text-slate-600 text-xl" onclick="closeEditModal()">&times;</button>
+    </div>
+    <form id="editUserForm" data-ajax="true" method="POST">
+      @csrf
+      @method('PUT')
+
+      <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">الإسم <span class="text-rose-500">*</span></label>
+          <input class="input" name="first_name" required>
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">اسم الأب <span class="text-rose-500">*</span></label>
+          <input class="input" name="father_name" required>
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">اسم الجد <span class="text-rose-500">*</span></label>
+          <input class="input" name="grandfather_name" required>
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">اللقب <span class="text-rose-500">*</span></label>
+          <input class="input" name="family_name" required>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">اسم الأم <span class="text-rose-500">*</span></label>
+          <input class="input" name="mother_name" required>
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">أب الأم <span class="text-rose-500">*</span></label>
+          <input class="input" name="mother_father_name" required>
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">جد الأم <span class="text-rose-500">*</span></label>
+          <input class="input" name="mother_grandfather_name" required>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">رقم البطاقة الوطنية <span class="text-rose-500">*</span></label>
+          <input class="input" name="national_id" required dir="ltr">
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">البريد الإلكتروني <small>(اختياري)</small></label>
+          <input class="input" type="email" name="email">
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">رقم الهاتف <span class="text-rose-500">*</span></label>
+          <input class="input" name="phone" placeholder="077xxxxxxxx أو 078xxxxxxxx" maxlength="11" required dir="ltr">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">سنة الميلاد <span class="text-rose-500">*</span></label>
+          <select class="input" name="date_of_birth" id="editDateOfBirth" required onchange="calcEditAge()">
+            <option value="">اختر سنة الميلاد...</option>
+            @foreach(range(2015, 1970) as $year)
+              <option value="{{ $year }}">{{ $year }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-2">
+          <label class="label">العمر</label>
+          <input class="input" type="number" id="editAge" readonly style="background:#f1f5f9">
+        </div>
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">الجنس <span class="text-rose-500">*</span></label>
+          <select class="input" name="gender" required>
+            <option value="">اختر</option>
+            <option value="ذكر">ذكر</option>
+            <option value="أنثى">أنثى</option>
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">الحالة الوظيفية <span class="text-rose-500">*</span></label>
+          <select class="input" name="job_status" required>
+            <option value="">اختر...</option>
+            <option value="موظف">موظف</option>
+            <option value="غير موظف">غير موظف</option>
+            <option value="طالب">طالب</option>
+            <option value="صاحب عمل">صاحب عمل</option>
+            <option value="متقاعد">متقاعد</option>
+            <option value="أخرى">أخرى</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-6">
+          <label class="label">الحالة الاجتماعية <span class="text-rose-500">*</span></label>
+          <select class="input" name="social_status" id="editSocialStatus" required onchange="toggleEditChildren()">
+            <option value="">اختر...</option>
+            <option value="أعزب">أعزب</option>
+            <option value="متزوج">متزوج</option>
+            <option value="مطلق">مطلق</option>
+            <option value="أرمل">أرمل</option>
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-6" id="editChildrenWrap" style="display:none">
+          <label class="label">عدد الأولاد</label>
+          <input class="input" type="number" name="children_count" min="0" max="20">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-3">
+          <label class="label">المحافظة <span class="text-rose-500">*</span></label>
+          <select class="input" name="governorate" id="editGovernorate" required>
+            <option value="">اختر...</option>
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-9">
+          <label class="label">عنوان السكن الحالى <span class="text-rose-500">*</span></label>
+          <textarea class="input" name="address" rows="3" placeholder="العنوان بالتفصيل" required></textarea>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">التحصيل الدراسى <span class="text-rose-500">*</span></label>
+          <select class="input" name="qualification_id" id="editQualification" required onchange="loadEditFaculties()">
+            <option value="">اختر المؤهل...</option>
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">الكلية / المعهد <span class="text-rose-500">*</span></label>
+          <select class="input" name="qualification_faculty_id" id="editFaculty" required disabled>
+            <option value="">اختر المؤهل أولاً...</option>
+          </select>
+        </div>
+        <div class="col-span-12 md:col-span-4">
+          <label class="label">سنة التخرج <span class="text-rose-500">*</span></label>
+          <select class="input" name="graduation_year" required>
+            <option value="">اختر سنة التخرج...</option>
+            @foreach(range(2025, 2000) as $year)
+              <option value="{{ $year }}">{{ $year }}</option>
+            @endforeach
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-12 gap-4 mb-4">
+        <div class="col-span-12 md:col-span-5">
+          <label class="label">كلمة المرور <small>(اتركه فارغاً إن لم ترد التغيير)</small></label>
+          <input class="input" type="password" name="password" placeholder="أقل شيء 8 أحرف">
+        </div>
+        <div class="col-span-12 md:col-span-5">
+          <label class="label">تأكيد كلمة المرور</label>
+          <input class="input" type="password" name="password_confirmation" placeholder="تأكيد كلمة المرور">
+        </div>
+        <div class="col-span-12 md:col-span-2">
+          <label class="label">الحالة</label>
+          <label class="relative inline-flex items-center cursor-pointer gap-3 status-wrapper mt-1">
+            <input type="checkbox" class="sr-only peer status-toggle">
+            <input type="hidden" name="status" value="active">
+            <div class="w-11 h-6 bg-slate-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+            <span class="text-sm font-semibold text-slate-700 status-label min-w-[60px]">نشط</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex gap-2 mt-5 justify-end">
+        <button type="button" class="btn btn-ghost" onclick="closeEditModal()">إلغاء</button>
+        <button type="submit" class="btn btn-primary">💾 تحديث</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 @push('scripts')
 <script>
 var apiBase = '{{ url('/api') }}';
+var editUserId = null;
+
+function openEditModal(userId) {
+  editUserId = userId;
+  var modal = document.getElementById('editUserModal');
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  // Set form action
+  var form = document.getElementById('editUserForm');
+  form.action = '{{ url('/admin/users') }}/' + userId;
+
+  // Fetch user data
+  fetch(form.action, {
+    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (!d.success) return;
+    var u = d.data;
+    document.getElementById('editModalTitle').textContent = '✏️ تعديل: ' + (u.first_name || '') + ' ' + (u.father_name || '') + ' ' + (u.grandfather_name || '') + ' ' + (u.family_name || '');
+
+    form.querySelector('[name="first_name"]').value = u.first_name || '';
+    form.querySelector('[name="father_name"]').value = u.father_name || '';
+    form.querySelector('[name="grandfather_name"]').value = u.grandfather_name || '';
+    form.querySelector('[name="family_name"]').value = u.family_name || '';
+    form.querySelector('[name="mother_name"]').value = u.mother_name || '';
+    form.querySelector('[name="mother_father_name"]').value = u.mother_father_name || '';
+    form.querySelector('[name="mother_grandfather_name"]').value = u.mother_grandfather_name || '';
+    form.querySelector('[name="national_id"]').value = u.national_id || '';
+    form.querySelector('[name="email"]').value = u.email || '';
+    form.querySelector('[name="phone"]').value = u.phone || '';
+    form.querySelector('[name="date_of_birth"]').value = u.date_of_birth || '';
+    calcEditAge();
+    form.querySelector('[name="gender"]').value = u.gender || '';
+    form.querySelector('[name="job_status"]').value = u.job_status || '';
+    form.querySelector('[name="social_status"]').value = u.social_status || '';
+    toggleEditChildren();
+    if (u.children_count !== null && u.children_count !== undefined) {
+      form.querySelector('[name="children_count"]').value = u.children_count;
+    }
+    form.querySelector('[name="address"]').value = u.address || '';
+
+    // Status toggle
+    var statusCheck = form.querySelector('.status-toggle');
+    var statusHidden = form.querySelector('[name="status"]');
+    var statusLabel = form.querySelector('.status-label');
+    var isActive = u.status === 'active';
+    statusCheck.checked = isActive;
+    statusHidden.value = u.status || 'active';
+    statusLabel.textContent = isActive ? 'نشط' : 'غير نشط';
+
+    // Load governorates
+    loadSelect(apiBase + '/governorates', 'editGovernorate', 'اختر المحافظة...', u.governorate || null);
+
+    // Load qualifications (and faculties)
+    loadSelectQuals(apiBase + '/qualifications', 'editQualification', 'اختر المؤهل...', u.qualification_id || null, u.qualification_faculty_id || null);
+
+    // Graduation year
+    form.querySelector('[name="graduation_year"]').value = u.graduation_year || '';
+  })
+  .catch(function() {
+    App.toast ? App.toast('حدث خطأ في تحميل بيانات المستخدم', 'error') : alert('حدث خطأ');
+  });
+}
+
+function closeEditModal() {
+  var modal = document.getElementById('editUserModal');
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+  editUserId = null;
+}
+
+function calcEditAge() {
+  var year = document.getElementById('editDateOfBirth').value;
+  document.getElementById('editAge').value = year ? (new Date().getFullYear() - parseInt(year)) : '';
+}
+
+function toggleEditChildren() {
+  var val = document.getElementById('editSocialStatus').value;
+  var wrap = document.getElementById('editChildrenWrap');
+  if (val === 'متزوج' || val === 'مطلق' || val === 'أرمل') {
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function loadEditFaculties() {
+  var qualId = document.getElementById('editQualification').value;
+  loadFacultiesFor('editFaculty', qualId, null);
+}
+
+// Close modal on overlay click
+document.getElementById('editUserModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeEditModal();
+});
+
+// Status toggle
+document.addEventListener('change', function(e) {
+  if (e.target.classList.contains('status-toggle')) {
+    const wrapper = e.target.closest('.status-wrapper');
+    const hidden = wrapper.querySelector('input[type="hidden"]');
+    const label = wrapper.querySelector('.status-label');
+    hidden.value = e.target.checked ? 'active' : 'inactive';
+    label.textContent = e.target.checked ? 'نشط' : 'غير نشط';
+  }
+});
 
 function loadSelect(url, selectId, placeholder, selectedValue) {
   var sel = document.getElementById(selectId);
@@ -656,38 +762,6 @@ document.addEventListener('DOMContentLoaded', function() {
   loadSelectQuals(apiBase + '/qualifications', 'createQualification', 'اختر المؤهل...');
 });
 
-// Load governorates & qualifications for edit modals
-document.addEventListener('DOMContentLoaded', function loadEditDropdowns() {
-  @foreach($users as $user)
-    loadSelect(apiBase + '/governorates', 'editGovernorate{{ $user->id }}', 'اختر المحافظة...', '{{ $user->governorate }}');
-    loadSelectQuals(apiBase + '/qualifications', 'editQualification{{ $user->id }}', 'اختر المؤهل...', '{{ $user->qualification_id }}', '{{ $user->qualification_faculty_id }}');
-  @endforeach
-});
-
-// ===== EDIT MODAL FUNCTIONS =====
-function calcAgeEdit(userId) {
-  var sel = document.getElementById('editDateOfBirth' + userId);
-  var year = sel.value;
-  var ageField = document.getElementById('editAge' + userId);
-  if (!year) { ageField.value = ''; return; }
-  ageField.value = new Date().getFullYear() - parseInt(year);
-}
-
-function toggleChildrenEdit(userId) {
-  var status = document.getElementById('editSocialStatus' + userId).value;
-  var wrap = document.getElementById('editChildrenWrap' + userId);
-  if (status === 'متزوج' || status === 'مطلق' || status === 'أرمل') {
-    wrap.style.display = 'block';
-  } else {
-    wrap.style.display = 'none';
-  }
-}
-
-function loadFacultiesEdit(userId) {
-  var qualId = document.getElementById('editQualification' + userId).value;
-  loadFacultiesFor('editFaculty' + userId, qualId, null);
-}
-
 // DataTable
 $(document).ready(function() {
   var table = $('#usersTable').DataTable({
@@ -695,7 +769,10 @@ $(document).ready(function() {
     order: [[1, 'desc']],
     columnDefs: [
       { orderable: false, targets: [0, 15] }
-    ]
+    ],
+    deferRender: true,
+    pageLength: 50,
+    lengthMenu: [[25, 50, 100, 200, -1], [25, 50, 100, 200, 'الكل']]
   });
 
   function applyFilters() {
