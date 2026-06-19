@@ -182,6 +182,12 @@
         ];
       @endphp
 
+      <div class="mb-3">
+        <label class="flex items-center gap-2 text-sm font-bold cursor-pointer text-sky-700">
+          <input type="checkbox" id="selectAllPermissions" class="rounded text-sky-600"> تحديد الكل
+        </label>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="permissionsContainer">
         @foreach($permissionGroups as $groupName => $perms)
         <div class="border border-slate-200 rounded-xl p-4">
@@ -263,6 +269,12 @@ $(function() {
     order: [[0, 'desc']],
     columnDefs: [{ orderable: false, targets: [5] }]
   });
+});
+
+document.getElementById('selectAllPermissions').addEventListener('change', function() {
+  document.querySelectorAll('.permission-checkbox').forEach(function(cb) {
+    cb.checked = this.checked;
+  }, this);
 });
 </script>
 @endpush
