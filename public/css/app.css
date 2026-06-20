@@ -20,6 +20,8 @@ body {
 .side {
   width: 260px;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
   background: white;
   border-left: 1px solid #e2e8f0;
   height: 100vh;
@@ -27,8 +29,22 @@ body {
   position: sticky;
   top: 0;
   align-self: flex-start;
-  overflow-y: auto;
   z-index: 40;
+}
+.side-nav-wrap {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.side-nav-wrap::-webkit-scrollbar {
+  width: 4px;
+}
+.side-nav-wrap::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.side-footer {
+  flex-shrink: 0;
 }
 .side a {
   display: flex;

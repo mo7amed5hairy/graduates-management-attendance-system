@@ -18,111 +18,115 @@
 <div class="layout-wrapper">
 
   <aside class="side" id="sidebar">
-    <div class="flex items-center gap-3 mb-6 px-2">
+    <div class="flex items-center gap-3 mb-6 px-2 flex-shrink-0">
       <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 flex items-center justify-center text-white text-xl">👥</div>
       <div>
         <div class="font-extrabold text-slate-900">نظام المستخدمين</div>
         <div class="text-xs text-slate-500">لوحة التحكم</div>
       </div>
     </div>
-    <nav>
-      <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('home') }}" class="{{ request()->routeIs('admin.dashboard') || request()->routeIs('home') ? 'active' : '' }}">
-        <span>🏠</span><span>الرئيسية</span>
-      </a>
-      @if(auth()->user()->isAdmin())
-      <a href="{{ route('admin.graduates.index') }}" class="{{ request()->routeIs('admin.graduates.*') ? 'active' : '' }}">
-        <span>🎓</span><span>الخريجين</span>
-      </a>
-      <div class="nav-group">
-        @php
-          $dataRoutes = ['admin.governorates.*', 'admin.institution-types.*', 'admin.university-types.*', 'admin.institutions.*', 'admin.departments.*'];
-          $dataActive = request()->routeIs($dataRoutes);
-        @endphp
-        <a href="#" onclick="toggleNavGroup(this); return false;" class="nav-group-toggle{{ $dataActive ? ' open' : '' }}">
-          <span>⚙️</span><span>المحافظات والجامعات والأقسام</span><span class="nav-arrow">{{ $dataActive ? '▲' : '▼' }}</span>
+    <div class="side-nav-wrap">
+      <nav>
+        <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('home') }}" class="{{ request()->routeIs('admin.dashboard') || request()->routeIs('home') ? 'active' : '' }}">
+          <span>🏠</span><span>الرئيسية</span>
         </a>
-        <div class="nav-sub" id="navDataGroup" style="display: {{ $dataActive ? 'block' : 'none' }};">
-          <a href="{{ route('admin.governorates.index') }}" class="{{ request()->routeIs('admin.governorates.*') ? 'active' : '' }}">
-            <span>🏛️</span><span>المحافظات</span>
-          </a>
-          <a href="{{ route('admin.institution-types.index') }}" class="{{ request()->routeIs('admin.institution-types.*') ? 'active' : '' }}">
-            <span>🏫</span><span>أنواع المؤسسات</span>
-          </a>
-          <a href="{{ route('admin.university-types.index') }}" class="{{ request()->routeIs('admin.university-types.*') ? 'active' : '' }}">
-            <span>📚</span><span>أنواع الجامعات</span>
-          </a>
-          <a href="{{ route('admin.institutions.index') }}" class="{{ request()->routeIs('admin.institutions.*') ? 'active' : '' }}">
-            <span>🎓</span><span>المؤسسات التعليمية</span>
-          </a>
-          <a href="{{ route('admin.departments.index') }}" class="{{ request()->routeIs('admin.departments.*') ? 'active' : '' }}">
-            <span>📖</span><span>الأقسام والتخصصات</span>
-          </a>
-        </div>
-      </div>
-      <a href="{{ route('admin.events.index') }}" class="{{ request()->routeIs('admin.events.*') ? 'active' : '' }}">
-        <span>📅</span><span>الفعاليات</span>
-      </a>
-      <a href="{{ route('admin.attendance.index') }}" class="{{ request()->routeIs('admin.attendance.*') ? 'active' : '' }}">
-        <span>📋</span><span>الحضور</span>
-      </a>
-      <a href="{{ route('admin.points.index') }}" class="{{ request()->routeIs('admin.points.*') ? 'active' : '' }}">
-        <span>⭐</span><span>النقاط</span>
-      </a>
-      <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-        <span>👥</span><span>إدارة المستخدمين</span>
-      </a>
-      <div class="nav-group">
-        @php
-          $qualRoutes = ['admin.qualifications.*', 'admin.qualification-faculties.*'];
-          $qualActive = request()->routeIs($qualRoutes);
-        @endphp
-        <a href="#" onclick="toggleNavGroup(this); return false;" class="nav-group-toggle{{ $qualActive ? ' open' : '' }}">
-          <span>📚</span><span>المؤهلات الدراسية</span><span class="nav-arrow">{{ $qualActive ? '▲' : '▼' }}</span>
+        @if(auth()->user()->isAdmin())
+        <a href="{{ route('admin.graduates.index') }}" class="{{ request()->routeIs('admin.graduates.*') ? 'active' : '' }}">
+          <span>🎓</span><span>الخريجين</span>
         </a>
-        <div class="nav-sub" id="navQualGroup" style="display: {{ $qualActive ? 'block' : 'none' }};">
-          <a href="{{ route('admin.qualifications.index') }}" class="{{ request()->routeIs('admin.qualifications.*') ? 'active' : '' }}">
-            <span>🎓</span><span>المؤهلات</span>
+        <div class="nav-group">
+          @php
+            $dataRoutes = ['admin.governorates.*', 'admin.institution-types.*', 'admin.university-types.*', 'admin.institutions.*', 'admin.departments.*'];
+            $dataActive = request()->routeIs($dataRoutes);
+          @endphp
+          <a href="#" onclick="toggleNavGroup(this); return false;" class="nav-group-toggle{{ $dataActive ? ' open' : '' }}">
+            <span>⚙️</span><span>المحافظات والجامعات والأقسام</span><span class="nav-arrow">{{ $dataActive ? '▲' : '▼' }}</span>
           </a>
-          <a href="{{ route('admin.qualification-faculties.index') }}" class="{{ request()->routeIs('admin.qualification-faculties.*') ? 'active' : '' }}">
-            <span>🏛️</span><span>الكليات</span>
-          </a>
+          <div class="nav-sub" id="navDataGroup" style="display: {{ $dataActive ? 'block' : 'none' }};">
+            <a href="{{ route('admin.governorates.index') }}" class="{{ request()->routeIs('admin.governorates.*') ? 'active' : '' }}">
+              <span>🏛️</span><span>المحافظات</span>
+            </a>
+            <a href="{{ route('admin.institution-types.index') }}" class="{{ request()->routeIs('admin.institution-types.*') ? 'active' : '' }}">
+              <span>🏫</span><span>أنواع المؤسسات</span>
+            </a>
+            <a href="{{ route('admin.university-types.index') }}" class="{{ request()->routeIs('admin.university-types.*') ? 'active' : '' }}">
+              <span>📚</span><span>أنواع الجامعات</span>
+            </a>
+            <a href="{{ route('admin.institutions.index') }}" class="{{ request()->routeIs('admin.institutions.*') ? 'active' : '' }}">
+              <span>🎓</span><span>المؤسسات التعليمية</span>
+            </a>
+            <a href="{{ route('admin.departments.index') }}" class="{{ request()->routeIs('admin.departments.*') ? 'active' : '' }}">
+              <span>📖</span><span>الأقسام والتخصصات</span>
+            </a>
+          </div>
         </div>
-      </div>
-      <a href="{{ route('admin.statistics.index') }}" class="{{ request()->routeIs('admin.statistics.*') ? 'active' : '' }}">
-        <span>📊</span><span>الإحصائيات</span>
-      </a>
-      <a href="{{ route('admin.profile-change-requests.index') }}" class="{{ request()->routeIs('admin.profile-change-requests.*') ? 'active' : '' }}">
-        <span>📝</span><span>طلبات التعديل</span>
-      </a>
-      <a href="{{ route('admin.tasks.index') }}" class="{{ request()->routeIs('admin.tasks.*') ? 'active' : '' }}">
-        <span>📋</span><span>المهام</span>
-      </a>
-      <a href="{{ route('admin.import.index') }}" class="{{ request()->routeIs('admin.import.*') ? 'active' : '' }}">
-        <span>📥</span><span>استيراد</span>
-      </a>
-      @if(auth()->user()->email === 'admin@admin.com')
-      <a href="{{ route('admin.sub-admins.index') }}" class="{{ request()->routeIs('admin.sub-admins.*') ? 'active' : '' }}">
-        <span>🔐</span><span>المشرفين والصلاحيات</span>
-      </a>
-      @endif
-      @endif
-      @if(!auth()->user()->isAdmin())
-      <a href="{{ route('tasks.index') }}" class="{{ request()->routeIs('tasks.index') ? 'active' : '' }}">
-        <span>📋</span><span>مهامي</span>
-      </a>
-      <a href="{{ route('events.index') }}" class="{{ request()->routeIs('events.*') ? 'active' : '' }}">
-        <span>📅</span><span>فعالياتي</span>
-      </a>
-      @endif
-      <a href="{{ route('profile.show') }}" class="{{ request()->routeIs('profile.*') ? 'active' : '' }}">
-        <span>👤</span><span>البروفايل</span>
-      </a>
+        <a href="{{ route('admin.events.index') }}" class="{{ request()->routeIs('admin.events.*') ? 'active' : '' }}">
+          <span>📅</span><span>الفعاليات</span>
+        </a>
+        <a href="{{ route('admin.attendance.index') }}" class="{{ request()->routeIs('admin.attendance.*') ? 'active' : '' }}">
+          <span>📋</span><span>الحضور</span>
+        </a>
+        <a href="{{ route('admin.points.index') }}" class="{{ request()->routeIs('admin.points.*') ? 'active' : '' }}">
+          <span>⭐</span><span>النقاط</span>
+        </a>
+        <a href="{{ route('admin.users.index') }}" class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+          <span>👥</span><span>إدارة المستخدمين</span>
+        </a>
+        <div class="nav-group">
+          @php
+            $qualRoutes = ['admin.qualifications.*', 'admin.qualification-faculties.*'];
+            $qualActive = request()->routeIs($qualRoutes);
+          @endphp
+          <a href="#" onclick="toggleNavGroup(this); return false;" class="nav-group-toggle{{ $qualActive ? ' open' : '' }}">
+            <span>📚</span><span>المؤهلات الدراسية</span><span class="nav-arrow">{{ $qualActive ? '▲' : '▼' }}</span>
+          </a>
+          <div class="nav-sub" id="navQualGroup" style="display: {{ $qualActive ? 'block' : 'none' }};">
+            <a href="{{ route('admin.qualifications.index') }}" class="{{ request()->routeIs('admin.qualifications.*') ? 'active' : '' }}">
+              <span>🎓</span><span>المؤهلات</span>
+            </a>
+            <a href="{{ route('admin.qualification-faculties.index') }}" class="{{ request()->routeIs('admin.qualification-faculties.*') ? 'active' : '' }}">
+              <span>🏛️</span><span>الكليات</span>
+            </a>
+          </div>
+        </div>
+        <a href="{{ route('admin.statistics.index') }}" class="{{ request()->routeIs('admin.statistics.*') ? 'active' : '' }}">
+          <span>📊</span><span>الإحصائيات</span>
+        </a>
+        <a href="{{ route('admin.profile-change-requests.index') }}" class="{{ request()->routeIs('admin.profile-change-requests.*') ? 'active' : '' }}">
+          <span>📝</span><span>طلبات التعديل</span>
+        </a>
+        <a href="{{ route('admin.tasks.index') }}" class="{{ request()->routeIs('admin.tasks.*') ? 'active' : '' }}">
+          <span>📋</span><span>المهام</span>
+        </a>
+        <a href="{{ route('admin.import.index') }}" class="{{ request()->routeIs('admin.import.*') ? 'active' : '' }}">
+          <span>📥</span><span>استيراد</span>
+        </a>
+        @if(auth()->user()->email === 'admin@admin.com')
+        <a href="{{ route('admin.sub-admins.index') }}" class="{{ request()->routeIs('admin.sub-admins.*') ? 'active' : '' }}">
+          <span>🔐</span><span>المشرفين والصلاحيات</span>
+        </a>
+        @endif
+        @endif
+        @if(!auth()->user()->isAdmin())
+        <a href="{{ route('tasks.index') }}" class="{{ request()->routeIs('tasks.index') ? 'active' : '' }}">
+          <span>📋</span><span>مهامي</span>
+        </a>
+        <a href="{{ route('events.index') }}" class="{{ request()->routeIs('events.*') ? 'active' : '' }}">
+          <span>📅</span><span>فعالياتي</span>
+        </a>
+        @endif
+        <a href="{{ route('profile.show') }}" class="{{ request()->routeIs('profile.*') ? 'active' : '' }}">
+          <span>👤</span><span>البروفايل</span>
+        </a>
+      </nav>
+    </div>
+    <div class="side-footer">
       <hr class="my-3 border-slate-100">
       <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
         <span>↩️</span><span>تسجيل الخروج</span>
       </a>
       <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">@csrf</form>
-    </nav>
+    </div>
   </aside>
 
   <div class="main-area">
