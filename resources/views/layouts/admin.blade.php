@@ -118,14 +118,12 @@
         <a href="{{ route('profile.show') }}" class="{{ request()->routeIs('profile.*') ? 'active' : '' }}">
           <span>👤</span><span>البروفايل</span>
         </a>
+        <hr class="my-3 border-slate-100">
+        <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+          <span>↩️</span><span>تسجيل الخروج</span>
+        </a>
+        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">@csrf</form>
       </nav>
-    </div>
-    <div class="side-footer">
-      <hr class="my-3 border-slate-100">
-      <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-        <span>↩️</span><span>تسجيل الخروج</span>
-      </a>
-      <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none;">@csrf</form>
     </div>
   </aside>
 
@@ -181,6 +179,10 @@
     <main class="p-6">
       @yield('content')
     </main>
+
+    <footer class="app-footer">
+      <span>الحقوق البرمجية محفوظة &copy; {{ date('Y') }}</span>
+    </footer>
   </div>
 </div>
 
