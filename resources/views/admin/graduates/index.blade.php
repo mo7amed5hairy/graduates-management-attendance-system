@@ -162,8 +162,8 @@
 </div>
 
 {{-- Image Zoom Modal --}}
-<div id="imageZoomModal" class="fixed inset-0 z-60 hidden bg-black/80 flex items-center justify-center p-4" onclick="closeImageZoom()">
-  <button onclick="closeImageZoom()" class="absolute top-4 left-4 text-white text-3xl hover:text-slate-300 z-10">&times;</button>
+<div id="imageZoomModal" class="fixed inset-0 hidden bg-black/80 flex items-center justify-center p-4" style="z-index:9999" onclick="closeImageZoom()">
+  <button onclick="closeImageZoom()" class="absolute top-4 left-4 text-white text-3xl hover:text-slate-300">&times;</button>
   <img id="zoomImage" class="max-w-full max-h-full object-contain rounded-lg" src="" alt="zoom">
 </div>
 
