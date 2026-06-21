@@ -175,7 +175,7 @@ function openUserModal(userId) {
   userModal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
   document.getElementById('userDetailsContent').innerHTML = '<div class="text-center text-slate-400 py-8">جاري التحميل...</div>';
-  fetch('{{ route('user-details', '') }}/' + userId, {
+  fetch('{{ route('admin.user-details', '') }}/' + userId, {
     headers: { 'X-Requested-With': 'XMLHttpRequest' }
   })
   .then(function(r) { return r.json(); })
