@@ -142,7 +142,7 @@
               <span class="text-slate-400">—</span>
             @endif
           </td>
-          <td>{{ $user->governorate ?? '—' }}</td>
+          <td>{{ $user->governorate_name }}</td>
           <td>{{ $user->date_of_birth ?? '—' }}</td>
           <td>{{ $user->social_status ?? '—' }}</td>
           <td>{{ $user->children_count ?? '—' }}</td>
