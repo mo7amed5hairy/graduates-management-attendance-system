@@ -38,6 +38,13 @@ class SubAdminController extends Controller
         $validated['approval_status'] = 'approved';
         $validated['national_id'] = 'admin_' . uniqid();
         $validated['permissions'] = $validated['permissions'] ?? [];
+        $validated['first_name'] = $validated['name'];
+        $validated['father_name'] = '';
+        $validated['grandfather_name'] = '';
+        $validated['family_name'] = '';
+        $validated['mother_name'] = '';
+        $validated['mother_father_name'] = '';
+        $validated['mother_grandfather_name'] = '';
 
         User::create($validated);
 
