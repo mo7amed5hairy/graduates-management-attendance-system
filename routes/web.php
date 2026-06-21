@@ -176,6 +176,21 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
             Route::post('/{user}/toggle-status', [UserController::class, 'toggleStatus'])->name('toggle-status');
         });
+        // Quick user details JSON (used in users and graduates tables)
+        Route::get('/user-details/{user}', function (App\Models\User $user) {
+            $user->load('qualification', 'qualificationFaculty', 'approvedBy');
+            return response()->json([
+                'success' => true,
+                'data' => $user->toArray() + [
+                    'governorate_name' => $user->governorate_name,
+                    'image_url' => $user->image_url,
+                    'approved_by_name' => $user->approvedBy?->name,
+                    'qualification_name' => $user->qualification?->name,
+                    'faculty_name' => $user->qualificationFaculty?->name,
+                    'graduation_attachments' => $user->graduation_attachments ?? [],
+                ],
+            ]);
+        })->name('user-details');
 
         // Points management
         Route::prefix('points')->name('points.')->group(function () {
