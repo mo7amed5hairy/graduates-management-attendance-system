@@ -230,7 +230,7 @@ function renderUserDetails(u) {
     '<div><span class="text-xs text-slate-400 block">حالة الاعتماد</span><span class="font-semibold">' + (u.approval_status === 'approved' ? '<span class="text-green-600">✅ معتمد</span>' : (u.approval_status === 'rejected' ? '<span class="text-rose-600">❌ مرفوض</span>' : '<span class="text-amber-600">⏳ قيد المراجعة</span>')) + '</span></div>' +
   '</div>';
 
-  {{!-- ID Photos --}}
+  // ID Photos
   if (u.id_photos && u.id_photos.length > 0) {
     html += '<hr class="my-4 border-slate-100"><div><span class="text-xs text-slate-400 block mb-2">🪪 صور الهوية</span><div class="flex flex-wrap gap-3">';
     u.id_photos.forEach(function(p) {
@@ -240,7 +240,7 @@ function renderUserDetails(u) {
     html += '</div></div>';
   }
 
-  {{!-- Graduation attachments --}}
+  // Graduation attachments
   if (u.graduation_attachments && u.graduation_attachments.length > 0) {
     html += '<hr class="my-4 border-slate-100"><div><span class="text-xs text-slate-400 block mb-2">📎 مرفقات التخرج (' + u.graduation_attachments.length + ')</span><div class="flex flex-wrap gap-2">';
     u.graduation_attachments.forEach(function(att) {
