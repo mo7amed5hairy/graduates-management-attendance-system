@@ -183,7 +183,7 @@
     <footer class="app-footer">
       <div class="text-center leading-relaxed">
         <div>الحقوق البرمجية محفوظة &copy; {{ date('Y') }}</div>
-        <div class="text-xs text-slate-400 mt-0.5">صمم بحب بواسطة <a href="https://www.instagram.com/update_iraq?igsh=NmFtZ3dvZWZzZ2d6" target="_blank" rel="noopener" class="text-sky-500 hover:text-sky-600 hover:underline">أبديت للحلول البرمجية</a></div>
+        <div class="text-xs text-slate-400 mt-0.5">صمم بحب بواسطة <a href="https://www.instagram.com/update_iraq" target="_blank" rel="noopener" class="text-sky-500 hover:text-sky-600 hover:underline">أبديت للحلول البرمجية</a></div>
       </div>
     </footer>
   </div>
