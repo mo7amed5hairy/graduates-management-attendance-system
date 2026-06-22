@@ -794,33 +794,33 @@ $(document).ready(function() {
     }
     if (gov) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[8] === gov;
+        return data[8].trim().localeCompare(gov, 'ar', { sensitivity: 'base' }) === 0;
       });
     }
     if (birth) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[9] === birth;
+        return data[9].trim() === birth;
       });
     }
     if (social) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[10] === social;
+        return data[10].trim().localeCompare(social, 'ar', { sensitivity: 'base' }) === 0;
       });
     }
     if (children !== '') {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[11] === children;
+        return data[11].trim() === children;
       });
     }
     if (qual) {
       var qualText = $('#filterQualification option:selected').text();
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[12] === qualText;
+        return data[12].trim().localeCompare(qualText, 'ar', { sensitivity: 'base' }) === 0;
       });
     }
     if (gradYear) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[13] === gradYear;
+        return data[13].trim() === gradYear;
       });
     }
 

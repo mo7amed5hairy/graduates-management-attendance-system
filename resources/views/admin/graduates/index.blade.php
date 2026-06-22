@@ -82,7 +82,7 @@
   <div id="bulkActions" class="flex items-center gap-2" style="display:none">
     <span class="text-sm text-slate-500" id="selectedCount">0</span>
     <span class="text-sm text-slate-400">محدد</span>
-    <button class="btn btn-success text-sm" onclick="bulkActivate()">✅ تفعيل الجميع</button>
+    <button class="btn btn-success text-sm" id="bulkActivateBtn" onclick="bulkActivate()">✅ تفعيل الجميع</button>
     <button class="btn btn-ghost text-sm" onclick="clearAllCheckboxes()">إلغاء التحديد</button>
   </div>
 </div>
@@ -315,34 +315,34 @@ $(function() {
     }
     if (birth) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[6] === birth;
+        return data[6].trim() === birth;
       });
     }
     if (gov) {
       var govText = $('#filterGovernorate option:selected').text();
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[7] === govText;
+        return data[7].trim().localeCompare(govText, 'ar', { sensitivity: 'base' }) === 0;
       });
     }
     if (social) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[8] === social;
+        return data[8].trim().localeCompare(social, 'ar', { sensitivity: 'base' }) === 0;
       });
     }
     if (children !== '') {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[9] === children;
+        return data[9].trim() === children;
       });
     }
     if (qual) {
       var qualText = $('#filterQualification option:selected').text();
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[10] === qualText;
+        return data[10].trim().localeCompare(qualText, 'ar', { sensitivity: 'base' }) === 0;
       });
     }
     if (gradYear) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[13] === gradYear;
+        return data[13].trim() === gradYear;
       });
     }
 
@@ -375,12 +375,21 @@ function toggleSelectAll(source) {
 
 function updateBulkActions() {
   var checked = document.querySelectorAll('.user-checkbox:checked');
+  var total = document.querySelectorAll('.user-checkbox');
   var count = checked.length;
   var bar = document.getElementById('bulkActions');
   var label = document.getElementById('selectedCount');
+  var btn = document.getElementById('bulkActivateBtn');
   if (count > 0) {
     bar.style.display = 'flex';
     label.textContent = count;
+    if (count === total.length) {
+      btn.textContent = '✅ تفعيل الجميع';
+    } else if (count === 1) {
+      btn.textContent = '✅ تفعيل مستخدم';
+    } else {
+      btn.textContent = '✅ تفعيل عدد ' + count + ' مستخدم';
+    }
   } else {
     bar.style.display = 'none';
   }
