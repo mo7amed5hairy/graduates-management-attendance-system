@@ -19,9 +19,13 @@ class GraduateController extends Controller
     {
         $query = User::where('role', 'user');
 
-        if ($request->filled('approval_status')) {
-            $query->where('approval_status', $request->approval_status);
-        }
+        $query->where(function ($q) use ($request) {
+            if ($request->filled('approval_status')) {
+                $q->where('approval_status', $request->approval_status);
+            } else {
+                $q->whereNull('approval_status')->orWhere('approval_status', 'pending');
+            }
+        });
 
         if ($request->filled('governorate')) {
             $query->where('governorate', $request->governorate);
