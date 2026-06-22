@@ -294,7 +294,9 @@ $(function() {
     order: [[1, 'asc']],
     columnDefs: [
       { orderable: false, targets: [0, 16] }
-    ]
+    ],
+    pageLength: 50,
+    lengthMenu: [[25, 50, 100, 200, -1], [25, 50, 100, 200, 'الكل']]
   });
 
   function applyFilters() {
