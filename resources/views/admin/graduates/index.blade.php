@@ -78,11 +78,21 @@
   </div>
 </div>
 
+<div class="mb-4 flex items-center gap-3">
+  <div id="bulkActions" class="flex items-center gap-2" style="display:none">
+    <span class="text-sm text-slate-500" id="selectedCount">0</span>
+    <span class="text-sm text-slate-400">محدد</span>
+    <button class="btn btn-success text-sm" onclick="bulkActivate()">✅ تفعيل الجميع</button>
+    <button class="btn btn-ghost text-sm" onclick="clearAllCheckboxes()">إلغاء التحديد</button>
+  </div>
+</div>
+
 <div class="card p-5">
   <div class="table-wrap">
     <table class="data" id="graduatesTable">
       <thead>
         <tr>
+          <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
           <th>#</th>
           <th>الاسم</th>
           <th>البريد</th>
@@ -104,6 +114,7 @@
       <tbody>
         @forelse($graduates as $i => $g)
         <tr>
+          <td><input type="checkbox" class="user-checkbox" value="{{ $g->id }}" onchange="updateBulkActions()"></td>
           <td>{{ $i + 1 }}</td>
           <td class="font-bold">{{ $g->name }}</td>
           <td class="text-xs">{{ $g->email }}</td>
@@ -136,8 +147,18 @@
           </td>
           <td class="text-xs text-slate-500">{{ $g->created_at->format('Y/m/d') }}</td>
           <td>
-            <button onclick="openUserModal({{ $g->id }})" class="btn btn-sm btn-ghost" title="عرض التفاصيل">👁️</button>
-            <a href="{{ route('admin.graduates.show', $g) }}" class="btn btn-sm btn-primary">🔍 عرض</a>
+            <div class="flex gap-1">
+              <button onclick="openUserModal({{ $g->id }})" class="btn btn-sm btn-ghost py-1 px-2" title="عرض التفاصيل">👁️</button>
+              <a href="{{ route('admin.graduates.show', $g) }}" class="btn btn-sm btn-primary">🔍 عرض</a>
+              <button class="btn btn-ghost py-1 px-2 text-xs toggle-status-btn" data-url="{{ route('admin.users.toggle-status', $g) }}" data-name="{{ $g->name }}" title="{{ $g->status === 'active' ? 'تعليق' : 'تفعيل' }}">
+                {{ $g->status === 'active' ? '⏸️' : '▶️' }}
+              </button>
+              @if(!$g->isAdmin())
+              <button class="btn btn-danger py-1 px-2 text-xs"
+                data-delete="{{ route('admin.users.destroy', $g) }}"
+                data-name="{{ $g->name }}">🗑️</button>
+              @endif
+            </div>
           </td>
         </tr>
         @empty
@@ -270,9 +291,9 @@ function esc(str) {
 $(function() {
   var table = $('#graduatesTable').DataTable({
     language: { url: '{{ asset('js/ar.json') }}' },
-    order: [[0, 'asc']],
+    order: [[1, 'asc']],
     columnDefs: [
-      { orderable: false, targets: [15] }
+      { orderable: false, targets: [0, 16] }
     ]
   });
 
@@ -289,39 +310,39 @@ $(function() {
 
     if (gender) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[4].trim().localeCompare(gender, 'ar', { sensitivity: 'base' }) === 0;
+        return data[5].trim().localeCompare(gender, 'ar', { sensitivity: 'base' }) === 0;
       });
     }
     if (birth) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[5] === birth;
+        return data[6] === birth;
       });
     }
     if (gov) {
       var govText = $('#filterGovernorate option:selected').text();
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[6] === govText;
+        return data[7] === govText;
       });
     }
     if (social) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[7] === social;
+        return data[8] === social;
       });
     }
     if (children !== '') {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[8] === children;
+        return data[9] === children;
       });
     }
     if (qual) {
       var qualText = $('#filterQualification option:selected').text();
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[9] === qualText;
+        return data[10] === qualText;
       });
     }
     if (gradYear) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[12] === gradYear;
+        return data[13] === gradYear;
       });
     }
 
@@ -341,6 +362,93 @@ $(function() {
     $.fn.dataTable.ext.search = [];
     table.draw();
   });
+});
+
+var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+function toggleSelectAll(source) {
+  document.querySelectorAll('.user-checkbox:not(:disabled)').forEach(function(cb) {
+    cb.checked = source.checked;
+  });
+  updateBulkActions();
+}
+
+function updateBulkActions() {
+  var checked = document.querySelectorAll('.user-checkbox:checked');
+  var count = checked.length;
+  var bar = document.getElementById('bulkActions');
+  var label = document.getElementById('selectedCount');
+  if (count > 0) {
+    bar.style.display = 'flex';
+    label.textContent = count;
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function clearAllCheckboxes() {
+  document.querySelectorAll('.user-checkbox:checked').forEach(function(cb) {
+    cb.checked = false;
+  });
+  document.getElementById('selectAll').checked = false;
+  updateBulkActions();
+}
+
+function bulkActivate() {
+  var checked = document.querySelectorAll('.user-checkbox:checked');
+  var ids = Array.from(checked).map(function(cb) { return cb.value; });
+  var count = ids.length;
+  if (count === 0) return;
+  if (!confirm('هل أنت متأكد من تفعيل ' + count + ' مستخدم؟')) return;
+
+  fetch('{{ route('admin.users.bulk-activate') }}', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken },
+    body: JSON.stringify({ ids: ids })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.success) { App.toast ? App.toast(d.message, 'success') : alert(d.message); location.reload(); }
+    else { alert(d.message || 'حدث خطأ'); }
+  })
+  .catch(function() { alert('حدث خطأ في الاتصال'); });
+}
+
+document.addEventListener('click', function(e) {
+  var deleteBtn = e.target.closest('[data-delete]');
+  if (deleteBtn) {
+    var url = deleteBtn.dataset.delete;
+    var name = deleteBtn.dataset.name;
+    if (!confirm('هل أنت متأكد من حذف "' + name + '"?')) return;
+    fetch(url, {
+      method: 'DELETE',
+      headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.success) { App.toast ? App.toast(d.message, 'success') : alert(d.message); location.reload(); }
+      else { alert(d.message || 'حدث خطأ'); }
+    })
+    .catch(function() { alert('حدث خطأ في الاتصال'); });
+  }
+});
+
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.toggle-status-btn');
+  if (!btn) return;
+  var url = btn.dataset.url;
+  var name = btn.dataset.name;
+  if (!confirm('تأكيد تغيير حالة المستخدم "' + name + '"?')) return;
+  fetch(url, {
+    method: 'POST',
+    headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.success) { location.reload(); }
+    else { alert(d.message || 'حدث خطأ'); }
+  })
+  .catch(function() { alert('حدث خطأ في الاتصال'); });
 });
 </script>
 @endpush
