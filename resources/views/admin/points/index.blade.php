@@ -128,7 +128,51 @@
 
 @endsection
 
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+<style>
+.select2-container--default .select2-selection--single {
+  height: 42px;
+  border: 1px solid #e2e8f0;
+  border-radius: .6rem;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  line-height: 40px;
+  font-size: .9rem;
+  color: #334155;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+  height: 40px;
+}
+.select2-container--default .select2-search--dropdown .select2-search__field {
+  border: 1px solid #e2e8f0;
+  border-radius: .4rem;
+  padding: 6px;
+}
+.select2-dropdown {
+  border: 1px solid #e2e8f0;
+  border-radius: .6rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+  z-index: 1060;
+}
+.select2-results__option {
+  padding: 8px 12px;
+  font-size: .85rem;
+}
+.select2-container--default .select2-results__option--highlighted {
+  background: #0ea5e9;
+}
+.select2-container--open .select2-dropdown--below {
+  margin-top: 4px;
+}
+</style>
+@endpush
+
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function() {
   $('#pointsTable').DataTable({
@@ -137,6 +181,21 @@ $(document).ready(function() {
     columnDefs: [{ orderable: false, targets: [4, 5, 6] }],
     responsive: true,
     autoWidth: true
+  });
+
+  // Searchable user selects
+  $('select[name="user_id"]').each(function() {
+    var placeholder = $(this).find('option:first').text();
+    $(this).select2({
+      placeholder: placeholder,
+      allowClear: true,
+      width: '100%',
+      dir: 'rtl',
+      language: {
+        noResults: function() { return 'لا توجد نتائج'; },
+        searching: function() { return 'جاري البحث...'; }
+      }
+    });
   });
 });
 </script>

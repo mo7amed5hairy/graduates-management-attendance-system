@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\Notification;
+use App\Models\Qualification;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -23,8 +24,9 @@ class EventController extends Controller
 
     public function create()
     {
-        $graduates = User::where('role', 'user')->where('approval_status', 'approved')->orderBy('name')->get();
-        return view('admin.events.create', compact('graduates'));
+        $graduates = User::with('qualification')->where('role', 'user')->where('approval_status', 'approved')->orderBy('name')->get();
+        $qualifications = Qualification::orderBy('name')->get(['id', 'name']);
+        return view('admin.events.create', compact('graduates', 'qualifications'));
     }
 
     public function store(Request $request): JsonResponse|RedirectResponse

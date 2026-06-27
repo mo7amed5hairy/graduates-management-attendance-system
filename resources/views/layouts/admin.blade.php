@@ -8,6 +8,7 @@
 <script src="{{ asset('js/tailwind.js') }}"></script>
 <link rel="stylesheet" href="{{ asset('css/app.css') }}">
 <link rel="stylesheet" href="{{ asset('css/dataTables.min.css') }}">
+@stack('styles')
 </head>
 <body>
 
