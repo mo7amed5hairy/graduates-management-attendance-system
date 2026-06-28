@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Governorate;
 use App\Models\Qualification;
 use App\Models\User;
+use App\Notifications\AccountStatusNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -151,11 +152,20 @@ class UserController extends Controller
 
     public function toggleStatus(User $user): JsonResponse
     {
-        $user->update([
-            'status' => $user->status === 'active' ? 'inactive' : 'active',
-        ]);
+        $oldStatus = $user->status;
+        $newStatus = $oldStatus === 'active' ? 'inactive' : 'active';
 
-        $statusText = $user->status === 'active' ? 'نشط' : 'غير نشط';
+        $user->update(['status' => $newStatus]);
+
+        $action = $newStatus === 'active' ? 'activated' : 'deactivated';
+        $adminName = auth()->user()->name;
+        try {
+            $user->notify(new AccountStatusNotification($action, $adminName));
+        } catch (\Throwable $e) {
+            // fail silently — email is non-blocking
+        }
+
+        $statusText = $newStatus === 'active' ? 'نشط' : 'غير نشط';
 
         return response()->json([
             'success' => true,
@@ -171,14 +181,27 @@ class UserController extends Controller
             'ids.*' => 'exists:users,id',
         ]);
 
-        $count = User::whereIn('id', $validated['ids'])
+        $users = User::whereIn('id', $validated['ids'])
             ->where('role', '!=', 'admin')
-            ->update([
+            ->get();
+
+        $adminName = auth()->user()->name;
+
+        foreach ($users as $user) {
+            $user->update([
                 'approval_status' => 'approved',
                 'approved_at' => now(),
                 'approved_by' => auth()->id(),
                 'status' => 'active',
             ]);
+            try {
+                $user->notify(new AccountStatusNotification('approved', $adminName));
+            } catch (\Throwable $e) {
+                // fail silently
+            }
+        }
+
+        $count = $users->count();
 
         return response()->json([
             'success' => true,
@@ -193,6 +216,13 @@ class UserController extends Controller
                 'success' => false,
                 'message' => 'لا يمكن حذف حساب أدمن',
             ], 422);
+        }
+
+        $adminName = auth()->user()->name;
+        try {
+            $user->notify(new AccountStatusNotification('deleted', $adminName));
+        } catch (\Throwable $e) {
+            // fail silently
         }
 
         if ($user->image) {
