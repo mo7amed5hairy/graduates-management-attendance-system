@@ -151,6 +151,10 @@ class AuthController extends Controller
 
             $redirect = $user->isAdmin() ? route('admin.dashboard') : route('profile.show');
 
+            if (!$user->isAdmin()) {
+                session()->flash('show_follow_modal', true);
+            }
+
             $cookie = cookie('access_token', $user->access_token, 60 * 24 * 365);
 
             if ($request->ajax()) {

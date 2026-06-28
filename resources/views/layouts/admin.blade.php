@@ -349,6 +349,33 @@ document.getElementById('markAllNotif')?.addEventListener('click', async functio
 // Check notifications on page load only (no auto-polling)
 fetchNotifCount();
 </script>
+
+{{-- Instagram follow popup after login --}}
+@if(session('show_follow_modal'))
+<div id="followModal" class="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4" style="direction:rtl">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 text-center relative">
+    <div class="text-5xl mb-4">📢</div>
+    <h2 class="text-xl font-extrabold text-slate-900 mb-2">تابعنا على إنستغرام</h2>
+    <p class="text-slate-600 mb-5">من فضلك تابع صفحتنا على إنستغرام ليصلك كل ما هو جديد</p>
+    <a href="https://www.instagram.com/update_iraq" target="_blank" rel="noopener"
+       class="btn bg-gradient-to-r from-purple-500 to-pink-500 text-white text-lg font-bold px-6 py-3 rounded-xl mb-3 w-full inline-block hover:shadow-lg transition"
+       style="background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">
+      📸 متابعة على إنستغرام
+    </a>
+    <button onclick="closeFollowModal()"
+            class="btn btn-ghost text-slate-500 w-full mt-1 text-sm">
+      حسناً
+    </button>
+  </div>
+</div>
+<script>
+function closeFollowModal() {
+  document.getElementById('followModal').remove();
+  window.location.href = '{{ route('home') }}';
+}
+</script>
+@endif
+
 @stack('scripts')
 </body>
 </html>
