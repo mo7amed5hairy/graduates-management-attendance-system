@@ -356,16 +356,18 @@ fetchNotifCount();
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 text-center relative">
     <div class="text-5xl mb-4">📢</div>
     <h2 class="text-xl font-extrabold text-slate-900 mb-2">تابعنا على إنستغرام</h2>
-    <p class="text-slate-600 mb-5">من فضلك تابع صفحتنا على إنستغرام ليصلك كل ما هو جديد</p>
+    <p class="text-slate-600 mb-5">من فضلك تابع صفحتنا على إنستغرام لمتابعة كل ما هو جديد</p>
     <a href="https://www.instagram.com/update_iraq" target="_blank" rel="noopener"
        class="btn bg-gradient-to-r from-purple-500 to-pink-500 text-white text-lg font-bold px-6 py-3 rounded-xl mb-3 w-full inline-block hover:shadow-lg transition"
        style="background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">
       📸 متابعة على إنستغرام
     </a>
-    <button onclick="closeFollowModal()"
-            class="btn btn-ghost text-slate-500 w-full mt-1 text-sm">
-      حسناً
-    </button>
+    <div class="flex justify-center">
+      <button onclick="closeFollowModal()"
+              class="btn bg-blue-600 text-white text-sm px-4 py-1.5 rounded-lg hover:bg-blue-700 transition">
+        حسناً
+      </button>
+    </div>
   </div>
 </div>
 <script>
