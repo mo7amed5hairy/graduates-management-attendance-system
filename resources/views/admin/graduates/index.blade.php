@@ -289,6 +289,7 @@ function esc(str) {
 </script>
 
 <script>
+@if($graduates->count() > 0)
 $(function() {
   var table = $('#graduatesTable').DataTable({
     language: { url: '{{ asset('js/ar.json') }}' },
@@ -366,6 +367,7 @@ $(function() {
     table.draw();
   });
 });
+@endif
 
 var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
