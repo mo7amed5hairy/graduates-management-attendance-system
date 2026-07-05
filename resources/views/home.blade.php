@@ -71,7 +71,9 @@
     </div>
     <div class="space-y-2 text-sm">
       <div><span class="text-slate-400">الهاتف:</span> <span class="font-semibold">{{ $user->phone ?? 'غير محدد' }}</span></div>
-      <div><span class="text-slate-400">الجامعة:</span> <span class="font-semibold">{{ $user->university ?? 'غير محدد' }}</span></div>
+      @if($user->university)
+      <div><span class="text-slate-400">الجامعة:</span> <span class="font-semibold">{{ $user->university }}</span></div>
+      @endif
       <div><span class="text-slate-400">سنة التخرج:</span> <span class="font-semibold">{{ $user->graduation_year ?? 'غير محدد' }}</span></div>
       @if($user->address)
       <div><span class="text-slate-400">العنوان:</span> <span class="font-semibold">{{ $user->address }}</span></div>

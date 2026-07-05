@@ -57,7 +57,7 @@
       </div>
       <div class="flex-1 min-w-0">
         <div class="text-sm font-semibold text-slate-900 truncate">{{ $g->name }}</div>
-        <div class="text-xs text-slate-400">{{ $g->university ?? '—' }} · {{ $g->graduation_year ?? '—' }}</div>
+        <div class="text-xs text-slate-400">@if($g->university){{ $g->university }} · @endif{{ $g->graduation_year ?? '—' }}</div>
       </div>
       @if($g->isPending())
         <span class="pill pill-amber text-xs">قيد المراجعة</span>

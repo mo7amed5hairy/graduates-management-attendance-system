@@ -27,7 +27,7 @@
 
 <div class="w-full max-w-full overflow-x-hidden">
   <div class="card p-4 sm:p-6 mb-6 overflow-x-auto">
-    <div class="flex items-start sm:items-center gap-4 flex-wrap">
+    <div class="flex items-center gap-4 mb-4">
       @if($user->image)
         <img src="{{ $user->image_url }}" class="avatar avatar-lg shrink-0" style="object-fit:cover">
       @else
@@ -35,29 +35,32 @@
           {{ substr($user->name, 0, 2) }}
         </div>
       @endif
-      <div class="flex-1 min-w-0">
-        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 break-words">{{ $user->name }}</h2>
-        <div class="flex flex-wrap gap-2 mt-2">
-          @if($user->isAdmin())
-            <span class="pill pill-violet">مدير</span>
-          @else
-            <span class="pill pill-blue">خريج</span>
-          @endif
-          <span class="pill pill-amber">{{ number_format($user->points) }} نقطة</span>
-          @if($user->isApproved())
-            <span class="pill pill-green">معتمد</span>
-          @elseif($user->isRejected())
-            <span class="pill pill-rose">مرفوض</span>
-          @else
-            <span class="pill pill-amber">قيد المراجعة</span>
-          @endif
-          @if($pendingRequest && $pendingRequest->status === 'pending')
-            <span class="pill pill-amber">🔔 طلب تعديل معلق</span>
-          @endif
+      <div class="flex-1 min-w-0 flex flex-wrap items-center gap-2">
+        <div>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">{{ $user->name }}</h2>
+          <p class="text-sm text-slate-500">{{ $user->email }}</p>
         </div>
+        @if(!$user->isAdmin())
+          <button onclick="openEditModal()" class="btn btn-primary text-sm">✏️ تعديل البروفايل</button>
+        @endif
       </div>
-      @if(!$user->isAdmin())
-        <button onclick="openEditModal()" class="btn btn-primary">✏️ تعديل البروفايل</button>
+    </div>
+    <div class="flex flex-wrap gap-2 mb-4">
+      @if($user->isAdmin())
+        <span class="pill pill-violet">مدير</span>
+      @else
+        <span class="pill pill-blue">خريج</span>
+      @endif
+      <span class="pill pill-amber">{{ number_format($user->points) }} نقطة</span>
+      @if($user->isApproved())
+        <span class="pill pill-green">معتمد</span>
+      @elseif($user->isRejected())
+        <span class="pill pill-rose">مرفوض</span>
+      @else
+        <span class="pill pill-amber">قيد المراجعة</span>
+      @endif
+      @if($pendingRequest && $pendingRequest->status === 'pending')
+        <span class="pill pill-amber">🔔 طلب تعديل معلق</span>
       @endif
     </div>
 
