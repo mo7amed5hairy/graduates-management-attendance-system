@@ -123,6 +123,8 @@ class UserController extends Controller
             });
         }
 
+        $recordsTotal = $query->count();
+
         // Column filters
         if ($gender = $request->input('gender')) {
             $query->where('gender', $gender);
@@ -153,7 +155,7 @@ class UserController extends Controller
             $query->where('status', $status);
         }
 
-        $recordsTotal = $query->count();
+        $recordsFiltered = $query->count();
 
         // Order
         $orderCol = $request->input('order.0.column', 1);
@@ -166,8 +168,6 @@ class UserController extends Controller
         $start = (int) $request->input('start', 0);
         $length = (int) $request->input('length', 50);
         $users = $query->skip($start)->take($length)->get();
-
-        $recordsFiltered = $recordsTotal;
 
         $data = [];
         foreach ($users as $i => $u) {
