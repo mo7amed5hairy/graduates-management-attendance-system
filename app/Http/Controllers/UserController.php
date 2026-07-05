@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Notifications\AccountStatusNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -76,14 +77,34 @@ class UserController extends Controller
 
     public function index()
     {
-        $users = User::with('qualification', 'qualificationFaculty')->latest()->get();
-        $genders = ['ذكر', 'أنثى'];
-        $governorates = User::whereNotNull('governorate')->distinct()->pluck('governorate')->sort();
-        $allGovernorates = Governorate::orderBy('name')->pluck('name');
-        $birthYears = User::whereNotNull('date_of_birth')->distinct()->pluck('date_of_birth')->sort();
-        $graduationYears = User::whereNotNull('graduation_year')->distinct()->pluck('graduation_year')->sort();
-        $qualifications = Qualification::orderBy('name')->get(['id', 'name']);
-        return view('admin.users.index', compact('users', 'genders', 'governorates', 'allGovernorates', 'birthYears', 'graduationYears', 'qualifications'));
+        $cacheKey = 'users_index_' . md5(request()->fullUrl());
+        $cacheTtl = 60; // seconds
+
+        $data = Cache::remember($cacheKey, $cacheTtl, function () {
+            $users = User::with('qualification:id,name', 'qualificationFaculty:id,name')
+                ->select([
+                    'id', 'name', 'first_name', 'father_name', 'grandfather_name', 'family_name',
+                    'mother_name', 'mother_father_name', 'mother_grandfather_name',
+                    'email', 'phone', 'national_id', 'governorate', 'address',
+                    'gender', 'social_status', 'children_count', 'age', 'date_of_birth',
+                    'qualification_id', 'qualification_faculty_id', 'graduation_year',
+                    'job_status', 'image', 'status', 'approval_status', 'role',
+                    'points', 'created_at', 'updated_at',
+                ])
+                ->latest()
+                ->get();
+
+            $genders = ['ذكر', 'أنثى'];
+            $governorates = User::whereNotNull('governorate')->distinct()->pluck('governorate')->sort();
+            $allGovernorates = Governorate::orderBy('name')->pluck('name');
+            $birthYears = User::whereNotNull('date_of_birth')->distinct()->pluck('date_of_birth')->sort();
+            $graduationYears = User::whereNotNull('graduation_year')->distinct()->pluck('graduation_year')->sort();
+            $qualifications = Qualification::orderBy('name')->get(['id', 'name']);
+
+            return compact('users', 'genders', 'governorates', 'allGovernorates', 'birthYears', 'graduationYears', 'qualifications');
+        });
+
+        return view('admin.users.index', $data);
     }
 
     public function show(User $user): JsonResponse

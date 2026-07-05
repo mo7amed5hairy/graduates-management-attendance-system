@@ -5,6 +5,48 @@
 @section('page_subtitle', 'مراجعة بيانات التعديل والمرفقات')
 
 @section('content')
+
+{{-- Status message at the top --}}
+@if($changeRequest->status !== 'pending')
+<div class="card p-5 mb-6">
+  <div class="flex items-center gap-3">
+    @if($changeRequest->status === 'approved')
+      <span class="text-green-600 text-lg">✅</span>
+      <h3 class="font-extrabold text-green-700">تم البت في هذا الطلب — تمت الموافقة</h3>
+    @else
+      <span class="text-rose-600 text-lg">❌</span>
+      <h3 class="font-extrabold text-rose-700">تم البت في هذا الطلب — تم الرفض</h3>
+    @endif
+  </div>
+  @if($changeRequest->admin_notes)
+    <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600 mt-3">
+      <span class="text-xs text-slate-400 block mb-1">💬 ملاحظات المشرف</span>
+      {{ $changeRequest->admin_notes }}
+    </div>
+  @endif
+</div>
+@endif
+
+{{-- Success/error flash messages --}}
+@if(session('success'))
+  <div class="card p-4 mb-6 bg-green-50 border border-green-200 text-green-700 rounded-lg" id="flashSuccess">
+    <div class="flex items-center gap-2">
+      <span>✅</span>
+      <span class="font-semibold">{{ session('success') }}</span>
+      <button onclick="this.parentElement.parentElement.remove()" class="mr-auto text-green-500 hover:text-green-700">&times;</button>
+    </div>
+  </div>
+@endif
+@if(session('error'))
+  <div class="card p-4 mb-6 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg" id="flashError">
+    <div class="flex items-center gap-2">
+      <span>❌</span>
+      <span class="font-semibold">{{ session('error') }}</span>
+      <button onclick="this.parentElement.parentElement.remove()" class="mr-auto text-rose-500 hover:text-rose-700">&times;</button>
+    </div>
+  </div>
+@endif
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
   {{-- User info --}}
   <div class="card p-5">
@@ -153,11 +195,11 @@
     <h3 class="font-extrabold text-slate-800 mb-4">⚙️ إجراءات المراجعة</h3>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       {{-- Approve form --}}
-      <form action="{{ route('admin.profile-change-requests.approve', $changeRequest) }}" method="POST">
+      <form action="{{ route('admin.profile-change-requests.approve', $changeRequest) }}" method="POST" class="pcr-form">
         @csrf
         <div class="mb-3">
-          <label class="label">ملاحظات (اختياري)</label>
-          <textarea class="input" name="admin_notes" rows="2" placeholder="ملاحظات على الموافقة"></textarea>
+          <label class="label">ملاحظات <span class="text-rose-500">*</span></label>
+          <textarea class="input" name="admin_notes" rows="2" placeholder="ملاحظات على الموافقة" required></textarea>
         </div>
         <button type="submit" class="btn btn-success w-full">✅ قبول الطلب</button>
       </form>
@@ -172,24 +214,6 @@
         <button type="submit" class="btn btn-danger w-full">❌ رفض الطلب</button>
       </form>
     </div>
-  </div>
-  @else
-  <div class="card p-5 lg:col-span-3">
-    <div class="flex items-center gap-3 mb-3">
-      @if($changeRequest->status === 'approved')
-        <span class="text-green-600 text-lg">✅</span>
-        <h3 class="font-extrabold text-green-700">تم البت في هذا الطلب — تمت الموافقة</h3>
-      @else
-        <span class="text-rose-600 text-lg">❌</span>
-        <h3 class="font-extrabold text-rose-700">تم البت في هذا الطلب — تم الرفض</h3>
-      @endif
-    </div>
-    @if($changeRequest->admin_notes)
-      <div class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600">
-        <span class="text-xs text-slate-400 block mb-1">💬 ملاحظات المشرف</span>
-        {{ $changeRequest->admin_notes }}
-      </div>
-    @endif
   </div>
   @endif
 </div>
@@ -206,6 +230,16 @@
 
 @push('scripts')
 <script>
+// Show toast on success flash
+(function() {
+  var flash = document.getElementById('flashSuccess') || document.getElementById('flashError');
+  if (flash) {
+    var msg = flash.querySelector('span.font-semibold')?.textContent || '';
+    if (App.toast) App.toast(msg, flash.id === 'flashSuccess' ? 'success' : 'error');
+    setTimeout(function() { flash.style.display = 'none'; }, 5000);
+  }
+})();
+
 function openZoom(src) {
   document.getElementById('zoomImg').src = src;
   document.getElementById('zoomModal').classList.remove('hidden');

@@ -32,6 +32,8 @@ class ProfileChangeRequestController extends Controller
             return back()->with('error', 'تمت معالجة هذا الطلب مسبقاً');
         }
 
+        $request->validate(['admin_notes' => 'required|string|max:1000']);
+
         $this->approveRequest($changeRequest, $request->input('admin_notes'));
 
         $msg = '✅ تمت الموافقة على الطلب وتحديث بيانات المستخدم';

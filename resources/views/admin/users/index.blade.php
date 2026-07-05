@@ -82,6 +82,23 @@
         @endforeach
       </select>
     </div>
+    <div class="col-span-6 md:col-span-2">
+      <label class="label text-xs mb-1">حالة الاعتماد</label>
+      <select class="input text-sm" id="filterApprovalStatus">
+        <option value="">الكل</option>
+        <option value="pending">⏳ قيد المراجعة</option>
+        <option value="approved">✅ مقبول</option>
+        <option value="rejected">❌ مرفوض</option>
+      </select>
+    </div>
+    <div class="col-span-6 md:col-span-1">
+      <label class="label text-xs mb-1">حالة الحساب</label>
+      <select class="input text-sm" id="filterActiveStatus">
+        <option value="">الكل</option>
+        <option value="active">نشط</option>
+        <option value="inactive">غير نشط</option>
+      </select>
+    </div>
     <div class="col-span-12 md:col-span-1 flex gap-2">
       <button class="btn btn-primary text-sm py-2 px-3 w-full" id="resetFilters">🔄</button>
     </div>
@@ -182,6 +199,7 @@
           </td>
         </tr>
         @empty
+          <tr><td colspan="17" class="text-center text-slate-400 py-8">لا يوجد مستخدمين لعرضهم</td></tr>
         @endforelse
       </tbody>
     </table>
@@ -454,8 +472,8 @@
 
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-6">
-          <label class="label">الحالة الاجتماعية <span class="text-rose-500">*</span></label>
-          <select class="input" name="social_status" id="editSocialStatus" required onchange="toggleEditChildren()">
+          <label class="label">الحالة الاجتماعية</label>
+          <select class="input" name="social_status" id="editSocialStatus" onchange="toggleEditChildren()">
             <option value="">اختر...</option>
             <option value="أعزب">أعزب</option>
             <option value="متزوج">متزوج</option>
@@ -471,8 +489,8 @@
 
       <div class="grid grid-cols-12 gap-4 mb-4">
         <div class="col-span-12 md:col-span-3">
-          <label class="label">المحافظة <span class="text-rose-500">*</span></label>
-          <select class="input" name="governorate" id="editGovernorate" required>
+          <label class="label">المحافظة</label>
+          <select class="input" name="governorate" id="editGovernorate">
             <option value="">اختر...</option>
           </select>
         </div>
@@ -784,6 +802,8 @@ $(document).ready(function() {
     var children = $('#filterChildren').val();
     var gradYear = $('#filterGradYear').val();
     var qual = $('#filterQualification').val();
+    var approval = $('#filterApprovalStatus').val();
+    var activeStatus = $('#filterActiveStatus').val();
 
     $.fn.dataTable.ext.search = [];
 
@@ -823,11 +843,21 @@ $(document).ready(function() {
         return data[13].trim() === gradYear;
       });
     }
+    if (approval) {
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[14].trim().localeCompare(approval, 'ar', { sensitivity: 'base' }) === 0;
+      });
+    }
+    if (activeStatus) {
+      $.fn.dataTable.ext.search.push(function(settings, data) {
+        return data[15].trim().localeCompare(activeStatus, 'ar', { sensitivity: 'base' }) === 0;
+      });
+    }
 
     table.draw();
   }
 
-  $('#filterGender, #filterGovernorate, #filterBirthYear, #filterSocialStatus, #filterChildren, #filterGradYear, #filterQualification').on('change', applyFilters);
+  $('#filterGender, #filterGovernorate, #filterBirthYear, #filterSocialStatus, #filterChildren, #filterGradYear, #filterQualification, #filterApprovalStatus, #filterActiveStatus').on('change', applyFilters);
 
   $('#resetFilters').on('click', function() {
     $('#filterGender').val('');
@@ -837,6 +867,8 @@ $(document).ready(function() {
     $('#filterChildren').val('');
     $('#filterGradYear').val('');
     $('#filterQualification').val('');
+    $('#filterApprovalStatus').val('');
+    $('#filterActiveStatus').val('');
     $.fn.dataTable.ext.search = [];
     table.draw();
   });
@@ -879,12 +911,25 @@ function clearAllCheckboxes() {
   updateBulkActions();
 }
 
+function showLoadingOverlay() {
+  var div = document.createElement('div');
+  div.id = 'bulkLoadingOverlay';
+  div.innerHTML = '<div class="fixed inset-0 bg-white/80 flex items-center justify-center" style="z-index:99999">' +
+    '<div class="text-center bg-white rounded-2xl shadow-2xl p-8">' +
+    '<div class="animate-spin w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full mx-auto mb-4"></div>' +
+    '<div class="text-slate-600 font-semibold">جاري التفعيل...</div></div></div>';
+  document.body.appendChild(div);
+}
+function hideLoadingOverlay() { var el = document.getElementById('bulkLoadingOverlay'); if (el) el.remove(); }
+
 function bulkActivate() {
   var checked = document.querySelectorAll('.user-checkbox:checked');
   var ids = Array.from(checked).map(function(cb) { return cb.value; });
   var count = ids.length;
   if (count === 0) return;
   if (!confirm('هل أنت متأكد من تفعيل ' + count + ' مستخدم؟')) return;
+
+  showLoadingOverlay();
 
   fetch('{{ route('admin.users.bulk-activate') }}', {
     method: 'POST',
@@ -897,6 +942,7 @@ function bulkActivate() {
   })
   .then(function(r) { return r.json(); })
   .then(function(d) {
+    hideLoadingOverlay();
     if (d.success) {
       App.toast(d.message);
       location.reload();
@@ -904,7 +950,10 @@ function bulkActivate() {
       alert(d.message || 'حدث خطأ');
     }
   })
-  .catch(function() { alert('حدث خطأ في الاتصال'); });
+  .catch(function() {
+    hideLoadingOverlay();
+    alert('حدث خطأ في الاتصال');
+  });
 }
 
 document.addEventListener('change', function(e) {

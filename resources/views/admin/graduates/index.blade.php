@@ -162,6 +162,7 @@
           </td>
         </tr>
         @empty
+          <tr><td colspan="17" class="text-center text-slate-400 py-8">لا يوجد خريجين لعرضهم</td></tr>
         @endforelse
       </tbody>
     </table>
@@ -405,12 +406,25 @@ function clearAllCheckboxes() {
   updateBulkActions();
 }
 
+function showLoadingOverlay() {
+  var div = document.createElement('div');
+  div.id = 'bulkLoadingOverlay';
+  div.innerHTML = '<div class="fixed inset-0 bg-white/80 flex items-center justify-center" style="z-index:99999">' +
+    '<div class="text-center bg-white rounded-2xl shadow-2xl p-8">' +
+    '<div class="animate-spin w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full mx-auto mb-4"></div>' +
+    '<div class="text-slate-600 font-semibold">جاري التفعيل...</div></div></div>';
+  document.body.appendChild(div);
+}
+function hideLoadingOverlay() { var el = document.getElementById('bulkLoadingOverlay'); if (el) el.remove(); }
+
 function bulkActivate() {
   var checked = document.querySelectorAll('.user-checkbox:checked');
   var ids = Array.from(checked).map(function(cb) { return cb.value; });
   var count = ids.length;
   if (count === 0) return;
   if (!confirm('هل أنت متأكد من تفعيل ' + count + ' مستخدم؟')) return;
+
+  showLoadingOverlay();
 
   fetch('{{ route('admin.users.bulk-activate') }}', {
     method: 'POST',
@@ -419,10 +433,14 @@ function bulkActivate() {
   })
   .then(function(r) { return r.json(); })
   .then(function(d) {
+    hideLoadingOverlay();
     if (d.success) { App.toast ? App.toast(d.message, 'success') : alert(d.message); location.reload(); }
     else { alert(d.message || 'حدث خطأ'); }
   })
-  .catch(function() { alert('حدث خطأ في الاتصال'); });
+  .catch(function() {
+    hideLoadingOverlay();
+    alert('حدث خطأ في الاتصال');
+  });
 }
 
 document.addEventListener('click', function(e) {
