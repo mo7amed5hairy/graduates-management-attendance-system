@@ -86,7 +86,7 @@ class UserController extends Controller
     public function index()
     {
         $genders = ['ذكر', 'أنثى'];
-        $allGovernorates = Governorate::orderBy('name')->pluck('name');
+        $allGovernorates = Governorate::orderBy('name')->get(['id', 'name']);
         $birthYears = User::whereNotNull('date_of_birth')->distinct()->pluck('date_of_birth')->sort();
         $graduationYears = User::whereNotNull('graduation_year')->distinct()->pluck('graduation_year')->sort();
         $qualifications = Qualification::orderBy('name')->get(['id', 'name']);
@@ -129,8 +129,14 @@ class UserController extends Controller
         if ($gender = $request->input('gender')) {
             $query->where('gender', $gender);
         }
-        if ($gov = $request->input('governorate')) {
-            $query->where('governorate', $gov);
+        if ($govId = $request->input('governorate')) {
+            $query->where(function ($q) use ($govId) {
+                $q->where('governorate', $govId);
+                $govModel = Governorate::find((int) $govId);
+                if ($govModel) {
+                    $q->orWhere('governorate', $govModel->name);
+                }
+            });
         }
         if ($birth = $request->input('birth_year')) {
             $query->where('date_of_birth', $birth);

@@ -32,7 +32,7 @@
       <select class="input text-sm" id="filterGovernorate">
         <option value="">الكل</option>
         @foreach($allGovernorates as $gov)
-          <option value="{{ $gov }}">{{ $gov }}</option>
+          <option value="{{ $gov->id }}">{{ $gov->name }}</option>
         @endforeach
       </select>
     </div>
