@@ -54,6 +54,12 @@ class ProfileChangeRequestController extends Controller
             'id_photo_back' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ], [
             'phone.regex' => 'صيغة رقم الهاتف غير صحيحة يجب أن تكون من 11 رقماً وتبدأ ب 077 أو 078',
+            'id_photo_front.max' => 'حجم صورة الهوية الأمامية يجب ألا يتجاوز 5120 كيلوبايت',
+            'id_photo_front.image' => 'يجب أن تكون صورة الهوية الأمامية صورة صالحة',
+            'id_photo_front.mimes' => 'صورة الهوية الأمامية يجب أن تكون من نوع: jpeg, png, jpg',
+            'id_photo_back.max' => 'حجم صورة الهوية الخلفية يجب ألا يتجاوز 5120 كيلوبايت',
+            'id_photo_back.image' => 'يجب أن تكون صورة الهوية الخلفية صورة صالحة',
+            'id_photo_back.mimes' => 'صورة الهوية الخلفية يجب أن تكون من نوع: jpeg, png, jpg',
         ]);
 
         // Build the requested data (all submitted fields except file uploads, password, token)
