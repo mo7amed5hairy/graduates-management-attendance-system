@@ -715,7 +715,7 @@ $(document).ready(function() {
   var table = $('#usersTable').DataTable({
     serverSide: true,
     ajax: {
-      url: '{{ route('admin.users.data') }}',
+      url: '{{ url('/admin/users/data') }}',
       type: 'GET',
       data: function(d) {
         d.gender = $('#filterGender').val();
