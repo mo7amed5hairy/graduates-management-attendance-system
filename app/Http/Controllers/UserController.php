@@ -251,7 +251,7 @@ class UserController extends Controller
             'job_status' => 'required|string|max:100',
             'social_status' => 'nullable|string|in:أعزب,متزوج,مطلق,أرمل',
             'children_count' => 'nullable|integer|min:0|max:20',
-            'governorate' => 'required|string|max:100',
+            'governorate' => 'nullable|string|max:100',
             'address' => 'nullable|string|max:1000',
             'qualification_id' => 'nullable|exists:qualifications,id',
             'qualification_faculty_id' => 'nullable|exists:qualification_faculties,id',
