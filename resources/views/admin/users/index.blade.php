@@ -130,77 +130,6 @@
         </tr>
       </thead>
       <tbody>
-        @forelse($users as $user)
-        <tr>
-          <td><input type="checkbox" class="user-checkbox" value="{{ $user->id }}" onchange="updateBulkActions()" {{ $user->isAdmin() ? 'disabled' : '' }}></td>
-          <td>{{ $user->id }}</td>
-          <td>
-            <div class="flex items-center gap-2">
-              @if($user->image)
-                <img src="{{ $user->image_url }}" class="avatar avatar-sm" style="object-fit:cover">
-              @else
-                <div class="avatar avatar-sm bg-gradient-to-br from-sky-500 to-indigo-600 text-white text-xs">
-                  {{ substr($user->name, 0, 2) }}
-                </div>
-              @endif
-              <span class="font-semibold">{{ $user->name }}</span>
-            </div>
-          </td>
-          <td>{{ $user->email }}</td>
-          <td class="text-xs">{{ $user->national_id ?? '—' }}</td>
-          <td>{{ $user->phone ?? '—' }}</td>
-          <td><span class="pill pill-amber">{{ number_format($user->points) }}</span></td>
-          <td>
-            @if($user->gender === 'ذكر')
-              <span class="pill pill-blue">ذكر</span>
-            @elseif($user->gender === 'أنثى')
-              <span class="pill pill-rose">أنثى</span>
-            @else
-              <span class="text-slate-400">—</span>
-            @endif
-          </td>
-          <td>{{ $user->governorate_name }}</td>
-          <td>{{ $user->date_of_birth ?? '—' }}</td>
-          <td>{{ $user->social_status ?? '—' }}</td>
-          <td>{{ $user->children_count ?? '—' }}</td>
-          <td>{{ $user->qualification?->name ?? '—' }}</td>
-          <td>{{ $user->graduation_year ?? '—' }}</td>
-          <td>
-            @if($user->role === 'admin')
-              <span class="pill pill-violet">مدير</span>
-            @elseif($user->approval_status === 'approved')
-              <span class="pill pill-green">مقبول</span>
-            @elseif($user->approval_status === 'rejected')
-              <span class="pill pill-rose">مرفوض</span>
-            @else
-              <span class="pill pill-amber">قيد المراجعة</span>
-            @endif
-          </td>
-          <td>
-            @if($user->status === 'active')
-              <span class="pill pill-green">نشط</span>
-            @else
-              <span class="pill pill-rose">غير نشط</span>
-            @endif
-          </td>
-          <td>
-            <div class="flex gap-1">
-              <button class="btn btn-ghost py-1 px-2 text-xs" onclick="openUserModal({{ $user->id }})" title="عرض التفاصيل">👁️</button>
-              <button class="btn btn-ghost py-1 px-2 text-xs" onclick="openEditModal({{ $user->id }})" title="تعديل">✏️</button>
-              @if(!$user->isAdmin())
-              <button class="btn btn-ghost py-1 px-2 text-xs toggle-status-btn" data-url="{{ route('admin.users.toggle-status', $user) }}" data-name="{{ $user->name }}" title="{{ $user->status === 'active' ? 'تعليق' : 'تفعيل' }}">
-                {{ $user->status === 'active' ? '⏸️' : '▶️' }}
-              </button>
-              <button class="btn btn-danger py-1 px-2 text-xs"
-                data-delete="{{ route('admin.users.destroy', $user) }}"
-                data-name="{{ $user->name }}">🗑️</button>
-              @endif
-            </div>
-          </td>
-        </tr>
-        @empty
-          <tr><td colspan="17" class="text-center text-slate-400 py-8">لا يوجد مستخدمين لعرضهم</td></tr>
-        @endforelse
       </tbody>
     </table>
   </div>
@@ -781,83 +710,43 @@ document.addEventListener('DOMContentLoaded', function() {
   loadSelectQuals(apiBase + '/qualifications', 'createQualification', 'اختر المؤهل...');
 });
 
-// DataTable
+// DataTable — server-side processing
 $(document).ready(function() {
   var table = $('#usersTable').DataTable({
+    serverSide: true,
+    ajax: {
+      url: '{{ route('admin.users.data') }}',
+      type: 'GET',
+      data: function(d) {
+        d.gender = $('#filterGender').val();
+        d.governorate = $('#filterGovernorate').val();
+        d.birth_year = $('#filterBirthYear').val();
+        d.social_status = $('#filterSocialStatus').val();
+        d.children_count = $('#filterChildren').val();
+        d.graduation_year = $('#filterGradYear').val();
+        d.qualification_id = $('#filterQualification').val();
+        d.approval_status = $('#filterApprovalStatus').val();
+        d.active_status = $('#filterActiveStatus').val();
+      }
+    },
     language: { url: '{{ asset('js/ar.json') }}' },
     order: [[1, 'desc']],
     columnDefs: [
-      { orderable: false, targets: [0, 15] }
+      { orderable: false, targets: [0, 16] }
     ],
-    deferRender: true,
     pageLength: 50,
-    lengthMenu: [[25, 50, 100, 200, -1], [25, 50, 100, 200, 'الكل']]
+    lengthMenu: [[25, 50, 100, 200, -1], [25, 50, 100, 200, 'الكل']],
+    drawCallback: function() {
+      // Re-bind delete/toggle events after table redraw
+      updateBulkActions();
+      document.getElementById('selectAll').checked = false;
+    }
   });
 
-  function applyFilters() {
-    var gender = $('#filterGender').val();
-    var gov = $('#filterGovernorate').val();
-    var birth = $('#filterBirthYear').val();
-    var social = $('#filterSocialStatus').val();
-    var children = $('#filterChildren').val();
-    var gradYear = $('#filterGradYear').val();
-    var qual = $('#filterQualification').val();
-    var approval = $('#filterApprovalStatus').val();
-    var activeStatus = $('#filterActiveStatus').val();
-
-    $.fn.dataTable.ext.search = [];
-
-    if (gender) {
-      $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[7].trim().localeCompare(gender, 'ar', { sensitivity: 'base' }) === 0;
-      });
-    }
-    if (gov) {
-      $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[8].trim().localeCompare(gov, 'ar', { sensitivity: 'base' }) === 0;
-      });
-    }
-    if (birth) {
-      $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[9].trim() === birth;
-      });
-    }
-    if (social) {
-      $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[10].trim().localeCompare(social, 'ar', { sensitivity: 'base' }) === 0;
-      });
-    }
-    if (children !== '') {
-      $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[11].trim() === children;
-      });
-    }
-    if (qual) {
-      var qualText = $('#filterQualification option:selected').text();
-      $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[12].trim().localeCompare(qualText, 'ar', { sensitivity: 'base' }) === 0;
-      });
-    }
-    if (gradYear) {
-      $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[13].trim() === gradYear;
-      });
-    }
-    if (approval) {
-      $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[14].trim().localeCompare(approval, 'ar', { sensitivity: 'base' }) === 0;
-      });
-    }
-    if (activeStatus) {
-      $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[15].trim().localeCompare(activeStatus, 'ar', { sensitivity: 'base' }) === 0;
-      });
-    }
-
-    table.draw();
-  }
-
-  $('#filterGender, #filterGovernorate, #filterBirthYear, #filterSocialStatus, #filterChildren, #filterGradYear, #filterQualification, #filterApprovalStatus, #filterActiveStatus').on('change', applyFilters);
+  // Apply filters on change
+  $('#filterGender, #filterGovernorate, #filterBirthYear, #filterSocialStatus, #filterChildren, #filterGradYear, #filterQualification, #filterApprovalStatus, #filterActiveStatus').on('change', function() {
+    table.ajax.reload();
+  });
 
   $('#resetFilters').on('click', function() {
     $('#filterGender').val('');
@@ -869,8 +758,7 @@ $(document).ready(function() {
     $('#filterQualification').val('');
     $('#filterApprovalStatus').val('');
     $('#filterActiveStatus').val('');
-    $.fn.dataTable.ext.search = [];
-    table.draw();
+    table.ajax.reload();
   });
 });
 

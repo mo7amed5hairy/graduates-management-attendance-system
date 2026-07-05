@@ -169,6 +169,7 @@ Route::middleware('auth')->group(function () {
         // Users management (approval / suspend / delete)
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/', [UserController::class, 'index'])->name('index');
+            Route::get('/data', [UserController::class, 'data'])->name('data');
             Route::post('/', [UserController::class, 'store'])->name('store');
             Route::post('/bulk-activate', [UserController::class, 'bulkActivate'])->name('bulk-activate');
             Route::get('/{user}', [UserController::class, 'show'])->name('show');

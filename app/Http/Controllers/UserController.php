@@ -8,7 +8,6 @@ use App\Models\User;
 use App\Notifications\AccountStatusNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -77,34 +76,153 @@ class UserController extends Controller
 
     public function index()
     {
-        $cacheKey = 'users_index_' . md5(request()->fullUrl());
-        $cacheTtl = 60; // seconds
+        $genders = ['ذكر', 'أنثى'];
+        $allGovernorates = Governorate::orderBy('name')->pluck('name');
+        $birthYears = User::whereNotNull('date_of_birth')->distinct()->pluck('date_of_birth')->sort();
+        $graduationYears = User::whereNotNull('graduation_year')->distinct()->pluck('graduation_year')->sort();
+        $qualifications = Qualification::orderBy('name')->get(['id', 'name']);
+        return view('admin.users.index', compact('genders', 'allGovernorates', 'birthYears', 'graduationYears', 'qualifications'));
+    }
 
-        $data = Cache::remember($cacheKey, $cacheTtl, function () {
-            $users = User::with('qualification:id,name', 'qualificationFaculty:id,name')
-                ->select([
-                    'id', 'name', 'first_name', 'father_name', 'grandfather_name', 'family_name',
-                    'mother_name', 'mother_father_name', 'mother_grandfather_name',
-                    'email', 'phone', 'national_id', 'governorate', 'address',
-                    'gender', 'social_status', 'children_count', 'age', 'date_of_birth',
-                    'qualification_id', 'qualification_faculty_id', 'graduation_year',
-                    'job_status', 'image', 'status', 'approval_status', 'role',
-                    'points', 'created_at', 'updated_at',
-                ])
-                ->latest()
-                ->get();
+    public function data(Request $request): JsonResponse
+    {
+        $columns = [
+            'id', 'id', 'name', 'email', 'national_id', 'phone', 'points',
+            'gender', 'governorate', 'date_of_birth', 'social_status',
+            'children_count', 'qualification_id', 'graduation_year',
+            'approval_status', 'status',
+        ];
 
-            $genders = ['ذكر', 'أنثى'];
-            $governorates = User::whereNotNull('governorate')->distinct()->pluck('governorate')->sort();
-            $allGovernorates = Governorate::orderBy('name')->pluck('name');
-            $birthYears = User::whereNotNull('date_of_birth')->distinct()->pluck('date_of_birth')->sort();
-            $graduationYears = User::whereNotNull('graduation_year')->distinct()->pluck('graduation_year')->sort();
-            $qualifications = Qualification::orderBy('name')->get(['id', 'name']);
+        $query = User::with('qualification:id,name')
+            ->select([
+                'id', 'name', 'first_name', 'father_name', 'grandfather_name', 'family_name',
+                'mother_name', 'mother_father_name', 'mother_grandfather_name',
+                'email', 'phone', 'national_id', 'governorate', 'address',
+                'gender', 'social_status', 'children_count', 'age', 'date_of_birth',
+                'qualification_id', 'qualification_faculty_id', 'graduation_year',
+                'job_status', 'image', 'status', 'approval_status', 'role',
+                'points', 'created_at', 'updated_at',
+            ]);
 
-            return compact('users', 'genders', 'governorates', 'allGovernorates', 'birthYears', 'graduationYears', 'qualifications');
-        });
+        // Global search
+        if ($search = $request->input('search.value')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('national_id', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
 
-        return view('admin.users.index', $data);
+        // Column filters
+        if ($gender = $request->input('gender')) {
+            $query->where('gender', $gender);
+        }
+        if ($gov = $request->input('governorate')) {
+            $query->where('governorate', $gov);
+        }
+        if ($birth = $request->input('birth_year')) {
+            $query->where('date_of_birth', $birth);
+        }
+        if ($social = $request->input('social_status')) {
+            $query->where('social_status', $social);
+        }
+        if ($request->filled('children_count')) {
+            $children = $request->input('children_count');
+            $query->where('children_count', $children);
+        }
+        if ($gradYear = $request->input('graduation_year')) {
+            $query->where('graduation_year', $gradYear);
+        }
+        if ($qualId = $request->input('qualification_id')) {
+            $query->where('qualification_id', $qualId);
+        }
+        if ($approval = $request->input('approval_status')) {
+            $query->where('approval_status', $approval);
+        }
+        if ($status = $request->input('active_status')) {
+            $query->where('status', $status);
+        }
+
+        $recordsTotal = $query->count();
+
+        // Order
+        $orderCol = $request->input('order.0.column', 1);
+        $orderDir = $request->input('order.0.dir', 'desc');
+        if (isset($columns[$orderCol])) {
+            $query->orderBy($columns[$orderCol], $orderDir);
+        }
+
+        // Paginate
+        $start = (int) $request->input('start', 0);
+        $length = (int) $request->input('length', 50);
+        $users = $query->skip($start)->take($length)->get();
+
+        $recordsFiltered = $recordsTotal;
+
+        $data = [];
+        foreach ($users as $i => $u) {
+            $govName = $u->governorate_name;
+            $qualName = $u->qualification?->name ?? '—';
+
+            $avatar = '';
+            if ($u->image) {
+                $avatar = '<img src="' . $u->image_url . '" class="avatar avatar-sm" style="object-fit:cover">';
+            } else {
+                $avatar = '<div class="avatar avatar-sm bg-gradient-to-br from-sky-500 to-indigo-600 text-white text-xs">' . htmlspecialchars(substr($u->name, 0, 2)) . '</div>';
+            }
+
+            $genderBadge = $u->gender === 'ذكر'
+                ? '<span class="pill pill-blue">ذكر</span>'
+                : ($u->gender === 'أنثى' ? '<span class="pill pill-rose">أنثى</span>' : '<span class="text-slate-400">—</span>');
+
+            $approvalBadge = $u->role === 'admin'
+                ? '<span class="pill pill-violet">مدير</span>'
+                : ($u->approval_status === 'approved' ? '<span class="pill pill-green">مقبول</span>' : ($u->approval_status === 'rejected' ? '<span class="pill pill-rose">مرفوض</span>' : '<span class="pill pill-amber">قيد المراجعة</span>'));
+
+            $statusBadge = $u->status === 'active'
+                ? '<span class="pill pill-green">نشط</span>'
+                : '<span class="pill pill-rose">غير نشط</span>';
+
+            $actions = '<div class="flex gap-1">'
+                . '<button class="btn btn-ghost py-1 px-2 text-xs" onclick="openUserModal(' . $u->id . ')" title="عرض التفاصيل">👁️</button>'
+                . '<button class="btn btn-ghost py-1 px-2 text-xs" onclick="openEditModal(' . $u->id . ')" title="تعديل">✏️</button>';
+
+            if (!$u->isAdmin()) {
+                $toggleIcon = $u->status === 'active' ? '⏸️' : '▶️';
+                $toggleTitle = $u->status === 'active' ? 'تعليق' : 'تفعيل';
+                $actions .= '<button class="btn btn-ghost py-1 px-2 text-xs toggle-status-btn" data-url="' . route('admin.users.toggle-status', $u) . '" data-name="' . htmlspecialchars($u->name) . '" title="' . $toggleTitle . '">' . $toggleIcon . '</button>'
+                    . '<button class="btn btn-danger py-1 px-2 text-xs" data-delete="' . route('admin.users.destroy', $u) . '" data-name="' . htmlspecialchars($u->name) . '">🗑️</button>';
+            }
+            $actions .= '</div>';
+
+            $data[] = [
+                '<input type="checkbox" class="user-checkbox" value="' . $u->id . '" onchange="updateBulkActions()"' . ($u->isAdmin() ? ' disabled' : '') . '>',
+                $u->id,
+                '<div class="flex items-center gap-2">' . $avatar . '<span class="font-semibold">' . htmlspecialchars($u->name) . '</span></div>',
+                htmlspecialchars($u->email),
+                htmlspecialchars($u->national_id ?? '—'),
+                htmlspecialchars($u->phone ?? '—'),
+                '<span class="pill pill-amber">' . number_format($u->points) . '</span>',
+                $genderBadge,
+                htmlspecialchars($govName),
+                htmlspecialchars($u->date_of_birth ?? '—'),
+                htmlspecialchars($u->social_status ?? '—'),
+                htmlspecialchars($u->children_count ?? '—'),
+                htmlspecialchars($qualName),
+                htmlspecialchars($u->graduation_year ?? '—'),
+                $approvalBadge,
+                $statusBadge,
+                $actions,
+            ];
+        }
+
+        return response()->json([
+            'draw' => (int) $request->input('draw', 0),
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ]);
     }
 
     public function show(User $user): JsonResponse
