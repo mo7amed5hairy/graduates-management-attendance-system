@@ -20,47 +20,85 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
       <h1 class="text-2xl font-extrabold mt-4 text-slate-900">{{ config('app.name') }}</h1>
       <p class="text-slate-500 text-sm mt-1">تسجيل خريج جديد — البيانات ستكون قيد المراجعة</p>
     </div>
+    
+    <script>
+    // خدعة برمجية مباشرة بداخل الصفحة للقط وترجمة رسالة السيرفر فوراً وتخطي الكاش
+    (function() {
+        const originalFetch = window.fetch;
+        window.fetch = async function(...args) {
+            try {
+                const response = await originalFetch(...args);
+                if (response.status === 422) {
+                    const clone = response.clone();
+                    const data = await clone.json();
+                    if (data.errors) {
+                        for (let key in data.errors) {
+                            data.errors[key] = data.errors[key].map(msg => {
+                                if (msg.toLowerCase().includes('format is invalid') || msg.toLowerCase().includes('phone field format')) {
+                                    return 'صيغة رقم الهاتف غير صحيحة، يجب أن يتكون من 11 رقماً ويبدأ بـ 077 أو 078.';
+                                }
+                                return msg;
+                            });
+                        }
+                        return new Response(JSON.stringify(data), {
+                            status: 422,
+                            headers: response.headers
+                        });
+                    }
+                }
+                return response;
+            } catch (e) {
+                return originalFetch(...args);
+            }
+        };
+    })();
+    </script>
 
-    <form id="registerForm" data-ajax="true" action="{{ route('register') }}" method="POST" class="space-y-4" enctype="multipart/form-data">
+    {{-- صندوق عرض الأخطاء الديناميكي المحدث --}}
+    <div id="errorAlertContainer" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-800 leading-6 hidden mb-4 shadow-sm"></div>
+
+    <form id="registerForm" action="{{ route('register') }}" method="POST" class="space-y-4" enctype="multipart/form-data">
       @csrf
 
-      {{-- Row 1: الإسم, اسم الأب, اسم الجد, اللقب --}}
+      {{-- Row 1: الإسم, اسم الأب, اسم الجد, اللقب (محددة بـ 15 حرفاً) --}}
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-3">
           <label class="label">الإسم <span class="text-rose-500">*</span></label>
-          <input class="input" name="first_name" placeholder="الإسم" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، الإسم مطلوب')" oninput="this.setCustomValidity('')">
+          <input class="input" name="first_name" maxlength="15" placeholder="الإسم" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، الإسم مطلوب')" oninput="this.setCustomValidity('')">
+          <!-- 💡 التوضيح المخصص للاسم الأول فقط أسفل الحقل -->
+          <small class="text-slate-400 block mt-0.5 text-xs">* الأسم الأول فقط</small>
         </div>
         <div class="col-span-12 md:col-span-3">
           <label class="label">اسم الأب <span class="text-rose-500">*</span></label>
-          <input class="input" name="father_name" placeholder="اسم الأب" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اسم الأب مطلوب')" oninput="this.setCustomValidity('')">
+          <input class="input" name="father_name" maxlength="15" placeholder="اسم الأب" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اسم الأب مطلوب')" oninput="this.setCustomValidity('')">
         </div>
         <div class="col-span-12 md:col-span-3">
           <label class="label">اسم الجد <span class="text-rose-500">*</span></label>
-          <input class="input" name="grandfather_name" placeholder="اسم الجد" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اسم الجد مطلوب')" oninput="this.setCustomValidity('')">
+          <input class="input" name="grandfather_name" maxlength="15" placeholder="اسم الجد" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اسم الجد مطلوب')" oninput="this.setCustomValidity('')">
         </div>
         <div class="col-span-12 md:col-span-3">
           <label class="label">اللقب <span class="text-rose-500">*</span></label>
-          <input class="input" name="family_name" placeholder="اللقب" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اللقب مطلوب')" oninput="this.setCustomValidity('')">
+          <input class="input" name="family_name" maxlength="15" placeholder="اللقب" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اللقب مطلوب')" oninput="this.setCustomValidity('')">
         </div>
       </div>
 
-      {{-- Row 1.5: اسم الأم, أب الأم, جد الأم --}}
+      {{-- Row 1.5: اسم الأم, أب الأم, جد الأم (محددة بـ 15 حرفاً) --}}
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-4">
           <label class="label">اسم الأم <span class="text-rose-500">*</span></label>
-          <input class="input" name="mother_name" placeholder="اسم الأم" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اسم الأم مطلوب')" oninput="this.setCustomValidity('')">
+          <input class="input" name="mother_name" maxlength="15" placeholder="اسم الأم" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اسم الأم مطلوب')" oninput="this.setCustomValidity('')">
         </div>
         <div class="col-span-12 md:col-span-4">
           <label class="label">أب الأم <span class="text-rose-500">*</span></label>
-          <input class="input" name="mother_father_name" placeholder="أب الأم" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اسم أب الأم مطلوب')" oninput="this.setCustomValidity('')">
+          <input class="input" name="mother_father_name" maxlength="15" placeholder="أب الأم" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اسم أب الأم مطلوب')" oninput="this.setCustomValidity('')">
         </div>
         <div class="col-span-12 md:col-span-4">
           <label class="label">جد الأم <span class="text-rose-500">*</span></label>
-          <input class="input" name="mother_grandfather_name" placeholder="جد الأم" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اسم جد الأم مطلوب')" oninput="this.setCustomValidity('')">
+          <input class="input" name="mother_grandfather_name" maxlength="15" placeholder="جد الأم" required oninvalid="this.setCustomValidity('يرجى ملء هذا الحقل، اسم جد الأم مطلوب')" oninput="this.setCustomValidity('')">
         </div>
       </div>
 
-      {{-- Row 2: رقم البطاقة (مقيد بـ 12 رقماً فقط), البريد (اختياري), الهاتف --}}
+      {{-- Row 2: رقم البطاقة, البريد (اختياري), الهاتف --}}
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-4">
           <label class="label">رقم البطاقة الوطنية <span class="text-rose-500">*</span></label>
@@ -84,7 +122,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         </div>
       </div>
 
-      {{-- Row 3: تاريخ الميلاد (من 1970 إلى 2015), العمر (auto), الجنس, الحالة الوظيفية --}}
+      {{-- Row 3: سنة الميلاد, العمر, الجنس, الحالة الوظيفية --}}
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-3">
           <label class="label">سنة الميلاد <span class="text-rose-500">*</span></label>
@@ -121,7 +159,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         </div>
       </div>
 
-      {{-- Row 3.5: الحالة الاجتماعية + عدد الأولاد (من 0 إلى 20 قائمة خيارات) --}}
+      {{-- Row 3.5: الحالة الاجتماعية + عدد الأولاد --}}
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12" id="socialStatusContainer">
           <label class="label">الحالة الاجتماعية <span class="text-rose-500">*</span></label>
@@ -157,7 +195,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         </div>
       </div>
 
-      {{-- Row 5: التحصيل الدراسى, الكلية/المعهد, سنة التخرج (من 2000 إلى 2025) --}}
+      {{-- Row 5: التحصيل الدراسى, الكلية/المعهد, سنة التخرج --}}
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 md:col-span-4">
           <label class="label">التحصيل الدراسى <span class="text-rose-500">*</span></label>
@@ -175,7 +213,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
           <label class="label">سنة التخرج <span class="text-rose-500">*</span></label>
           <select class="input text-base" name="graduation_year" required oninvalid="this.setCustomValidity('يرجى تحديد سنة التخرج')" onchange="this.setCustomValidity('')">
             <option value="">اختر سنة التخرج...</option>
-            @foreach(range(2025, 2000) as $year)
+            @foreach(range(2025, 1990) as $year)
               <option value="{{ $year }}">{{ $year }}</option>
             @endforeach
           </select>
@@ -194,34 +232,75 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
         </div>
       </div>
 
-      <button type="submit" class="btn btn-success w-full justify-center">تسجيل</button>
+      <button type="submit" id="submitBtn" class="btn btn-success w-full justify-center">تسجيل</button>
     </form>
 
     <div class="mt-4 text-center text-sm text-slate-500">
       لديك حساب بالفعل؟ <a href="{{ route('login') }}" class="text-sky-600 font-bold hover:underline">تسجيل دخول</a>
     </div>
+  </div>
 
-    @if($errors->any())
-    <div class="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl text-sm text-red-800 leading-6">
-      @foreach($errors->all() as $error)
-        <div>
-          ⚠️ 
-          @if(str_contains($error, 'phone'))
-            صيغة رقم الهاتف غير صحيحة، يرجى كتابة الرقم بالكامل (مثال: 07705666666 أو 07805666666)
-          @elseif(str_contains($error, 'email'))
-            البريد الإلكتروني المستخدم مسجل مسبقاً أو غير صحيح
-          @elseif(str_contains($error, 'password'))
-            كلمة المرور غير متطابقة أو أقل من 8 أحرف
-          @else
-            {{ $error }}
-          @endif
-        </div>
-      @endforeach
+  {{-- نافذة منبثقة تظهر بعد اكتمال التسجيل بنجاح --}}
+  <div id="successRegisterModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full text-center shadow-2xl border border-slate-100 transform scale-95 transition-transform duration-300" id="modalContentBox">
+      
+      <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-3xl mb-4 shadow-inner">
+        ✓
+      </div>
+      
+      <h3 class="text-xl font-extrabold text-slate-900 mb-2">تم تسجيل بياناتك بنجاح</h3>
+      <p class="text-slate-600 text-sm mb-6 leading-relaxed">
+        سيتم مراجعة المدخلات من قبل اللجنة التنسيقية خلال أقرب وقت.
+      </p>
+      
+      <hr class="border-slate-100 my-4">
+      
+      <p class="text-slate-500 text-xs font-semibold mb-4 block">
+        📣 يرجى متابعة حساباتنا في إنستغرام:
+      </p>
+
+      {{-- الأزرار الثلاثة الملوّنة بالحسابات الرسمية --}}
+      <div class="grid grid-cols-1 gap-2 mb-6">
+        <a href="https://www.instagram.com/_u/graduates.of.basra?igsh=amJqZ3RoOTM2OHJm" 
+           target="_blank" 
+           class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-pink-500 to-yellow-500 text-white font-bold text-sm shadow-sm hover:opacity-95 transition">
+          📱 حساب الخريجين (graduates.of.basra)
+        </a>
+        <a href="https://www.instagram.com/_u/update_iraq?igsh=MW5nNTJxZmV1b3hpZA==" 
+           target="_blank" 
+           class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 text-white font-bold text-sm shadow-sm hover:opacity-95 transition">
+          📱 حساب الشركة المنفذة (update_iraq)
+        </a>
+        <a href="https://www.instagram.com/_u/s14mv?igsh=MTRiZnRpZ2kzZzdtdA==" 
+           target="_blank" 
+           class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white font-bold text-sm shadow-sm hover:opacity-95 transition">
+          📱 حساب المطور (s14mv)
+        </a>
+      </div>
+
+      <button onclick="redirectToLogin()" class="w-full py-3 px-4 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition text-sm shadow-md">
+        حسنًا، الانتقال لتسجيل الدخول
+      </button>
     </div>
-    @endif
   </div>
 
   <script>
+  var loginUrl = "{{ route('login') }}"; 
+
+  function showSuccessModal() {
+      var modal = document.getElementById('successRegisterModal');
+      var box = document.getElementById('modalContentBox');
+      if (modal && box) {
+          modal.classList.remove('opacity-0', 'pointer-events-none');
+          box.classList.remove('scale-95');
+          box.classList.add('scale-100');
+      }
+  }
+
+  function redirectToLogin() {
+      window.location.href = loginUrl;
+  }
+
   function cleanArabicNumbers(str) {
     if(!str) return "";
     var res = str.trim();
@@ -232,21 +311,97 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
     return res.replace(/\s+/g, '');
   }
 
-  document.getElementById('registerForm').addEventListener('submit', function() {
+  // معالجة الإرسال البرمجي الذكي والتحقق الصارم من الـ 15 حرفاً لكل حقول الأسماء وأسماء الأم
+  document.getElementById('registerForm').addEventListener('submit', function(e) {
+    
+    // 🛠️ فحص جافا سكريبت الصارم لمنع كتابة أكثر من 15 حرف في حقول الأسماء وأسماء الأم
+    var fName = document.querySelector('input[name="first_name"]')?.value || '';
+    var faName = document.querySelector('input[name="father_name"]')?.value || '';
+    var gName = document.querySelector('input[name="grandfather_name"]')?.value || '';
+    var famName = document.querySelector('input[name="family_name"]')?.value || '';
+    var mName = document.querySelector('input[name="mother_name"]')?.value || '';
+    var mfName = document.querySelector('input[name="mother_father_name"]')?.value || '';
+    var mgName = document.querySelector('input[name="mother_grandfather_name"]')?.value || '';
+
+    if (
+      fName.length > 15 || faName.length > 15 || gName.length > 15 || famName.length > 15 || 
+      mName.length > 15 || mfName.length > 15 || mgName.length > 15
+    ) {
+        e.preventDefault(); 
+        var errAlert = document.getElementById('errorAlertContainer');
+        errAlert.classList.remove('hidden');
+        errAlert.innerHTML = '⚠️ عذراً، يجب ألا يتجاوز طول أي من حقول الأسماء أو أسماء الأم 15 حرفاً.';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return false;
+    }
+
+    e.preventDefault();
+    
     var pInput = document.getElementById('phoneInput');
     if(pInput) pInput.value = cleanArabicNumbers(pInput.value);
     
     var nInput = document.getElementById('nationalId');
     if(nInput) nInput.value = cleanArabicNumbers(nInput.value); 
+
+    var form = this;
+    var formData = new FormData(form);
+    var submitBtn = document.getElementById('submitBtn');
+    var errAlert = document.getElementById('errorAlertContainer');
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="loader-sm"></span> جاري التسجيل...';
+    errAlert.classList.add('hidden');
+    errAlert.innerHTML = '';
+
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(function(res) {
+        if (res.status === 422 || !res.ok) {
+            return res.json().then(function(errData) { throw errData; });
+        }
+        return res.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+            showSuccessModal();
+        } else {
+            throw data;
+        }
+    })
+    .catch(function(error) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'تسجيل';
+        errAlert.classList.remove('hidden');
+        
+        if (error.errors) {
+            var errorMessages = [];
+            for (var key in error.errors) {
+                if (error.errors.hasOwnProperty(key)) {
+                    errorMessages.push('⚠️ ' + error.errors[key][0]);
+                }
+            }
+            errAlert.innerHTML = errorMessages.join('<br>');
+        } else if (error.message) {
+            errAlert.innerHTML = '⚠️ ' + error.message;
+        } else {
+            errAlert.innerHTML = '⚠️ حدث خطأ أثناء معالجة البيانات، يرجى مراجعة المدخلات والمحاولة لاحقاً.';
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   });
 
   function calcAgeFromYear() {
     var selectField = document.getElementById('dateOfBirth');
     var year = selectField.value;
     var ageField = document.getElementById('age');
-    
     selectField.setCustomValidity('');
-    
     if (!year) { ageField.value = ''; return; }
     ageField.value = new Date().getFullYear() - parseInt(year);
   }
@@ -257,9 +412,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
     var childrenContainer = document.getElementById('childrenCountContainer');
     var childrenInput = document.getElementById('childrenCount');
     var statusContainer = document.getElementById('socialStatusContainer');
-    
     selectField.setCustomValidity('');
-    
     if (status === 'متزوج' || status === 'مطلق' || status === 'أرمل') {
       childrenContainer.classList.remove('hidden');
       statusContainer.className = "col-span-12 md:col-span-6";
@@ -274,9 +427,7 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
     var selectField = document.getElementById('qualificationId');
     var qualId = selectField.value;
     var facSel = document.getElementById('facultyId');
-    
     selectField.setCustomValidity('');
-    
     if (!qualId) {
       facSel.innerHTML = '<option value="">اختر المؤهل أولاً...</option>';
       facSel.disabled = true;
@@ -350,7 +501,5 @@ select.input:disabled { opacity: 0.5; cursor: not-allowed; }
       });
   });
   </script>
-
-  <script src="{{ asset('js/app.js') }}"></script>
 </body>
 </html>

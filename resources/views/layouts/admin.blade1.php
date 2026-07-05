@@ -138,6 +138,7 @@
         </div>
       </div>
       <div class="flex items-center gap-4">
+        {{-- Notifications --}}
         <div class="relative" id="notifWrap">
           <button class="relative p-2 text-slate-500 hover:text-slate-700 transition" id="notifBtn" onclick="toggleNotif()">
             <span class="text-xl">🔔</span>
@@ -195,6 +196,7 @@
 <script src="{{ asset('js/dataTables.min.js') }}"></script>
 <script src="{{ asset('js/app.js') }}"></script>
 <script>
+// Collapsible nav group
 function toggleNavGroup(btn) {
   var sub = btn.nextElementSibling;
   var arrow = btn.querySelector('.nav-arrow');
@@ -209,6 +211,7 @@ function toggleNavGroup(btn) {
   }
 }
 
+// Notification system
 let notifVisible = false;
 var notifBase = '{{ route('notifications.index') }}'.replace(/\/+$/, '');
 var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
@@ -343,38 +346,34 @@ document.getElementById('markAllNotif')?.addEventListener('click', async functio
   } catch(e) { console.warn('markAllNotif failed', e); }
 });
 
+// Check notifications on page load only (no auto-polling)
 fetchNotifCount();
 </script>
 
-{{-- النافذة المنبثقة الثلاثية المحدثة لإنستغرام عند تسجيل الدخول بنجاح --}}
+{{-- Instagram follow popup after login --}}
 @if(session('show_follow_modal'))
-<div id="followModal" class="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" style="direction:rtl">
-  <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8 text-center relative border border-slate-100">
-    <div class="w-16 h-16 mx-auto rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-3xl mb-4 shadow-inner">📣</div>
-    <h2 class="text-xl font-extrabold text-slate-900 mb-2">مرحباً بك، تابعنا على إنستغرام</h2>
-    <p class="text-slate-600 text-sm mb-6 leading-relaxed">يرجى متابعة حساباتنا الرسمية لمتابعة كل ما هو جديد ومستجد أولاً بأول</p>
-    
-    <div class="grid grid-cols-1 gap-2 mb-6">
-      <a href="https://www.instagram.com/_u/graduates.of.basra?igsh=amJqZ3RoOTM2OHJm" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-pink-500 to-yellow-500 text-white font-bold text-sm shadow-sm hover:opacity-95 transition">
-        📱 حساب الخريجين (graduates.of.basra)
-      </a>
-      <a href="https://www.instagram.com/_u/update_iraq?igsh=MW5nNTJxZmV1b3hpZA==" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 text-white font-bold text-sm shadow-sm hover:opacity-95 transition">
-        📱 حساب الشركة المنفذة (update_iraq)
-      </a>
-      <a href="https://www.instagram.com/_u/s14mv?igsh=MTRiZnRpZ2kzZzdtdA==" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white font-bold text-sm shadow-sm hover:opacity-95 transition">
-        📱 حساب المطور (s14mv)
-      </a>
+<div id="followModal" class="fixed inset-0 z-[9999] bg-black/60 flex items-center justify-center p-4" style="direction:rtl">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 text-center relative">
+    <div class="text-5xl mb-4">📢</div>
+    <h2 class="text-xl font-extrabold text-slate-900 mb-2">تابعنا على إنستغرام</h2>
+    <p class="text-slate-600 mb-5">من فضلك تابع صفحتنا على إنستغرام لمتابعة كل ما هو جديد</p>
+    <a href="https://www.instagram.com/update_iraq" target="_blank" rel="noopener"
+       class="btn bg-gradient-to-r from-purple-500 to-pink-500 text-white text-lg font-bold px-6 py-3 rounded-xl mb-3 w-full inline-block hover:shadow-lg transition"
+       style="background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);">
+      📸 متابعة على إنستغرام
+    </a>
+    <div class="flex justify-center">
+      <button onclick="closeFollowModal()"
+              class="btn bg-blue-600 text-white text-sm px-4 py-1.5 rounded-lg hover:bg-blue-700 transition">
+        حسناً
+      </button>
     </div>
-
-    <button onclick="closeFollowModal()" class="w-full py-3 px-4 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition text-sm shadow-md">
-      حسنًا، الذهاب للرئيسية
-    </button>
   </div>
 </div>
 <script>
 function closeFollowModal() {
-  const modal = document.getElementById('followModal');
-  if(modal) modal.remove();
+  document.getElementById('followModal').remove();
+  window.location.href = '{{ route('home') }}';
 }
 </script>
 @endif

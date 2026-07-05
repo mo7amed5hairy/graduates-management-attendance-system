@@ -32,7 +32,7 @@ class ProfileChangeRequestController extends Controller
             'mother_father_name' => 'nullable|string|max:255',
             'mother_grandfather_name' => 'nullable|string|max:255',
             'email' => 'nullable|string|email|max:255|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|regex:/^077\d{8}$/',
+            'phone' => 'nullable|string|regex:/^07[78]\d{8}$/',
             'password' => 'nullable|string|min:8|confirmed',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'address' => 'nullable|string|max:1000',

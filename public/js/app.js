@@ -16,6 +16,17 @@ const App = {
     const existing = document.querySelector('.toast');
     if (existing) existing.remove();
 
+    // 💡 فحص ذكي وشامل لتنظيف وترجمة أي رسالة إنجليزية تخص صيغة الهاتف
+    if (message && typeof message === 'string') {
+      if (
+        message.toLowerCase().includes('phone field format is invalid') || 
+        message.toLowerCase().includes('phone format is invalid') ||
+        message.toLowerCase().includes('format is invalid')
+      ) {
+        message = 'صيغة رقم الهاتف غير صحيحة، يجب أن يتكون من 11 رقماً ويبدأ بـ 077 أو 078.';
+      }
+    }
+
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
@@ -56,7 +67,17 @@ const App = {
     const data = await response.json();
     if (!response.ok) {
       if (response.status === 422 && data.errors) {
-        const messages = Object.values(data.errors).flat().join('\n');
+        // 💡 نقوم بلقط وترجمة الأخطاء فرداً فرداً بداخل المصفوفة قبل دمجها لتجنب المشاكل
+        const messages = Object.values(data.errors).flat().map(msg => {
+          if (
+            msg.toLowerCase().includes('phone field format is invalid') || 
+            msg.toLowerCase().includes('format is invalid')
+          ) {
+            return 'صيغة رقم الهاتف غير صحيحة، يجب أن يتكون من 11 رقماً ويبدأ بـ 077 أو 078.';
+          }
+          return msg;
+        }).join('\n');
+        
         throw new Error(messages);
       }
       throw new Error(data.message || 'حدث خطأ غير متوقع');
@@ -101,7 +122,7 @@ const App = {
     }
 
     this.setButtonLoading(btn, true);
-    progressText && (progressText.textContent = '...');
+    progressText && (progressText.textContent = 'جاري المعالجة...');
 
     try {
       const formData = new FormData(form);
@@ -124,7 +145,7 @@ const App = {
       if (progressAnim) clearInterval(progressAnim);
       if (progressFill) {
         progressFill.style.width = '100%';
-        if (progressText) progressText.textContent = '✅ تم';
+        if (progressText) progressText.textContent = '✅ تم بنجاح';
       }
 
       this.toast(data.message, 'success');
@@ -234,13 +255,11 @@ const App = {
         onSuccess: (response) => {
           document.getElementById('currentPoints').textContent = response.data.user_points;
           form.reset();
-          // Reload the page to show updated transaction list
           setTimeout(() => window.location.reload(), 1000);
         }
       });
     });
 
-    // User select change to show current points
     const userSelect = form.querySelector('[name="user_id"]');
     if (userSelect) {
       userSelect.addEventListener('change', async () => {
