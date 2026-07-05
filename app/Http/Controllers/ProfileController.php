@@ -77,6 +77,8 @@ class ProfileController extends Controller
             'children_count' => 'nullable|integer|min:0|max:20',
             'social_links' => 'nullable|array',
             'social_links.*' => 'nullable|url|max:500',
+        ], [
+            'phone.regex' => 'صيغة رقم الهاتف غير صحيحة يجب أن تكون من 11 رقماً وتبدأ ب 077 أو 078',
         ]);
 
         $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}" . (!empty($validated['mother_name']) ? " ({$validated['mother_name']} {$validated['mother_father_name']} {$validated['mother_grandfather_name']})" : ''));

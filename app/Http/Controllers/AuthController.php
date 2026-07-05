@@ -17,12 +17,20 @@ class AuthController extends Controller
 {
     public function showLoginForm()
     {
-        return view('auth.login');
+        return response()
+            ->view('auth.login')
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 
     public function showRegisterForm()
     {
-        return view('auth.register');
+        return response()
+            ->view('auth.register')
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
     }
 
     public function register(Request $request): JsonResponse|RedirectResponse
@@ -49,6 +57,9 @@ class AuthController extends Controller
             'children_count' => 'nullable|integer|min:0|max:20',
             'qualification_id' => 'required|exists:qualifications,id',
             'qualification_faculty_id' => 'required|exists:qualification_faculties,id',
+        ], [
+            'phone.regex' => 'صيغة رقم الهاتف غير صحيحة يجب أن تكون من 11 رقماً وتبدأ ب 077 أو 078',
+            'phone.required' => 'رقم الهاتف مطلوب',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);

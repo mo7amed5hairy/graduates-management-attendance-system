@@ -52,6 +52,8 @@ class ProfileChangeRequestController extends Controller
             'attachments.*' => 'file|mimes:jpg,jpeg,png,pdf,doc,docx|max:10240',
             'id_photo_front' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             'id_photo_back' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+        ], [
+            'phone.regex' => 'صيغة رقم الهاتف غير صحيحة يجب أن تكون من 11 رقماً وتبدأ ب 077 أو 078',
         ]);
 
         // Build the requested data (all submitted fields except file uploads, password, token)

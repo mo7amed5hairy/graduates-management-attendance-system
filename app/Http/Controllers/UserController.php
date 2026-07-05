@@ -20,6 +20,15 @@ class UserController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        $messages = [
+            'phone.regex' => 'صيغة رقم الهاتف غير صحيحة يجب أن تكون من 11 رقماً وتبدأ ب 077 أو 078',
+            'phone.required' => 'رقم الهاتف مطلوب',
+            'national_id.unique' => 'رقم البطاقة الوطنية موجود مسبقاً',
+            'email.unique' => 'البريد الإلكتروني موجود مسبقاً',
+            'password.min' => 'كلمة المرور يجب أن تكون 8 أحرف على الأقل',
+            'password.confirmed' => 'تأكيد كلمة المرور غير متطابق',
+        ];
+
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'father_name' => 'required|string|max:255',
@@ -42,7 +51,7 @@ class UserController extends Controller
             'qualification_id' => 'required|exists:qualifications,id',
             'qualification_faculty_id' => 'required|exists:qualification_faculties,id',
             'graduation_year' => 'required|integer|min:2000|max:2025',
-        ]);
+        ], $messages);
 
         $motherName = trim(($validated['mother_name'] ?? '') . ' ' . ($validated['mother_father_name'] ?? '') . ' ' . ($validated['mother_grandfather_name'] ?? ''));
         $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}" . ($motherName ? " ($motherName)" : ''));
@@ -235,6 +244,14 @@ class UserController extends Controller
 
     public function update(Request $request, User $user): JsonResponse
     {
+        $messages = [
+            'phone.regex' => 'صيغة رقم الهاتف غير صحيحة يجب أن تكون من 11 رقماً وتبدأ ب 077 أو 078',
+            'national_id.unique' => 'رقم البطاقة الوطنية موجود مسبقاً',
+            'email.unique' => 'البريد الإلكتروني موجود مسبقاً',
+            'password.min' => 'كلمة المرور يجب أن تكون 8 أحرف على الأقل',
+            'password.confirmed' => 'تأكيد كلمة المرور غير متطابق',
+        ];
+
         $data = $request->validate([
             'first_name' => 'required|string|max:255',
             'father_name' => 'required|string|max:255',
@@ -258,7 +275,7 @@ class UserController extends Controller
             'graduation_year' => 'required|integer|min:2000|max:2025',
             'status' => 'required|in:active,inactive',
             'password' => 'nullable|string|min:8|confirmed',
-        ]);
+        ], $messages);
 
         $motherName = trim(($data['mother_name'] ?? '') . ' ' . ($data['mother_father_name'] ?? '') . ' ' . ($data['mother_grandfather_name'] ?? ''));
         $data['name'] = trim("{$data['first_name']} {$data['father_name']} {$data['grandfather_name']} {$data['family_name']}" . ($motherName ? " ($motherName)" : ''));
@@ -296,12 +313,14 @@ class UserController extends Controller
 
         $user->update(['status' => $newStatus]);
 
-        $action = $newStatus === 'active' ? 'activated' : 'deactivated';
-        $adminName = auth()->user()->name;
-        try {
-            $user->notify(new AccountStatusNotification($action, $adminName));
-        } catch (\Throwable $e) {
-            // fail silently — email is non-blocking
+        // Only send email on deactivation, not on activation
+        if ($newStatus === 'inactive') {
+            $adminName = auth()->user()->name;
+            try {
+                $user->notify(new AccountStatusNotification('deactivated', $adminName));
+            } catch (\Throwable $e) {
+                // fail silently
+            }
         }
 
         $statusText = $newStatus === 'active' ? 'نشط' : 'غير نشط';
@@ -315,6 +334,8 @@ class UserController extends Controller
 
     public function bulkActivate(Request $request): JsonResponse
     {
+        @set_time_limit(300);
+
         $validated = $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:users,id',
@@ -325,26 +346,31 @@ class UserController extends Controller
             ->get();
 
         $adminName = auth()->user()->name;
+        $total = $users->count();
+        $processed = 0;
 
-        foreach ($users as $user) {
-            $user->update([
+        // Bulk update all at once
+        User::whereIn('id', $users->pluck('id'))
+            ->update([
                 'approval_status' => 'approved',
                 'approved_at' => now(),
                 'approved_by' => auth()->id(),
                 'status' => 'active',
             ]);
+
+        // Send emails individually
+        foreach ($users as $user) {
             try {
                 $user->notify(new AccountStatusNotification('approved', $adminName));
             } catch (\Throwable $e) {
                 // fail silently
             }
+            $processed++;
         }
-
-        $count = $users->count();
 
         return response()->json([
             'success' => true,
-            'message' => "تم تفعيل {$count} مستخدم بنجاح",
+            'message' => "تم تفعيل {$total} مستخدم بنجاح",
         ]);
     }
 

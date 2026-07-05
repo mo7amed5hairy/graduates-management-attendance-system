@@ -406,41 +406,65 @@ function clearAllCheckboxes() {
   updateBulkActions();
 }
 
-function showLoadingOverlay() {
-  var div = document.createElement('div');
-  div.id = 'bulkLoadingOverlay';
-  div.innerHTML = '<div class="fixed inset-0 bg-white/80 flex items-center justify-center" style="z-index:99999">' +
-    '<div class="text-center bg-white rounded-2xl shadow-2xl p-8">' +
-    '<div class="animate-spin w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full mx-auto mb-4"></div>' +
-    '<div class="text-slate-600 font-semibold">جاري التفعيل...</div></div></div>';
-  document.body.appendChild(div);
+function showProgressOverlay(current, total) {
+  var existing = document.getElementById('bulkProgressOverlay');
+  if (!existing) {
+    var div = document.createElement('div');
+    div.id = 'bulkProgressOverlay';
+    div.innerHTML = '<div class="fixed inset-0 bg-white/80 flex items-center justify-center" style="z-index:99999">' +
+      '<div class="text-center bg-white rounded-2xl shadow-2xl p-8 w-96">' +
+      '<div class="text-lg font-bold text-slate-800 mb-3" id="progressText">جاري التفعيل...</div>' +
+      '<div class="w-full bg-slate-200 rounded-full h-4 mb-2 overflow-hidden">' +
+      '<div class="bg-gradient-to-r from-sky-500 to-emerald-500 h-4 rounded-full transition-all duration-300" id="progressBar" style="width:0%"></div></div>' +
+      '<div class="text-xs text-slate-500" id="progressPercent">0%</div></div></div>';
+    document.body.appendChild(div);
+  }
+  var pct = total > 0 ? Math.round((current / total) * 100) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressPercent').textContent = pct + '%';
+  document.getElementById('progressText').textContent = 'جاري التفعيل... (' + current + '/' + total + ')';
 }
-function hideLoadingOverlay() { var el = document.getElementById('bulkLoadingOverlay'); if (el) el.remove(); }
+function hideProgressOverlay() { var el = document.getElementById('bulkProgressOverlay'); if (el) el.remove(); }
 
 function bulkActivate() {
   var checked = document.querySelectorAll('.user-checkbox:checked');
   var ids = Array.from(checked).map(function(cb) { return cb.value; });
-  var count = ids.length;
-  if (count === 0) return;
-  if (!confirm('هل أنت متأكد من تفعيل ' + count + ' مستخدم؟')) return;
+  var total = ids.length;
+  if (total === 0) return;
+  if (!confirm('هل أنت متأكد من تفعيل ' + total + ' مستخدم؟')) return;
 
-  showLoadingOverlay();
+  var BATCH_SIZE = 50;
+  var completed = 0;
 
-  fetch('{{ route('admin.users.bulk-activate') }}', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken },
-    body: JSON.stringify({ ids: ids })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(d) {
-    hideLoadingOverlay();
-    if (d.success) { App.toast ? App.toast(d.message, 'success') : alert(d.message); location.reload(); }
-    else { alert(d.message || 'حدث خطأ'); }
-  })
-  .catch(function() {
-    hideLoadingOverlay();
-    alert('حدث خطأ في الاتصال');
-  });
+  showProgressOverlay(0, total);
+
+  function sendBatch(batchIds) {
+    return fetch('{{ route('admin.users.bulk-activate') }}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': csrfToken },
+      body: JSON.stringify({ ids: batchIds })
+    }).then(function(r) { return r.json(); });
+  }
+
+  function processNext() {
+    if (completed >= total) {
+      hideProgressOverlay();
+      App.toast ? App.toast('✅ تم تفعيل ' + total + ' مستخدم بنجاح', 'success') : alert('✅ تم تفعيل ' + total + ' مستخدم بنجاح');
+      location.reload();
+      return;
+    }
+    var batch = ids.slice(completed, completed + BATCH_SIZE);
+    sendBatch(batch).then(function(d) {
+      completed += batch.length;
+      showProgressOverlay(completed, total);
+      processNext();
+    }).catch(function() {
+      hideProgressOverlay();
+      alert('حدث خطأ في الاتصال بعد تفعيل ' + completed + ' من ' + total + ' مستخدم');
+    });
+  }
+
+  processNext();
 }
 
 document.addEventListener('click', function(e) {
