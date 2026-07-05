@@ -7,6 +7,7 @@ use App\Models\Governorate;
 use App\Models\Notification;
 use App\Models\Qualification;
 use App\Models\User;
+use App\Notifications\AccountStatusNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -118,8 +119,15 @@ class GraduateController extends Controller
 
         $user->update([
             'approval_status' => 'rejected',
+            'status' => 'inactive',
             'rejection_reason' => $request->reason,
         ]);
+
+        try {
+            $user->notify(new AccountStatusNotification('rejected', auth()->user()->name));
+        } catch (\Throwable $e) {
+            // fail silently
+        }
 
         Notification::create([
             'user_id' => $user->id,

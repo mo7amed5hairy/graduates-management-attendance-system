@@ -31,6 +31,7 @@ class AccountStatusNotification extends Notification
                 'approved' => '✅ تم قبول طلب التسجيل',
                 'activated' => '✅ تم تفعيل حسابك',
                 'deactivated' => '⏸️ تم تعليق حسابك',
+                'rejected' => '❌ تم رفض حسابك',
                 'deleted' => '🗑️ تم حذف حسابك',
                 default => '📢 تغيير حالة الحساب',
             })
@@ -46,6 +47,9 @@ class AccountStatusNotification extends Notification
             'deactivated' => $mail
                 ->line('تم تعليق حسابك من قبل الإدارة.')
                 ->line('إذا كان لديك أي استفسار، يرجى التواصل مع الإدارة.'),
+            'rejected' => $mail
+                ->line('عذراً، لم يتم اعتماد حسابك في نظام توثيق الخريجين.')
+                ->line('إذا كان لديك أي استفسار بخصوص سبب الرفض، يرجى التواصل مع الإدارة.'),
             'deleted' => $mail
                 ->line('تم حذف حسابك من قبل الإدارة.')
                 ->line('إذا كان لديك أي استفسار، يرجى التواصل مع الإدارة.'),
