@@ -334,8 +334,6 @@ class UserController extends Controller
 
     public function bulkActivate(Request $request): JsonResponse
     {
-        @set_time_limit(300);
-
         $validated = $request->validate([
             'ids' => 'required|array',
             'ids.*' => 'exists:users,id',
@@ -344,10 +342,6 @@ class UserController extends Controller
         $users = User::whereIn('id', $validated['ids'])
             ->where('role', '!=', 'admin')
             ->get();
-
-        $adminName = auth()->user()->name;
-        $total = $users->count();
-        $processed = 0;
 
         // Bulk update all at once
         User::whereIn('id', $users->pluck('id'))
@@ -358,19 +352,9 @@ class UserController extends Controller
                 'status' => 'active',
             ]);
 
-        // Send emails individually
-        foreach ($users as $user) {
-            try {
-                $user->notify(new AccountStatusNotification('approved', $adminName));
-            } catch (\Throwable $e) {
-                // fail silently
-            }
-            $processed++;
-        }
-
         return response()->json([
             'success' => true,
-            'message' => "تم تفعيل {$total} مستخدم بنجاح",
+            'message' => "تم تفعيل {$users->count()} مستخدم بنجاح",
         ]);
     }
 

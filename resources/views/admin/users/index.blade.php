@@ -826,16 +826,15 @@ function bulkActivate() {
   if (total === 0) return;
   if (!confirm('هل أنت متأكد من تفعيل ' + total + ' مستخدم؟')) return;
 
-  var BATCH_SIZE = 50;
   var completed = 0;
 
   showProgressOverlay(0, total);
 
-  function sendBatch(batchIds) {
+  function sendOne(id) {
     return fetch('{{ route('admin.users.bulk-activate') }}', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-      body: JSON.stringify({ ids: batchIds })
+      body: JSON.stringify({ ids: [id] })
     }).then(function(r) { return r.json(); });
   }
 
@@ -846,9 +845,8 @@ function bulkActivate() {
       location.reload();
       return;
     }
-    var batch = ids.slice(completed, completed + BATCH_SIZE);
-    sendBatch(batch).then(function(d) {
-      completed += batch.length;
+    sendOne(ids[completed]).then(function(d) {
+      completed++;
       showProgressOverlay(completed, total);
       processNext();
     }).catch(function() {
