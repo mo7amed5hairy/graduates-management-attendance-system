@@ -177,7 +177,7 @@ body::before {
   {{-- Header --}}
   <header class="main-header">
     <div class="inner">
-      <img src="{{ asset('images/portal/logo.png') }}" alt="logo" class="logo" />
+      <img src="{{ asset('images/portal/logo_grad.jpeg') }}" alt="logo" class="logo" />
       <button class="mobile-menu-btn" onclick="document.querySelector('.main-header nav').classList.toggle('open')">☰</button>
       <nav>
         <a href="#hero" class="active" onclick="closeMobileNav()">الرئيسية</a>
