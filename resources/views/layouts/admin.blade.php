@@ -99,6 +99,9 @@
         <a href="{{ route('admin.tasks.index') }}" class="{{ request()->routeIs('admin.tasks.*') ? 'active' : '' }}">
           <span>📋</span><span>المهام</span>
         </a>
+        <a href="{{ route('admin.portal.index') }}" class="{{ request()->routeIs('admin.portal.*') ? 'active' : '' }}">
+          <span>🌐</span><span>إدارة البوابة</span>
+        </a>
         <a href="{{ route('admin.import.index') }}" class="{{ request()->routeIs('admin.import.*') ? 'active' : '' }}">
           <span>📥</span><span>استيراد</span>
         </a>
