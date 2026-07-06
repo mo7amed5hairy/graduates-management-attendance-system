@@ -42,7 +42,7 @@
         </div>
         @if(!$user->isAdmin())
           <button onclick="openEditModal()" class="btn btn-primary text-sm">✏️ تعديل البروفايل</button>
-          <a href="https://www.instagram.com/s14mv" target="_blank" rel="noopener" class="btn btn-ghost text-sm">🎬 شاهد الفيديوهات التعليمية</a>
+          <a href="https://www.instagram.com/s14mv" target="_blank" rel="noopener" class="btn text-sm" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:white;border:none">🎬 شاهد الفيديوهات التعليمية</a>
         @endif
       </div>
     </div>
