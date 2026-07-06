@@ -101,6 +101,8 @@ class UserController extends Controller
             'approval_status', 'status',
         ];
 
+        $governoratesMap = Governorate::pluck('name', 'id');
+
         $query = User::with('qualification:id,name')
             ->select([
                 'id', 'name', 'first_name', 'father_name', 'grandfather_name', 'family_name',
@@ -112,6 +114,8 @@ class UserController extends Controller
                 'points', 'created_at', 'updated_at',
             ]);
 
+        $recordsTotal = $query->count();
+
         // Global search
         if ($search = $request->input('search.value')) {
             $query->where(function ($q) use ($search) {
@@ -121,8 +125,6 @@ class UserController extends Controller
                   ->orWhere('phone', 'like', "%{$search}%");
             });
         }
-
-        $recordsTotal = $query->count();
 
         // Column filters
         if ($gender = $request->input('gender')) {
@@ -181,7 +183,13 @@ class UserController extends Controller
 
         $data = [];
         foreach ($users as $i => $u) {
-            $govName = $u->governorate_name;
+            // Resolve governorate name from pre-loaded map (avoid N+1 via accessor)
+            $rawGov = $u->governorate;
+            if ($rawGov && is_numeric($rawGov)) {
+                $govName = $governoratesMap[(int) $rawGov] ?? $rawGov;
+            } else {
+                $govName = $rawGov ?: 'غير محدد';
+            }
             $qualName = $u->qualification?->name ?? '—';
 
             $avatar = '';
