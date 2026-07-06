@@ -82,7 +82,7 @@ class CheckAdminPermission
         'admin.import.index' => 'import.view',
         'admin.import.process' => 'import.process',
 
-        'admin.export.users' => 'users.view',
+        'admin.export.users' => 'export.data',
 
         'admin.sub-admins.index' => 'sub-admins.view',
         'admin.sub-admins.store' => 'sub-admins.create',
@@ -100,15 +100,10 @@ class CheckAdminPermission
 
         $routeName = $request->route()?->getName();
 
-        if ($user->email === 'admin@admin.com') {
-            return $next($request);
-        }
-
         if ($routeName && isset($this->permissionMap[$routeName])) {
             $permission = $this->permissionMap[$routeName];
-            $userPermissions = $user->permissions ?? [];
 
-            if (!in_array($permission, $userPermissions)) {
+            if (!$user->hasPermission($permission)) {
                 if ($request->ajax()) {
                     return response()->json([
                         'success' => false,

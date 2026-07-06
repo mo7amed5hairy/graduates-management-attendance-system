@@ -7,7 +7,10 @@
 @section('content')
 
 <div class="mb-4 flex items-center gap-3">
+  @php $canExport = auth()->user()->hasPermission('export.data'); @endphp
+  @if($canExport)
   <button class="btn btn-success" onclick="exportUsersXlsx()" id="exportUsersBtn">📤 تنزيل كإكسل</button>
+  @endif
   <button class="btn btn-primary" onclick="document.getElementById('createUserModal').classList.add('active')">➕ إضافة مستخدم جديد</button>
   <div id="bulkActions" class="flex items-center gap-2" style="display:none">
     <span class="text-sm text-slate-500" id="selectedCount">0</span>

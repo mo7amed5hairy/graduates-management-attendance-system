@@ -6,7 +6,10 @@
 
 @section('content')
 <div class="mb-4 flex items-center gap-3">
+  @php $canExport = auth()->user()->hasPermission('export.data'); @endphp
+  @if($canExport)
   <button class="btn btn-success" onclick="exportGraduatesXlsx()" id="exportGradBtn">📤 تنزيل كإكسل</button>
+  @endif
 </div>
 <div class="card p-4 mb-4">
   <div class="grid grid-cols-12 gap-3 items-end">

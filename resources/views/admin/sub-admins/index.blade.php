@@ -173,6 +173,9 @@
             'import.view' => 'عرض',
             'import.process' => 'استيراد',
           ],
+          'تصدير بيانات' => [
+            'export.data' => 'تصدير إلى إكسل',
+          ],
           'المشرفين والصلاحيات' => [
             'sub-admins.view' => 'عرض',
             'sub-admins.create' => 'إضافة',
