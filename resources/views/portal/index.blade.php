@@ -118,6 +118,13 @@ body::before {
 .news-card .info p.title { font-size:11px; font-weight:700; color:#0d2f44; margin-bottom:3px; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .news-card .info p.date { font-size:10px; color:#999; }
 
+/* Video Pagination */
+.video-pagination { display:flex; justify-content:center; align-items:center; gap:4px; margin-top:16px; flex-wrap:wrap; grid-column:1/-1; }
+.video-pagination button { background:white; border:1px solid #d9c78a; color:#0d2f44; padding:6px 12px; border-radius:4px; font-size:12px; font-weight:600; font-family:'Cairo',sans-serif; cursor:pointer; transition:all 0.2s; }
+.video-pagination button:hover { background:#fdf7e8; }
+.video-pagination button.active { background:#c9a24a; color:white; border-color:#c9a24a; }
+.video-pagination button:disabled { opacity:0.4; cursor:default; }
+
 /* === VIDEO MODAL === */
 .video-modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; opacity:0; transition:opacity 0.3s ease; }
 .video-modal-overlay.show { display:flex; opacity:1; }
@@ -303,7 +310,7 @@ body::before {
         @endforelse
 
         @foreach($videos as $item)
-        <div class="news-card" onclick="openVideoModal('{{ addslashes($item->title) }}', '{{ $item->url }}')">
+        <div class="news-card video-item" onclick="openVideoModal('{{ addslashes($item->title) }}', '{{ $item->url }}')">
           <div class="thumb">
             <img src="{{ $item->image ? asset('images/portal/'.$item->image) : asset('images/portal/ticker.png') }}" alt="{{ $item->title }}" loading="lazy" onerror="this.src='{{ asset('images/portal/ticker.png') }}'" />
             <div class="play-overlay"><div class="play-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>
@@ -314,6 +321,9 @@ body::before {
           </div>
         </div>
         @endforeach
+
+        {{-- Video Pagination --}}
+        <div class="video-pagination" id="videoPagination"></div>
       </div>
     </div>
   </div>
@@ -463,6 +473,64 @@ document.querySelectorAll('nav a[href^="#"]').forEach(a => {
     if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 });
+
+// Video pagination
+(function() {
+  var items = document.querySelectorAll('.video-item');
+  var perPage = 8;
+  var total = items.length;
+  var totalPages = Math.ceil(total / perPage);
+  var container = document.getElementById('videoPagination');
+  if (total <= perPage || !container) return;
+
+  function showPage(page) {
+    var start = (page - 1) * perPage;
+    var end = start + perPage;
+    items.forEach(function(el, i) {
+      el.style.display = (i >= start && i < end) ? '' : 'none';
+    });
+    var btns = container.querySelectorAll('button');
+    btns.forEach(function(b) {
+      b.classList.toggle('active', parseInt(b.dataset.page) === page);
+    });
+  }
+
+  var prevBtn = document.createElement('button');
+  prevBtn.textContent = '‹';
+  prevBtn.disabled = true;
+  prevBtn.addEventListener('click', function() {
+    var active = container.querySelector('.active');
+    if (active) {
+      var p = parseInt(active.dataset.page);
+      if (p > 1) showPage(p - 1);
+    }
+  });
+  container.appendChild(prevBtn);
+
+  for (var i = 1; i <= totalPages; i++) {
+    var btn = document.createElement('button');
+    btn.textContent = i;
+    btn.dataset.page = i;
+    if (i === 1) btn.className = 'active';
+    btn.addEventListener('click', function() {
+      showPage(parseInt(this.dataset.page));
+    });
+    container.appendChild(btn);
+  }
+
+  var nextBtn = document.createElement('button');
+  nextBtn.textContent = '›';
+  nextBtn.addEventListener('click', function() {
+    var active = container.querySelector('.active');
+    if (active) {
+      var p = parseInt(active.dataset.page);
+      if (p < totalPages) showPage(p + 1);
+    }
+  });
+  container.appendChild(nextBtn);
+
+  showPage(1);
+})();
 </script>
 
 </body>
