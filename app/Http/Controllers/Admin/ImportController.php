@@ -70,7 +70,7 @@ class ImportController extends Controller
         $rows = $sheet->toArray(null, true, true, false);
         $totalRows = count($rows);
 
-        if ($totalRows < 5) {
+        if ($totalRows < 2) {
             $errors[] = 'الملف لا يحتوي على بيانات كافية';
             return false;
         }
@@ -78,7 +78,12 @@ class ImportController extends Controller
         $qualifications = Qualification::pluck('id', 'name')->toArray();
         $governorates = Governorate::pluck('id', 'name')->toArray();
 
-        for ($i = 4; $i < $totalRows; $i++) {
+        // Expected columns (0-indexed):
+        // 0: مسلسل | 1: الحالة | 2: الاسم الكامل مع اللقب | 3: العمر | 4: الجنس
+        // 5: عنوان السكن الحالي | 6: سنة تخرج | 7: التحصيل الدراسي | 8: رقم الهاتف
+        // 9: اسم الام الرباعي | 10: الحالة الاجتماعية
+
+        for ($i = 1; $i < $totalRows; $i++) {
             $row = $rows[$i];
             $rowNum = $i + 1;
             $serial = trim((string) ($row[0] ?? ''));
@@ -88,37 +93,46 @@ class ImportController extends Controller
             }
 
             try {
-                $fullName = trim((string) ($row[3] ?? ''));
+                $fullName = trim((string) ($row[2] ?? ''));
                 if (empty($fullName)) {
                     continue;
                 }
 
-                $phoneRaw = preg_replace('/[^0-9]/', '', (string) ($row[9] ?? ''));
+                $phoneRaw = preg_replace('/[^0-9]/', '', (string) ($row[8] ?? ''));
                 if (!empty($phoneRaw) && User::where('phone', $phoneRaw)->exists()) {
                     continue;
                 }
 
                 $nameParts = $this->parseFullName($fullName);
-                $motherParts = $this->parseMotherName(trim((string) ($row[10] ?? '')));
+                $motherParts = $this->parseMotherName(trim((string) ($row[9] ?? '')));
 
-                $qualText = trim((string) ($row[8] ?? ''));
+                $qualText = trim((string) ($row[7] ?? ''));
                 $qualId = $this->findQualificationId($qualText, $qualifications);
 
-                $gender = $this->normalizeGender(trim((string) ($row[5] ?? '')));
-                $socialStatus = $this->normalizeSocialStatus(trim((string) ($row[11] ?? '')));
-                $gradYear = trim((string) ($row[7] ?? ''));
+                $gender = $this->normalizeGender(trim((string) ($row[4] ?? '')));
+                $socialStatus = $this->normalizeSocialStatus(trim((string) ($row[10] ?? '')));
+                $gradYear = trim((string) ($row[6] ?? ''));
                 $gradYear = is_numeric($gradYear) ? (int) $gradYear : null;
 
                 if ($gradYear && ($gradYear < 1950 || $gradYear > (int) date('Y') + 5)) {
                     $gradYear = null;
                 }
 
-                $age = trim((string) ($row[4] ?? ''));
+                $age = trim((string) ($row[3] ?? ''));
                 $age = is_numeric($age) ? (int) $age : null;
                 $birthYear = $age ? (int) date('Y') - $age : null;
 
-                $address = trim((string) ($row[6] ?? ''));
+                $address = trim((string) ($row[5] ?? ''));
                 $govName = $this->extractGovernorates($address, $governorates);
+
+                // Column 1 = الحالة (status: مقبول / مرفوض / قيد المراجعة)
+                $statusText = trim((string) ($row[1] ?? ''));
+                $approvalStatus = 'approved';
+                if (mb_strpos($statusText, 'مرفوض') !== false) {
+                    $approvalStatus = 'rejected';
+                } elseif (mb_strpos($statusText, 'قيد') !== false || mb_strpos($statusText, 'مراجعة') !== false) {
+                    $approvalStatus = 'pending';
+                }
 
                 $email = 'user_' . ($phoneRaw ?: uniqid()) . '@system.local';
                 $nationalId = null;
@@ -139,9 +153,9 @@ class ImportController extends Controller
                     'qualification_id' => $qualId,
                     'job_status' => 'غير موظف',
                     'role' => 'user',
-                    'approval_status' => 'approved',
-                    'approved_at' => now(),
-                    'approved_by' => auth()->id(),
+                    'approval_status' => $approvalStatus,
+                    'approved_at' => ($approvalStatus === 'approved') ? now() : null,
+                    'approved_by' => ($approvalStatus === 'approved') ? auth()->id() : null,
                     'access_token' => bin2hex(random_bytes(32)),
                     'status' => 'active',
                     'points' => 0,
