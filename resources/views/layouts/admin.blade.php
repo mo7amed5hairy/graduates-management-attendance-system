@@ -347,36 +347,92 @@ document.getElementById('markAllNotif')?.addEventListener('click', async functio
 fetchNotifCount();
 </script>
 
-{{-- النافذة المنبثقة الثلاثية المحدثة لإنستغرام عند تسجيل الدخول بنجاح --}}
-@if(session('show_follow_modal'))
+{{-- النافذة المنبثقة الترحيبية والتوجيهية الذكية عند تسجيل الدخول بنجاح --}}
+@if(session('show_follow_modal') && auth()->check())
 <div id="followModal" class="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" style="direction:rtl">
   <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8 text-center relative border border-slate-100">
-    <div class="w-16 h-16 mx-auto rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-3xl mb-4 shadow-inner">📣</div>
-    <h2 class="text-xl font-extrabold text-slate-900 mb-2">مرحباً بك، تابعنا على إنستغرام</h2>
-    <p class="text-slate-600 text-sm mb-6 leading-relaxed">يرجى متابعة حساباتنا الرسمية لمتابعة كل ما هو جديد ومستجد أولاً بأول</p>
     
-    <div class="grid grid-cols-1 gap-2 mb-6">
-      <a href="https://www.instagram.com/_u/graduates.of.basra?igsh=amJqZ3RoOTM2OHJm" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-pink-500 to-yellow-500 text-white font-bold text-sm shadow-sm hover:opacity-95 transition">
-        📱 حساب الخريجين (graduates.of.basra)
-      </a>
-      <a href="https://www.instagram.com/_u/update_iraq?igsh=MW5nNTJxZmV1b3hpZA==" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 text-white font-bold text-sm shadow-sm hover:opacity-95 transition">
-        📱 حساب الشركة المنفذة (update_iraq)
-      </a>
-      <a href="https://www.instagram.com/_u/s14mv?igsh=MTRiZnRpZ2kzZzdtdA==" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white font-bold text-sm shadow-sm hover:opacity-95 transition">
-        📱 حساب المطور (s14mv)
-      </a>
-    </div>
+    <div class="w-16 h-16 mx-auto rounded-full bg-sky-100 flex items-center justify-center text-sky-600 text-3xl mb-4 shadow-inner">👋</div>
+    
+    <h2 class="text-xl font-extrabold text-slate-900 mb-2">أهلاً بك في منصة الخريجين</h2>
+    
+    <div id="modalDynamicText" class="text-slate-600 text-sm mb-6 space-y-3 leading-relaxed text-right bg-slate-50 p-4 rounded-2xl border border-slate-100">
+        </div>
+    
+    <hr class="border-slate-100 my-4">
+    
+    <div class="grid grid-cols-1 gap-3 mb-6" id="modalDynamicButtons">
+        </div>
 
     <button onclick="closeFollowModal()" class="w-full py-3 px-4 rounded-xl bg-slate-900 text-white font-bold hover:bg-slate-800 transition text-sm shadow-md">
       حسنًا، الذهاب للرئيسية
     </button>
   </div>
 </div>
+
 <script>
 function closeFollowModal() {
   const modal = document.getElementById('followModal');
   if(modal) modal.remove();
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 💡 حماية للأدمن: فحص إذا كان الحساب الحالي هو الأدمن عبر البريد الإلكتروني لمنع ظهورها له نهائياً
+    var userEmail = "{{ auth()->user()->email }}";
+    var adminEmails = ["admin@oldgrads.org", "info@oldgrads.org"]; // يمكنك إضافة إيميلات الأدمن هنا
+    
+    if (adminEmails.includes(userEmail)) {
+        closeFollowModal(); 
+        return;
+    }
+
+    // إدارة عداد الزيارات محلياً في متصفح المستخدم العادي
+    let visitCount = localStorage.getItem('login_welcome_visits');
+
+    if (!visitCount) {
+        visitCount = 1;
+        localStorage.setItem('login_welcome_visits', 1);
+    } else {
+        visitCount = parseInt(visitCount) + 1;
+        localStorage.setItem('login_welcome_visits', visitCount);
+    }
+
+    const textContainer = document.getElementById('modalDynamicText');
+    const buttonsContainer = document.getElementById('modalDynamicButtons');
+    
+    // رابط الإنستغرام الجديد المعتمد والآمن للشروحات
+    const instagramUrl = "https://www.instagram.com/s14mv";
+
+    if (parseInt(visitCount) === 1) {
+        // 🌟 المرة الأولى: رسائل المستمسكات وزر التعديل (profile.show) وزر الشرح مدمج
+        textContainer.innerHTML = `
+            <p class="font-bold text-center text-slate-800 text-base mb-1">يرجى استكمال متطلبات التوثيق:</p>
+            <p class="flex items-start gap-2">
+                <span>🔹</span>
+                <span>يرجى إضافة <strong>صورة مستمسك البطاقة الوطنية</strong> و<strong>وثيقة التخرج</strong> الخاصة بك، وذلك من خلال زر <strong>تعديل البروفايل</strong> بملفك الشخصي.</span>
+            </p>
+        `;
+        buttonsContainer.innerHTML = `
+            <a href="{{ route('profile.show') }}" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-950 text-white font-bold text-sm shadow-md hover:bg-slate-800 transition">
+                ⚙️ تعديل البروفايل واستكمال البيانات
+            </a>
+            <a href="${instagramUrl}" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white font-bold text-sm shadow-sm hover:opacity-95 transition">
+                📺 شاهد فيديوهات الشرح في إنستغرام
+            </a>
+        `;
+    } else {
+        // 🌟 المرة الثانية فما فوق: رسالة ترحيبية خفيفة وزر الشرح فقط
+        textContainer.innerHTML = `
+            <p class="text-center text-slate-800 font-semibold text-base">سعداء بعودتك مجدداً إلى المنصة! ✨</p>
+            <p class="text-center text-slate-500 text-xs mt-1">يمكنك دائماً متابعة الشروحات والتحديثات الرسمية للمنصة عبر الرابط أدناه.</p>
+        `;
+        buttonsContainer.innerHTML = `
+            <a href="${instagramUrl}" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white font-bold text-sm shadow-md hover:opacity-95 transition">
+                📺 شاهد فيديوهات الشرح في إنستغرام
+            </a>
+        `;
+    }
+});
 </script>
 @endif
 
