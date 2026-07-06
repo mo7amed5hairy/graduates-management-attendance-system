@@ -7,7 +7,6 @@
 @section('content')
 <div class="mb-4 flex items-center gap-3">
   <button class="btn btn-success" onclick="exportGraduatesXlsx()" id="exportGradBtn">📤 تنزيل كإكسل</button>
-  <a href="{{ route('admin.import.index') }}" class="btn btn-primary">📥 استيراد من إكسل</a>
 </div>
 <div class="card p-4 mb-4">
   <div class="grid grid-cols-12 gap-3 items-end">
@@ -99,6 +98,7 @@
           <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
           <th>#</th>
           <th>الاسم</th>
+          <th>اسم الأم</th>
           <th>البريد</th>
           <th>رقم البطاقة الوطنية</th>
           <th>الجنس</th>
@@ -121,6 +121,7 @@
           <td><input type="checkbox" class="user-checkbox" value="{{ $g->id }}" onchange="updateBulkActions()"></td>
           <td>{{ $i + 1 }}</td>
           <td class="font-bold">{{ $g->name }}</td>
+          <td class="text-xs">{{ $g->mother_full_name }}</td>
           <td class="text-xs">{{ $g->email }}</td>
           <td class="text-xs">{{ $g->national_id ?? '—' }}</td>
           <td>
@@ -200,7 +201,7 @@ function exportGraduatesXlsx() {
   btn.disabled = true;
   btn.textContent = '⏳ جاري التحميل...';
 
-  var headers = ['#', 'الاسم', 'البريد', 'رقم البطاقة الوطنية', 'الجنس', 'سنة الميلاد', 'المحافظة', 'الحالة الاجتماعية', 'عدد الأولاد', 'المؤهل', 'الجامعة', 'الكلية', 'سنة التخرج', 'الحالة', 'تاريخ التسجيل'];
+  var headers = ['#', 'الاسم', 'اسم الأم', 'البريد', 'رقم البطاقة الوطنية', 'الجنس', 'سنة الميلاد', 'المحافظة', 'الحالة الاجتماعية', 'عدد الأولاد', 'المؤهل', 'الجامعة', 'الكلية', 'سنة التخرج', 'الحالة', 'تاريخ التسجيل'];
   var rows = [headers];
 
   var filtered = $('#graduatesTable tbody tr').filter(function() {
@@ -209,7 +210,7 @@ function exportGraduatesXlsx() {
   filtered.each(function() {
     var tds = $(this).find('td');
     var vals = [];
-    for (var i = 1; i <= 15; i++) {
+    for (var i = 1; i <= 16; i++) {
       vals.push($(tds[i]).text().trim());
     }
     rows.push(vals);
@@ -335,7 +336,7 @@ $(function() {
     language: { url: '{{ asset('js/ar.json') }}' },
     order: [[1, 'asc']],
     columnDefs: [
-      { orderable: false, targets: [0, 16] }
+      { orderable: false, targets: [0, 17] }
     ],
     pageLength: 50,
     lengthMenu: [[25, 50, 100, 200, -1], [25, 50, 100, 200, 'الكل']]
@@ -354,39 +355,39 @@ $(function() {
 
     if (gender) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[5].trim().localeCompare(gender, 'ar', { sensitivity: 'base' }) === 0;
+        return data[6].trim().localeCompare(gender, 'ar', { sensitivity: 'base' }) === 0;
       });
     }
     if (birth) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[6].trim() === birth;
+        return data[7].trim() === birth;
       });
     }
     if (gov) {
       var govText = $('#filterGovernorate option:selected').text();
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[7].trim().localeCompare(govText, 'ar', { sensitivity: 'base' }) === 0;
+        return data[8].trim().localeCompare(govText, 'ar', { sensitivity: 'base' }) === 0;
       });
     }
     if (social) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[8].trim().localeCompare(social, 'ar', { sensitivity: 'base' }) === 0;
+        return data[9].trim().localeCompare(social, 'ar', { sensitivity: 'base' }) === 0;
       });
     }
     if (children !== '') {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[9].trim() === children;
+        return data[10].trim() === children;
       });
     }
     if (qual) {
       var qualText = $('#filterQualification option:selected').text();
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[10].trim().localeCompare(qualText, 'ar', { sensitivity: 'base' }) === 0;
+        return data[11].trim().localeCompare(qualText, 'ar', { sensitivity: 'base' }) === 0;
       });
     }
     if (gradYear) {
       $.fn.dataTable.ext.search.push(function(settings, data) {
-        return data[13].trim() === gradYear;
+        return data[14].trim() === gradYear;
       });
     }
 

@@ -9,7 +9,6 @@
 <div class="mb-4 flex items-center gap-3">
   <button class="btn btn-success" onclick="exportUsersXlsx()" id="exportUsersBtn">📤 تنزيل كإكسل</button>
   <button class="btn btn-primary" onclick="document.getElementById('createUserModal').classList.add('active')">➕ إضافة مستخدم جديد</button>
-  <a href="{{ route('admin.import.index') }}" class="btn btn-ghost">📥 استيراد</a>
   <div id="bulkActions" class="flex items-center gap-2" style="display:none">
     <span class="text-sm text-slate-500" id="selectedCount">0</span>
     <span class="text-sm text-slate-400">محدد</span>
@@ -115,6 +114,7 @@
           <th><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
           <th>#</th>
           <th>المستخدم</th>
+          <th>اسم الأم</th>
           <th>البريد الإلكتروني</th>
           <th>رقم البطاقة الوطنية</th>
           <th>الهاتف</th>
@@ -791,7 +791,7 @@ $(document).ready(function() {
     language: { url: '{{ asset('js/ar.json') }}' },
     order: [[1, 'desc']],
     columnDefs: [
-      { orderable: false, targets: [0, 16] }
+      { orderable: false, targets: [0, 17] }
     ],
     pageLength: 50,
     lengthMenu: [[25, 50, 100, 200, -1], [25, 50, 100, 200, 'الكل']],

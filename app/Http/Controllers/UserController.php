@@ -95,7 +95,7 @@ class UserController extends Controller
     public function data(Request $request): JsonResponse
     {
         $columns = [
-            'id', 'id', 'name', 'email', 'national_id', 'phone', 'points',
+            'id', 'id', 'name', 'name', 'email', 'national_id', 'phone', 'points',
             'gender', 'governorate', 'date_of_birth', 'social_status',
             'children_count', 'qualification_id', 'graduation_year',
             'approval_status', 'status',
@@ -214,6 +214,7 @@ class UserController extends Controller
                 '<input type="checkbox" class="user-checkbox" value="' . $u->id . '" onchange="updateBulkActions()"' . ($u->isAdmin() ? ' disabled' : '') . '>',
                 $u->id,
                 '<div class="flex items-center gap-2">' . $avatar . '<span class="font-semibold">' . htmlspecialchars($u->name) . '</span></div>',
+                htmlspecialchars($u->mother_full_name),
                 htmlspecialchars($u->email),
                 htmlspecialchars($u->national_id ?? '—'),
                 htmlspecialchars($u->phone ?? '—'),
