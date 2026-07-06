@@ -2,18 +2,23 @@
 
 @section('title', 'استيراد')
 @section('page_title', 'استيراد الخريجين')
-@section('page_subtitle', 'استيراد بيانات الخريجين من ملف CSV أو Excel')
+@section('page_subtitle', 'استيراد بيانات الخريجين من ملف Excel')
 
 @section('content')
 <div class="max-w-2xl mx-auto">
   <div class="card p-6 mb-6">
     <h3 class="font-bold text-slate-900 mb-2">تعليمات الاستيراد</h3>
     <ul class="text-sm text-slate-600 space-y-1 list-disc pr-5">
-      <li>الملف يجب أن يكون بصيغة CSV أو Excel (xlsx, xls)</li>
-      <li>العمود <strong>name</strong> و <strong>email</strong> إلزاميان</li>
-      <li>باقي الأعمدة اختيارية: phone, national_id, governorate, university, faculty, graduation_year, job_status, address, password</li>
-      <li>إذا لم يتم توفير كلمة مرور، سيتم تعيين "password" ككلمة مرور افتراضية</li>
-      <li>جميع الخريجين المستوردين سيكونون بحالة "قيد المراجعة" لحين اعتمادهم</li>
+      <li>الملف يجب أن يكون بصيغة Excel (xlsx, xls) أو CSV</li>
+      <li>صيغة Excel المدعومة تحتوي على الأعمدة التالية بالترتيب:
+        <span class="block mt-1 text-xs text-slate-500">ت | الحالة | فحص المكرر | الاسم الكامل مع اللقب | العمر | الجنس | عنوان السكن الحالي | سنة تخرج | التحصيل الدراسي | رقم الهاتف | اسم الأم الرباعي | الحالة الاجتماعية</span>
+      </li>
+      <li>الاسم الرباعي يتم تقسيمه تلقائياً (الاسم، الأب، الجد، اللقب)</li>
+      <li>اسم الأم الرباعي يتم تقسيمه تلقائياً (الأم، أب الأم، جد الأم)</li>
+      <li>رقم الهاتف يستخدم للتحقق من التكرار — إذا كان موجوداً مسبقاً يتم تخطي الصف</li>
+      <li>جميع الخريجين المستوردين سيكونون بحالة <strong>معتمد</strong> تلقائياً</li>
+      <li>يتم إنشاء بريد إلكتروني تلقائي لكل خريج</li>
+      <li>كلمة المرور الافتراضية للجميع: <code class="bg-slate-100 px-1 rounded">password</code></li>
     </ul>
   </div>
 
@@ -22,7 +27,7 @@
       @csrf
       <div>
         <label class="label">اختر ملف البيانات</label>
-        <input class="input" type="file" name="file" accept=".csv,.xlsx,.xls,.txt" required>
+        <input class="input" type="file" name="file" accept=".xlsx,.xls,.csv" required>
       </div>
       <button type="submit" class="btn btn-success w-full justify-center mt-4">📥 استيراد</button>
     </form>

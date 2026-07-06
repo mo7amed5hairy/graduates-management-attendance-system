@@ -5,6 +5,9 @@
 @section('page_subtitle', 'مراجعة واعتماد بيانات الخريجين')
 
 @section('content')
+<div class="mb-4 flex items-center gap-3">
+  <a href="{{ route('admin.import.index') }}" class="btn btn-success">📥 استيراد من إكسل</a>
+</div>
 <div class="card p-4 mb-4">
   <div class="grid grid-cols-12 gap-3 items-end">
     <div class="col-span-6 md:col-span-2">

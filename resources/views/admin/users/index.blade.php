@@ -8,6 +8,7 @@
 
 <div class="mb-4 flex items-center gap-3">
   <button class="btn btn-primary" onclick="document.getElementById('createUserModal').classList.add('active')">➕ إضافة مستخدم جديد</button>
+  <a href="{{ route('admin.import.index') }}" class="btn btn-success">📥 استيراد من إكسل</a>
   <div id="bulkActions" class="flex items-center gap-2" style="display:none">
     <span class="text-sm text-slate-500" id="selectedCount">0</span>
     <span class="text-sm text-slate-400">محدد</span>
