@@ -246,10 +246,9 @@ Route::middleware('auth')->group(function () {
             Route::post('/', [ImportController::class, 'import'])->name('process');
         });
 
-        // Export
+        // Export (JSON data — XLSX conversion is done client-side by SheetJS)
         Route::prefix('export')->name('export.')->group(function () {
-            Route::get('/graduates', [ExportController::class, 'graduates'])->name('graduates');
-            Route::get('/users', [ExportController::class, 'users'])->name('users');
+            Route::get('/users', [ExportController::class, 'usersJson'])->name('users');
         });
 
         // Sub-admins & permissions

@@ -6,7 +6,7 @@
 
 @section('content')
 <div class="mb-4 flex items-center gap-3">
-  <a href="{{ route('admin.export.graduates') }}" class="btn btn-success">📤 تنزيل كإكسل</a>
+  <button class="btn btn-success" onclick="exportGraduatesXlsx()" id="exportGradBtn">📤 تنزيل كإكسل</button>
   <a href="{{ route('admin.import.index') }}" class="btn btn-primary">📥 استيراد من إكسل</a>
 </div>
 <div class="card p-4 mb-4">
@@ -195,6 +195,42 @@
 
 @push('scripts')
 <script>
+function exportGraduatesXlsx() {
+  var btn = document.getElementById('exportGradBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري التحميل...';
+
+  var headers = ['#', 'الاسم', 'البريد', 'رقم البطاقة الوطنية', 'الجنس', 'سنة الميلاد', 'المحافظة', 'الحالة الاجتماعية', 'عدد الأولاد', 'المؤهل', 'الجامعة', 'الكلية', 'سنة التخرج', 'الحالة', 'تاريخ التسجيل'];
+  var rows = [headers];
+
+  var filtered = $('#graduatesTable tbody tr').filter(function() {
+    return $(this).css('display') !== 'none';
+  });
+  filtered.each(function() {
+    var tds = $(this).find('td');
+    var vals = [];
+    for (var i = 1; i <= 15; i++) {
+      vals.push($(tds[i]).text().trim());
+    }
+    rows.push(vals);
+  });
+
+  if (rows.length <= 1) {
+    App.toast ? App.toast('لا توجد بيانات للتصدير', 'warning') : alert('لا توجد بيانات للتصدير');
+    btn.disabled = false;
+    btn.textContent = '📤 تنزيل كإكسل';
+    return;
+  }
+
+  var wb = XLSX.utils.book_new();
+  var ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!dir'] = 'rtl';
+  XLSX.utils.book_append_sheet(wb, ws, 'الخريجين');
+  XLSX.writeFile(wb, 'الخريجين_' + new Date().toISOString().slice(0,10).replace(/-/g,'_') + '.xlsx');
+  btn.disabled = false;
+  btn.textContent = '📤 تنزيل كإكسل';
+}
+
 var userModal = document.getElementById('userDetailsModal');
 
 function openUserModal(userId) {

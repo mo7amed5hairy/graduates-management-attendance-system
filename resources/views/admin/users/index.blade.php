@@ -7,7 +7,7 @@
 @section('content')
 
 <div class="mb-4 flex items-center gap-3">
-  <a href="{{ route('admin.export.users') }}" class="btn btn-success">📤 تنزيل كإكسل</a>
+  <button class="btn btn-success" onclick="exportUsersXlsx()" id="exportUsersBtn">📤 تنزيل كإكسل</button>
   <button class="btn btn-primary" onclick="document.getElementById('createUserModal').classList.add('active')">➕ إضافة مستخدم جديد</button>
   <a href="{{ route('admin.import.index') }}" class="btn btn-ghost">📥 استيراد</a>
   <div id="bulkActions" class="flex items-center gap-2" style="display:none">
@@ -711,6 +711,63 @@ document.addEventListener('DOMContentLoaded', function() {
   loadSelect(apiBase + '/governorates', 'createGovernorate', 'اختر المحافظة...');
   loadSelectQuals(apiBase + '/qualifications', 'createQualification', 'اختر المؤهل...');
 });
+
+function exportUsersXlsx() {
+  var btn = document.getElementById('exportUsersBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري التحميل...';
+
+  var params = new URLSearchParams();
+  var filters = {
+    gender: $('#filterGender').val(),
+    governorate: $('#filterGovernorate').val(),
+    birth_year: $('#filterBirthYear').val(),
+    social_status: $('#filterSocialStatus').val(),
+    children_count: $('#filterChildren').val(),
+    graduation_year: $('#filterGradYear').val(),
+    qualification_id: $('#filterQualification').val(),
+    approval_status: $('#filterApprovalStatus').val(),
+    active_status: $('#filterActiveStatus').val(),
+  };
+  Object.keys(filters).forEach(function(k) {
+    if (filters[k]) params.set(k, filters[k]);
+  });
+
+  var url = '{{ url('/admin/export/users') }}' + '?' + params.toString();
+
+  fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+    .then(function(r) { return r.json(); })
+    .then(function(resp) {
+      if (!resp.success || !resp.data || resp.data.length === 0) {
+        App.toast ? App.toast('لا توجد بيانات للتصدير', 'warning') : alert('لا توجد بيانات للتصدير');
+        btn.disabled = false;
+        btn.textContent = '📤 تنزيل كإكسل';
+        return;
+      }
+      var rows = resp.data;
+      var headers = Object.keys(rows[0]);
+      var wsData = [headers];
+      rows.forEach(function(row) {
+        var vals = [];
+        headers.forEach(function(h) { vals.push(row[h] || ''); });
+        wsData.push(vals);
+      });
+
+      var wb = XLSX.utils.book_new();
+      var ws = XLSX.utils.aoa_to_sheet(wsData);
+      ws['!dir'] = 'rtl';
+      XLSX.utils.book_append_sheet(wb, ws, 'المستخدمين');
+      XLSX.writeFile(wb, 'المستخدمين_' + new Date().toISOString().slice(0,10).replace(/-/g,'_') + '.xlsx');
+
+      btn.disabled = false;
+      btn.textContent = '📤 تنزيل كإكسل';
+    })
+    .catch(function() {
+      App.toast ? App.toast('حدث خطأ في تصدير البيانات', 'error') : alert('حدث خطأ');
+      btn.disabled = false;
+      btn.textContent = '📤 تنزيل كإكسل';
+    });
+}
 
 // DataTable — server-side processing
 $(document).ready(function() {

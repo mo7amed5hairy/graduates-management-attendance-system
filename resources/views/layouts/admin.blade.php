@@ -193,6 +193,7 @@
 
 <script src="{{ asset('js/jquery.min.js') }}"></script>
 <script src="{{ asset('js/dataTables.min.js') }}"></script>
+<script src="{{ asset('js/xlsx.min.js') }}"></script>
 <script src="{{ asset('js/app.js') }}"></script>
 <script>
 function toggleNavGroup(btn) {
