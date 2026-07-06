@@ -172,7 +172,12 @@ class UserController extends Controller
         // Paginate
         $start = (int) $request->input('start', 0);
         $length = (int) $request->input('length', 50);
-        $users = $query->skip($start)->take($length)->get();
+
+        if ($length === -1) {
+            $users = $query->get();
+        } else {
+            $users = $query->skip($start)->take($length)->get();
+        }
 
         $data = [];
         foreach ($users as $i => $u) {
