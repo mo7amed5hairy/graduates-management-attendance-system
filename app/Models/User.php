@@ -78,23 +78,23 @@ class User extends Authenticatable
     public function getNameAttribute($value)
     {
         if ($this->attributes['first_name'] ?? null) {
-            $name = trim(
+            return trim(
                 ($this->attributes['first_name'] ?? '') . ' ' .
                 ($this->attributes['father_name'] ?? '') . ' ' .
                 ($this->attributes['grandfather_name'] ?? '') . ' ' .
                 ($this->attributes['family_name'] ?? '')
             );
-            $motherName = trim(
-                ($this->attributes['mother_name'] ?? '') . ' ' .
-                ($this->attributes['mother_father_name'] ?? '') . ' ' .
-                ($this->attributes['mother_grandfather_name'] ?? '')
-            );
-            if ($motherName) {
-                $name .= ' (' . $motherName . ')';
-            }
-            return $name;
         }
         return $value;
+    }
+
+    public function getMotherFullNameAttribute(): string
+    {
+        return trim(
+            ($this->attributes['mother_name'] ?? '') . ' ' .
+            ($this->attributes['mother_father_name'] ?? '') . ' ' .
+            ($this->attributes['mother_grandfather_name'] ?? '')
+        );
     }
 
     public function isAdmin(): bool

@@ -81,7 +81,7 @@ class ProfileController extends Controller
             'phone.regex' => 'صيغة رقم الهاتف غير صحيحة يجب أن تكون من 11 رقماً وتبدأ ب 077 أو 078',
         ]);
 
-        $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}" . (!empty($validated['mother_name']) ? " ({$validated['mother_name']} {$validated['mother_father_name']} {$validated['mother_grandfather_name']})" : ''));
+        $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}");
 
         if ($request->filled('password')) {
             $validated['password'] = Hash::make($validated['password']);

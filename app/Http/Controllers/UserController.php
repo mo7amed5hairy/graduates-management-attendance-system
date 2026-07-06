@@ -53,8 +53,7 @@ class UserController extends Controller
             'graduation_year' => 'required|integer|min:2000|max:2025',
         ], $messages);
 
-        $motherName = trim(($validated['mother_name'] ?? '') . ' ' . ($validated['mother_father_name'] ?? '') . ' ' . ($validated['mother_grandfather_name'] ?? ''));
-        $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}" . ($motherName ? " ($motherName)" : ''));
+        $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}");
 
         $validated['password'] = Hash::make($validated['password']);
 
@@ -283,8 +282,7 @@ class UserController extends Controller
             'password' => 'nullable|string|min:8|confirmed',
         ], $messages);
 
-        $motherName = trim(($data['mother_name'] ?? '') . ' ' . ($data['mother_father_name'] ?? '') . ' ' . ($data['mother_grandfather_name'] ?? ''));
-        $data['name'] = trim("{$data['first_name']} {$data['father_name']} {$data['grandfather_name']} {$data['family_name']}" . ($motherName ? " ($motherName)" : ''));
+        $data['name'] = trim("{$data['first_name']} {$data['father_name']} {$data['grandfather_name']} {$data['family_name']}");
 
         // Calculate age from date_of_birth (year only)
         if (!empty($data['date_of_birth'])) {

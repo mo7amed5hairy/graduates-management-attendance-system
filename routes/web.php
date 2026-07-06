@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\EventController;
 use App\Http\Controllers\Admin\GovernorateController;
 use App\Http\Controllers\Admin\GraduateController;
+use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Admin\ImportController;
 use App\Http\Controllers\Admin\InstitutionController;
 use App\Http\Controllers\Admin\InstitutionTypeController;
@@ -243,6 +244,12 @@ Route::middleware('auth')->group(function () {
         Route::prefix('import')->name('import.')->group(function () {
             Route::get('/', [ImportController::class, 'index'])->name('index');
             Route::post('/', [ImportController::class, 'import'])->name('process');
+        });
+
+        // Export
+        Route::prefix('export')->name('export.')->group(function () {
+            Route::get('/graduates', [ExportController::class, 'graduates'])->name('graduates');
+            Route::get('/users', [ExportController::class, 'users'])->name('users');
         });
 
         // Sub-admins & permissions

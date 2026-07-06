@@ -65,7 +65,7 @@ class AuthController extends Controller
         $validated['password'] = Hash::make($validated['password']);
 
         // Concatenate name parts
-        $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}" . ($validated['mother_name'] ? " ({$validated['mother_name']} {$validated['mother_father_name']} {$validated['mother_grandfather_name']})" : ''));
+        $validated['name'] = trim("{$validated['first_name']} {$validated['father_name']} {$validated['grandfather_name']} {$validated['family_name']}");
 
         // Calculate age from date_of_birth (year only)
         if (!empty($validated['date_of_birth'])) {

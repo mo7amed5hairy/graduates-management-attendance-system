@@ -82,6 +82,9 @@ class CheckAdminPermission
         'admin.import.index' => 'import.view',
         'admin.import.process' => 'import.process',
 
+        'admin.export.graduates' => 'graduates.view',
+        'admin.export.users' => 'users.view',
+
         'admin.sub-admins.index' => 'sub-admins.view',
         'admin.sub-admins.store' => 'sub-admins.create',
         'admin.sub-admins.update' => 'sub-admins.edit',
