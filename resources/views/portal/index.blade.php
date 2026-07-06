@@ -53,8 +53,8 @@ body::before {
 .hero-title-area p { color:rgba(255,255,255,0.9); font-size:clamp(12px,2.5vw,14px); margin-bottom:10px; }
 .hero-divider { width:70%; max-width:500px; height:1px; background:linear-gradient(90deg,transparent,#c9a24a,transparent); margin:0 auto 8px; }
 .hero-content { padding:0; }
-.medallions-area { width:100%; }
-.medallions-area img { width:100%; height:auto; object-fit:contain; max-height:140px; }
+.medalions-area { width:100%; }
+.medalions-area img { width:100%; height:auto; }
 
 /* === BOTTOM BAND === */
 .bottom-band-wrapper { max-width:1100px; margin:0 auto; padding:0 16px; }
@@ -199,8 +199,8 @@ body::before {
       </div>
       <div class="hero-divider"></div>
       <div class="hero-content">
-        <div class="medallions-area">
-          <img src="{{ asset('images/portal/medallions.png') }}" alt="medallions" />
+        <div class="medalions-area">
+          <img src="{{ asset('images/portal/medalions.png') }}" alt="medalions" />
         </div>
       </div>
     </div>

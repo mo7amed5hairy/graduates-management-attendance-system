@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             QualificationSeeder::class,
             IraqiUniversitiesSeeder::class,
+            PortalSeeder::class,
         ]);
 
         User::create([
