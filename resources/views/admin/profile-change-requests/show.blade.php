@@ -195,23 +195,23 @@
     <h3 class="font-extrabold text-slate-800 mb-4">⚙️ إجراءات المراجعة</h3>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       {{-- Approve form --}}
-      <form action="{{ route('admin.profile-change-requests.approve', $changeRequest) }}" method="POST" class="pcr-form">
+      <form id="approveForm" class="pcr-form">
         @csrf
         <div class="mb-3">
           <label class="label">ملاحظات <span class="text-rose-500">*</span></label>
           <textarea class="input" name="admin_notes" rows="2" placeholder="ملاحظات على الموافقة" required></textarea>
         </div>
-        <button type="submit" class="btn btn-success w-full">✅ قبول الطلب</button>
+        <button type="submit" class="btn btn-success w-full" id="approveBtn">✅ قبول الطلب</button>
       </form>
 
       {{-- Reject form --}}
-      <form action="{{ route('admin.profile-change-requests.reject', $changeRequest) }}" method="POST">
+      <form id="rejectForm">
         @csrf
         <div class="mb-3">
           <label class="label">سبب الرفض <span class="text-rose-500">*</span></label>
           <textarea class="input" name="admin_notes" rows="2" placeholder="اذكر سبب الرفض" required></textarea>
         </div>
-        <button type="submit" class="btn btn-danger w-full">❌ رفض الطلب</button>
+        <button type="submit" class="btn btn-danger w-full" id="rejectBtn">❌ رفض الطلب</button>
       </form>
     </div>
   </div>
@@ -230,6 +230,8 @@
 
 @push('scripts')
 <script>
+var csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
 // Show toast on success flash
 (function() {
   var flash = document.getElementById('flashSuccess') || document.getElementById('flashError');
@@ -259,6 +261,76 @@ function closeZoom(e) {
 }
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeZoom();
+});
+
+// AJAX Approve
+document.getElementById('approveForm')?.addEventListener('submit', function(e) {
+  e.preventDefault();
+  var btn = document.getElementById('approveBtn');
+  var notes = this.querySelector('[name="admin_notes"]').value.trim();
+  if (!notes) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري القبول...';
+  fetch('{{ route("admin.profile-change-requests.approve", $changeRequest) }}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRF-TOKEN': csrfToken
+    },
+    body: JSON.stringify({ admin_notes: notes })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.success) {
+      App.toast ? App.toast('✅ ' + d.message) : alert(d.message);
+      window.location.href = '{{ route("admin.profile-change-requests.index") }}';
+    } else {
+      alert(d.message || 'حدث خطأ');
+      btn.disabled = false;
+      btn.textContent = '✅ قبول الطلب';
+    }
+  })
+  .catch(function() {
+    alert('حدث خطأ في الاتصال');
+    btn.disabled = false;
+    btn.textContent = '✅ قبول الطلب';
+  });
+});
+
+// AJAX Reject
+document.getElementById('rejectForm')?.addEventListener('submit', function(e) {
+  e.preventDefault();
+  var btn = document.getElementById('rejectBtn');
+  var notes = this.querySelector('[name="admin_notes"]').value.trim();
+  if (!notes) return;
+  btn.disabled = true;
+  btn.textContent = '⏳ جاري الرفض...';
+  fetch('{{ route("admin.profile-change-requests.reject", $changeRequest) }}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
+      'X-CSRF-TOKEN': csrfToken
+    },
+    body: JSON.stringify({ admin_notes: notes })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.success) {
+      App.toast ? App.toast(d.message) : alert(d.message);
+      window.location.href = '{{ route("admin.profile-change-requests.index") }}';
+    } else {
+      alert(d.message || 'حدث خطأ');
+      btn.disabled = false;
+      btn.textContent = '❌ رفض الطلب';
+    }
+  })
+  .catch(function() {
+    alert('حدث خطأ في الاتصال');
+    btn.disabled = false;
+    btn.textContent = '❌ رفض الطلب';
+  });
 });
 </script>
 @endpush

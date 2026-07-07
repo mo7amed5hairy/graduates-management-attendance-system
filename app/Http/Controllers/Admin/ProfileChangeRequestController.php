@@ -16,7 +16,10 @@ class ProfileChangeRequestController extends Controller
 {
     public function index()
     {
-        $requests = ProfileChangeRequest::with('user', 'attachments')->latest()->get();
+        $requests = ProfileChangeRequest::with('user', 'attachments')
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
         return view('admin.profile-change-requests.index', compact('requests'));
     }
 
@@ -69,6 +72,7 @@ class ProfileChangeRequestController extends Controller
                 $data['id_photos'] = array_merge($existing, $idPhotoPaths);
             }
             $user->update($data);
+            $user->save();
         }
 
         // Copy graduation attachments to user profile

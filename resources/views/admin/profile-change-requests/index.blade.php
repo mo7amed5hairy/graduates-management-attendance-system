@@ -10,10 +10,18 @@
   <div id="bulkActions" class="flex items-center gap-2" style="display:none">
     <span class="text-sm text-slate-500" id="selectedCount">0</span>
     <span class="text-sm text-slate-400">محدد</span>
-    <button class="btn btn-success text-sm" onclick="bulkApprove()">✅ قبول الجميع</button>
+    <button class="btn btn-success text-sm" onclick="bulkApprove()">✅ قبول المحدد</button>
     <button class="btn btn-ghost text-sm" onclick="clearAllCheckboxes()">إلغاء التحديد</button>
   </div>
 </div>
+
+@if($requests->count() === 0)
+<div class="card p-8 text-center">
+  <div class="text-4xl mb-3">✅</div>
+  <div class="text-lg font-bold text-slate-700">لا توجد طلبات تعديل معلقة</div>
+  <div class="text-sm text-slate-400 mt-1">جميع الطلبات تمت مراجعتها</div>
+</div>
+@else
 
 <div class="card p-0">
   <div class="table-wrap">
@@ -25,15 +33,14 @@
           <th>المستخدم</th>
           <th>نوع الطلب</th>
           <th>المرفقات</th>
-          <th>الحالة</th>
           <th>تاريخ التقديم</th>
           <th></th>
         </tr>
       </thead>
       <tbody>
-        @forelse($requests as $r)
-        <tr>
-          <td><input type="checkbox" class="request-checkbox" value="{{ $r->id }}" onchange="updateBulkActions()" {{ $r->status !== 'pending' ? 'disabled' : '' }}></td>
+        @foreach($requests as $r)
+        <tr id="row-{{ $r->id }}">
+          <td><input type="checkbox" class="request-checkbox" value="{{ $r->id }}" onchange="updateBulkActions()"></td>
           <td>{{ $r->id }}</td>
           <td class="font-semibold">{{ $r->user->name }}</td>
           <td>
@@ -46,26 +53,18 @@
             @endif
           </td>
           <td>{{ $r->attachments->count() ? $r->attachments->count() . ' ملف' : '—' }}</td>
-          <td>
-            @if($r->status === 'pending')
-              <span class="pill pill-amber">قيد المراجعة</span>
-            @elseif($r->status === 'approved')
-              <span class="pill pill-green">مقبول</span>
-            @else
-              <span class="pill pill-rose">مرفوض</span>
-            @endif
-          </td>
           <td class="text-xs text-slate-500">{{ $r->created_at->format('Y/m/d H:i') }}</td>
           <td>
             <a href="{{ route('admin.profile-change-requests.show', $r) }}" class="btn btn-sm btn-primary">🔍 عرض</a>
           </td>
         </tr>
-        @empty
-        @endforelse
+        @endforeach
       </tbody>
     </table>
   </div>
 </div>
+
+@endif
 @endsection
 
 @push('scripts')
@@ -76,7 +75,7 @@ $(function() {
   $('#changeRequestsTable').DataTable({
     language: { url: '{{ asset('js/ar.json') }}' },
     order: [[1, 'desc']],
-    columnDefs: [{ orderable: false, targets: [0, 7] }]
+    columnDefs: [{ orderable: false, targets: [0, 6] }]
   });
 });
 
@@ -108,32 +107,74 @@ function clearAllCheckboxes() {
   updateBulkActions();
 }
 
+function showProgressOverlay(current, total) {
+  var existing = document.getElementById('bulkProgressOverlay');
+  if (!existing) {
+    var div = document.createElement('div');
+    div.id = 'bulkProgressOverlay';
+    div.innerHTML = '<div class="fixed inset-0 bg-white/80 flex items-center justify-center" style="z-index:99999">' +
+      '<div class="text-center bg-white rounded-2xl shadow-2xl p-8 w-96">' +
+      '<div class="text-lg font-bold text-slate-800 mb-3" id="progressText">جاري القبول...</div>' +
+      '<div class="w-full bg-slate-200 rounded-full h-4 mb-2 overflow-hidden">' +
+      '<div class="bg-gradient-to-r from-sky-500 to-emerald-500 h-4 rounded-full transition-all duration-300" id="progressBar" style="width:0%"></div></div>' +
+      '<div class="text-xs text-slate-500" id="progressPercent">0%</div></div></div>';
+    document.body.appendChild(div);
+  }
+  var pct = total > 0 ? Math.round((current / total) * 100) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressPercent').textContent = pct + '%';
+  document.getElementById('progressText').textContent = 'جاري القبول... (' + current + '/' + total + ')';
+}
+
+function hideProgressOverlay() {
+  var el = document.getElementById('bulkProgressOverlay');
+  if (el) el.remove();
+}
+
 function bulkApprove() {
   var checked = document.querySelectorAll('.request-checkbox:checked');
   var ids = Array.from(checked).map(function(cb) { return cb.value; });
-  var count = ids.length;
-  if (count === 0) return;
-  if (!confirm('هل أنت متأكد من قبول ' + count + ' طلب؟')) return;
+  var total = ids.length;
+  if (total === 0) return;
+  if (!confirm('هل أنت متأكد من قبول ' + total + ' طلب؟')) return;
 
-  fetch('{{ route('admin.profile-change-requests.bulk-approve') }}', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
-      'X-CSRF-TOKEN': csrfToken
-    },
-    body: JSON.stringify({ ids: ids })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(d) {
-    if (d.success) {
-      App.toast ? App.toast(d.message) : alert(d.message);
+  var completed = 0;
+
+  showProgressOverlay(0, total);
+
+  function sendOne(id) {
+    return fetch('{{ route("admin.profile-change-requests.bulk-approve") }}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-CSRF-TOKEN': csrfToken
+      },
+      body: JSON.stringify({ ids: [id] })
+    }).then(function(r) { return r.json(); });
+  }
+
+  function processNext() {
+    if (completed >= total) {
+      hideProgressOverlay();
+      App.toast ? App.toast('✅ تم قبول ' + total + ' طلب بنجاح') : alert('✅ تم القبول بنجاح');
       location.reload();
-    } else {
-      alert(d.message || 'حدث خطأ');
+      return;
     }
-  })
-  .catch(function() { alert('حدث خطأ في الاتصال'); });
+    sendOne(ids[completed]).then(function(d) {
+      completed++;
+      showProgressOverlay(completed, total);
+      // Remove row from table
+      var row = document.getElementById('row-' + ids[completed - 1]);
+      if (row) row.remove();
+      processNext();
+    }).catch(function() {
+      hideProgressOverlay();
+      alert('حدث خطأ في الاتصال بعد قبول ' + completed + ' من ' + total + ' طلب');
+    });
+  }
+
+  processNext();
 }
 </script>
 @endpush

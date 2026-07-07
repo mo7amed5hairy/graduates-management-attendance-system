@@ -18,8 +18,6 @@ use App\Http\Controllers\Admin\UniversityTypeController;
 use App\Http\Controllers\Api\LocationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CheckDetailsController;
-use App\Http\Controllers\PortalController;
-use App\Http\Controllers\Admin\PortalController as AdminPortalController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\HomeController;
@@ -44,7 +42,14 @@ Route::get('/files/{path}', function (string $path) {
     return response()->file($fullPath);
 })->where('path', '.*')->name('file.serve');
 
-Route::get('/', [PortalController::class, 'index'])->name('portal.home');
+Route::get('/', function () {
+    if (auth()->check()) {
+        return auth()->user()->isAdmin()
+            ? redirect()->route('admin.dashboard')
+            : redirect()->route('home');
+    }
+    return redirect()->route('login');
+});
 
 // Public route - check personal details without login
 Route::get('/checkmydetails', [CheckDetailsController::class, 'index'])->name('check-details');
@@ -244,20 +249,6 @@ Route::middleware('auth')->group(function () {
         // Export (JSON data — XLSX conversion is done client-side by SheetJS)
         Route::prefix('export')->name('export.')->group(function () {
             Route::get('/users', [ExportController::class, 'usersJson'])->name('users');
-        });
-
-        // Portal management
-        Route::prefix('portal')->name('portal.')->group(function () {
-            Route::get('/', [AdminPortalController::class, 'index'])->name('index');
-            Route::post('/settings', [AdminPortalController::class, 'updateSettings'])->name('settings');
-            Route::post('/news', [AdminPortalController::class, 'storeNews'])->name('news.store');
-            Route::delete('/news/{portalNews}', [AdminPortalController::class, 'destroyNews'])->name('news.destroy');
-            Route::get('/news/{portalNews}/toggle', [AdminPortalController::class, 'toggleNews'])->name('news.toggle');
-            Route::post('/videos', [AdminPortalController::class, 'storeVideo'])->name('videos.store');
-            Route::delete('/videos/{portalVideo}', [AdminPortalController::class, 'destroyVideo'])->name('videos.destroy');
-            Route::get('/videos/{portalVideo}/toggle', [AdminPortalController::class, 'toggleVideo'])->name('videos.toggle');
-            Route::post('/faqs', [AdminPortalController::class, 'storeFaq'])->name('faqs.store');
-            Route::delete('/faqs/{portalFaq}', [AdminPortalController::class, 'destroyFaq'])->name('faqs.destroy');
         });
 
         // Sub-admins & permissions

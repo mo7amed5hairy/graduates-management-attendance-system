@@ -88,17 +88,6 @@ class CheckAdminPermission
         'admin.sub-admins.store' => 'sub-admins.create',
         'admin.sub-admins.update' => 'sub-admins.edit',
         'admin.sub-admins.destroy' => 'sub-admins.delete',
-
-        'admin.portal.index' => 'portal.view',
-        'admin.portal.settings' => 'portal.settings',
-        'admin.portal.news.store' => 'portal.news.manage',
-        'admin.portal.news.destroy' => 'portal.news.manage',
-        'admin.portal.news.toggle' => 'portal.news.manage',
-        'admin.portal.videos.store' => 'portal.videos.manage',
-        'admin.portal.videos.destroy' => 'portal.videos.manage',
-        'admin.portal.videos.toggle' => 'portal.videos.manage',
-        'admin.portal.faqs.store' => 'portal.faqs.manage',
-        'admin.portal.faqs.destroy' => 'portal.faqs.manage',
     ];
 
     public function handle(Request $request, Closure $next): Response
