@@ -169,7 +169,7 @@
   </div>
   @endif
 
-  {{-- Attachments --}}
+  {{-- Attachments (old-style from attachments table) --}}
   @if($changeRequest->attachments->count() > 0)
   <div class="card p-5 lg:col-span-3">
     <h3 class="font-extrabold text-slate-800 mb-4">📎 المرفقات ({{ $changeRequest->attachments->count() }})</h3>
@@ -183,6 +183,26 @@
           @endif
           <div class="text-xs text-slate-500 truncate" title="{{ $att->original_name }}">{{ $att->original_name }}</div>
           <a href="{{ route('file.serve', $att->file_path) }}" target="_blank" class="text-xs text-sky-600">عرض</a>
+        </div>
+      @endforeach
+    </div>
+  </div>
+  @endif
+
+  {{-- New-style graduation attachments (stored in requested_data) --}}
+  @if(isset($changeRequest->requested_data['_new_graduation_attachments']) && count($changeRequest->requested_data['_new_graduation_attachments']) > 0)
+  <div class="card p-5 lg:col-span-3">
+    <h3 class="font-extrabold text-slate-800 mb-4">📎 مرفق التخرج الجديد (يحل محل القديم)</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      @foreach($changeRequest->requested_data['_new_graduation_attachments'] as $att)
+        <div class="border border-slate-200 rounded-lg p-3 text-center">
+          @if(str_starts_with($att['mime_type'] ?? '', 'image/'))
+            <img src="{{ route('file.serve', $att['file_path']) }}" class="w-full h-24 object-cover rounded mb-2">
+          @else
+            <div class="w-full h-24 flex items-center justify-center bg-slate-50 rounded mb-2 text-3xl">📄</div>
+          @endif
+          <div class="text-xs text-slate-500 truncate" title="{{ $att['original_name'] }}">{{ $att['original_name'] ?? 'ملف' }}</div>
+          <a href="{{ route('file.serve', $att['file_path']) }}" target="_blank" class="text-xs text-sky-600">عرض</a>
         </div>
       @endforeach
     </div>

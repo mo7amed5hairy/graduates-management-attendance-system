@@ -48,7 +48,7 @@ class ProfileChangeRequestController extends Controller
             'qualification_faculty_id' => 'nullable|exists:qualification_faculties,id',
             'social_links' => 'nullable|array',
             'social_links.*' => 'nullable|url|max:500',
-            'attachments' => 'nullable|array',
+            'attachments' => 'nullable|array|max:1',
             'attachments.*' => 'file|mimes:jpg,jpeg,png,pdf,doc,docx|max:10240',
             'id_photo_front' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             'id_photo_back' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
@@ -117,16 +117,20 @@ class ProfileChangeRequestController extends Controller
             $changeRequest->save();
         }
 
-        // Save attachments
+        // Save attachments (store as replacement in requested_data)
         if ($request->hasFile('attachments')) {
+            $data = $changeRequest->requested_data ?? [];
+            $data['_new_graduation_attachments'] = [];
             foreach ($request->file('attachments') as $file) {
                 $path = $file->store('graduation-attachments/' . $user->id, 'public');
-                $changeRequest->attachments()->create([
+                $data['_new_graduation_attachments'][] = [
                     'file_path' => $path,
                     'original_name' => $file->getClientOriginalName(),
                     'mime_type' => $file->getMimeType(),
-                ]);
+                ];
             }
+            $changeRequest->requested_data = $data;
+            $changeRequest->save();
         }
 
         // Handle ID photo uploads (store temporarily in requested_data)

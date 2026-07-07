@@ -44,12 +44,19 @@
           <td>{{ $r->id }}</td>
           <td class="font-semibold">{{ $r->user->name }}</td>
           <td>
-            @if($r->requested_data && $r->attachments->count() > 0)
+            @php
+              $hasData = !empty($r->requested_data);
+              $hasAttachments = $r->attachments->count() > 0 || !empty($r->requested_data['_new_graduation_attachments']);
+              $hasIdPhotos = !empty($r->requested_data['_new_id_photos']);
+            @endphp
+            @if($hasData && $hasAttachments)
               <span class="pill pill-amber">تعديل + مرفقات</span>
-            @elseif($r->requested_data)
+            @elseif($hasData)
               <span class="pill pill-blue">تعديل بيانات</span>
-            @else
+            @elseif($hasAttachments)
               <span class="pill pill-violet">رفع مرفقات</span>
+            @elseif($hasIdPhotos)
+              <span class="pill pill-violet">رفع صور هوية</span>
             @endif
           </td>
           <td>{{ $r->attachments->count() ? $r->attachments->count() . ' ملف' : '—' }}</td>

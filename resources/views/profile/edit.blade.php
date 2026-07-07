@@ -130,32 +130,63 @@
 
       <hr class="my-5 border-slate-100">
 
-      <h3 class="font-extrabold text-slate-800 mb-3">📎 مرفقات التخرج</h3>
-      <p class="text-xs text-slate-500 mb-3">يمكنك رفع صور أو مستندات متعلقة بالتخرج (شهادة، وثائق، صور، إلخ)</p>
+      <h3 class="font-extrabold text-slate-800 mb-3">📎 مرفق التخرج</h3>
+      <p class="text-xs text-slate-500 mb-3">يمكنك رفع ملف واحد فقط متعلق بالتخرج (شهادة، وثيقة، صورة). سيتم استبدال الملف القديم بالجديد.</p>
+      @if(!empty($user->graduation_attachments) && count($user->graduation_attachments) > 0)
+      <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 mb-3">
+        <div class="text-xs text-slate-500 mb-2 font-semibold">الملف الحالي:</div>
+        <div class="flex flex-wrap gap-2">
+          @foreach($user->graduation_attachments as $att)
+            @php $ext = strtolower(pathinfo($att['original_name'] ?? '', PATHINFO_EXTENSION)); @endphp
+            <a href="{{ route('file.serve', $att['file_path']) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-sky-50 hover:border-sky-200 transition text-xs text-slate-600 hover:text-sky-700">
+              @if(in_array($ext, ['jpg','jpeg','png','gif','webp'])) 🖼️ @else 📄 @endif
+              <span class="truncate max-w-[140px]">{{ $att['original_name'] ?? 'ملف' }}</span>
+            </a>
+          @endforeach
+        </div>
+      </div>
+      @endif
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label class="label">رفع ملفات</label>
-          <input class="input" type="file" name="attachments[]" id="attachmentsInput" multiple accept="image/*,.pdf,.doc,.docx" onchange="previewAttachments(this)">
+          <label class="label">رفع ملف جديد</label>
+          <input class="input" type="file" name="attachments[]" id="attachmentsInput" accept="image/*,.pdf,.doc,.docx" onchange="previewAttachments(this)">
           <div class="flex flex-wrap gap-2 mt-2" id="attachmentsPreview"></div>
         </div>
         <div class="text-xs text-slate-400">
           <p>الصيغ المسموحة: JPG, PNG, PDF, DOC, DOCX</p>
-          <p>الحد الأقصى: 10 MB لكل ملف</p>
+          <p>الحد الأقصى: 10 MB</p>
+          <p class="text-amber-600 font-semibold mt-1">⚠️ ملف واحد فقط — سيتم استبدال القديم</p>
         </div>
       </div>
 
       <hr class="my-5 border-slate-100">
 
       <h3 class="font-extrabold text-slate-800 mb-3">🪪 البطاقة الوطنية</h3>
-      <p class="text-xs text-slate-500 mb-3">يمكنك رفع صورة البطاقة الوطنية (الوجه الأمامي والخلفي). غير إلزامي.</p>
+      <p class="text-xs text-slate-500 mb-3">صورة واحدة للوجه الأمامي وصورة واحدة للوجه الخلفي. سيتم استبدال الصور القديمة بالجديدة.</p>
+      @if(!empty($user->id_photos) && count($user->id_photos) > 0)
+      <div class="bg-slate-50 border border-slate-200 rounded-lg p-3 mb-3">
+        <div class="text-xs text-slate-500 mb-2 font-semibold">الصور الحالية:</div>
+        <div class="flex flex-wrap gap-3">
+          @foreach($user->id_photos as $idx => $photo)
+            @php $side = $idx === 0 ? 'الأمامي' : 'الخلفي'; @endphp
+            <div class="text-center">
+              <a href="{{ route('file.serve', $photo) }}" target="_blank">
+                <img src="{{ route('file.serve', $photo) }}" class="w-24 h-16 object-cover rounded-lg border border-slate-200 hover:shadow-lg transition cursor-pointer">
+              </a>
+              <div class="text-[10px] text-slate-400 mt-1">الوجه {{ $side }}</div>
+            </div>
+          @endforeach
+        </div>
+      </div>
+      @endif
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label class="label">الوجه الأمامي للبطاقة</label>
-          <input class="input" type="file" name="id_photo_front" accept="image/*">
+          <input class="input" type="file" name="id_photo_front" accept="image/jpeg,png,jpg">
         </div>
         <div>
           <label class="label">الوجه الخلفي للبطاقة</label>
-          <input class="input" type="file" name="id_photo_back" accept="image/*">
+          <input class="input" type="file" name="id_photo_back" accept="image/jpeg,png,jpg">
         </div>
       </div>
 

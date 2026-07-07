@@ -68,24 +68,32 @@ class ProfileChangeRequestController extends Controller
                     $idPhotoPaths[] = $path;
                 }
                 unset($data['_new_id_photos']);
-                $existing = $user->id_photos ?? [];
-                $data['id_photos'] = array_merge($existing, $idPhotoPaths);
+                // Replace old ID photos (delete old files, set new ones)
+                $oldPhotos = $user->id_photos ?? [];
+                foreach ($oldPhotos as $oldPhoto) {
+                    Storage::disk('public')->delete($oldPhoto);
+                }
+                $data['id_photos'] = $idPhotoPaths;
+            }
+            if (isset($data['_new_graduation_attachments'])) {
+                unset($data['_new_graduation_attachments']);
             }
             $user->update($data);
             $user->save();
         }
 
-        // Copy graduation attachments to user profile
-        if ($changeRequest->attachments()->count() > 0) {
-            $existing = $user->graduation_attachments ?? [];
-            foreach ($changeRequest->attachments as $att) {
-                $existing[] = [
-                    'file_path' => $att->file_path,
-                    'original_name' => $att->original_name,
-                    'mime_type' => $att->mime_type,
-                ];
+        // Handle graduation attachments replacement
+        if (isset($changeRequest->requested_data['_new_graduation_attachments'])) {
+            $newAttachments = $changeRequest->requested_data['_new_graduation_attachments'];
+            // Delete old graduation attachment files
+            $oldAttachments = $user->graduation_attachments ?? [];
+            foreach ($oldAttachments as $oldAtt) {
+                if (isset($oldAtt['file_path'])) {
+                    Storage::disk('public')->delete($oldAtt['file_path']);
+                }
             }
-            $user->graduation_attachments = $existing;
+            // Set new attachments (replace, not append)
+            $user->graduation_attachments = $newAttachments;
             $user->save();
         }
 
@@ -150,11 +158,19 @@ class ProfileChangeRequestController extends Controller
             }
         }
 
-        // Delete attachments
+        // Delete uploaded graduation attachments if any
+        if ($data && isset($data['_new_graduation_attachments'])) {
+            foreach ($data['_new_graduation_attachments'] as $att) {
+                if (isset($att['file_path'])) {
+                    Storage::disk('public')->delete($att['file_path']);
+                }
+            }
+        }
+
+        // Also delete any old-style attachments
         foreach ($changeRequest->attachments as $attachment) {
             Storage::disk('public')->delete($attachment->file_path);
         }
-
         $changeRequest->attachments()->delete();
 
         $changeRequest->update([
